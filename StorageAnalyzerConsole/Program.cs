@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StorageAnalyzerService;
+using System.IO;
 
 namespace StorageAnalyzerConsole
 {
@@ -12,7 +13,7 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            CompareDataFiles();
+            CopyCompareResultFilesToDest();
         }
 
         static void WriteDataFile()
@@ -37,7 +38,7 @@ namespace StorageAnalyzerConsole
             }
             else
             {
-                Console.WriteLine("No matching files found for given search cirteria");
+                Console.WriteLine("No matching files found for given search criteria");
             }
             Console.WriteLine("Searching for duplicates now");
             var result2 = searcher.SearchXactDuplicates();
@@ -64,15 +65,72 @@ namespace StorageAnalyzerConsole
                 SecondInputFilePathName = ConfigurationManager.AppSettings["compareFilePathAndName"]
             };
             var result = dirComparer.LookupNonMatchingFiles();
+            var resultFilePathName = ConfigurationManager.AppSettings["compareResultsFilePathAndName"];
+            var resultFile = File.CreateText(resultFilePathName);
+          
             if (result.Any())
             {
                 foreach (var entry in result)
+                {
                     Console.WriteLine(entry);
+                    resultFile.WriteLine(entry);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No non-matching files found in compared folders");
+                resultFile.WriteLine("No non-matching files found in compared folders");
+            }
+            resultFile.Close();
+            resultFile.Dispose();
+        }
+
+        static void SyncUpNonMatchingFiles()
+        {
+            var rootFolder = ConfigurationManager.AppSettings["rootFolder"];
+            var syncDestRootFolder = ConfigurationManager.AppSettings["syncDestRootFolder"];
+            DirectoryMapComparer dirComparer = new DirectoryMapComparer()
+            {
+                FirstInputFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"],
+                SecondInputFilePathName = ConfigurationManager.AppSettings["compareFilePathAndName"]
+            };
+            var result = dirComparer.LookupNonMatchingFiles();
+            if (result.Any())
+            {
+                foreach (var entry in result)
+                {
+                    var destFilePath = entry.Replace(rootFolder, syncDestRootFolder); 
+                    Console.WriteLine(destFilePath);
+                    var destDir = Path.GetDirectoryName(destFilePath);
+                    if (!Directory.Exists(destDir))
+                        Directory.CreateDirectory(destDir);
+                    File.Copy(entry, destFilePath, true);
+                }
             }
             else
             {
                 Console.WriteLine("No non-matching files found in compared folders");
             }
         }
+
+        static void CopyCompareResultFilesToDest()
+        {
+            var rootFolder = ConfigurationManager.AppSettings["rootFolder"];
+            var resultFilePathName = ConfigurationManager.AppSettings["compareResultsFilePathAndName"];
+            var resultFileReader = File.OpenText(resultFilePathName);
+            var syncDestRootFolder = ConfigurationManager.AppSettings["syncDestRootFolder"];
+
+            while (!resultFileReader.EndOfStream)
+            {
+                var entry = resultFileReader.ReadLine();
+                var destFilePath = entry.Replace(rootFolder, syncDestRootFolder);
+                Console.WriteLine(destFilePath);
+                var destDir = Path.GetDirectoryName(destFilePath);
+                if (!Directory.Exists(destDir))
+                    Directory.CreateDirectory(destDir);
+                File.Copy(entry, destFilePath, true);
+            }
+        }
+
     }
 }
