@@ -6,6 +6,9 @@
 *.user
 *.sln.docstates
 
+# Visual Studio temporary files folder
+.vs/
+
 # Data Directory
 App_Data/
 

@@ -13,7 +13,7 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            CopyCompareResultFilesToDest();
+          WriteDataFile();
         }
 
         static void WriteDataFile()
