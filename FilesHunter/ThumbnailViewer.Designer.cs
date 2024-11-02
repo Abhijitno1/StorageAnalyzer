@@ -48,7 +48,7 @@
             // imlTiles
             // 
             this.imlTiles.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imlTiles.ImageSize = new System.Drawing.Size(16, 16);
+            this.imlTiles.ImageSize = new System.Drawing.Size(128, 128);
             this.imlTiles.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // ThumbnailViewer
@@ -57,7 +57,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.lvwTiles);
             this.Name = "ThumbnailViewer";
-            this.Size = new System.Drawing.Size(1063, 593);
+            this.Size = new System.Drawing.Size(1061, 593);
             this.Load += new System.EventHandler(this.ThumbnailViewer_Load);
             this.ResumeLayout(false);
 

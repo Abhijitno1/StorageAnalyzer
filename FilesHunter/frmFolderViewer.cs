@@ -17,6 +17,7 @@ namespace FilesHunter
 {
     public partial class frmFolderViewer : Form
     {
+        private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
         public frmFolderViewer()
         {
             InitializeComponent();
@@ -44,6 +45,8 @@ namespace FilesHunter
             browser.FolderImageIndex = 0;
             browser.FileImageIndex = 1;
             var rootNode = browser.BuildNodesForTreeView();
+            tvwDirTree.Nodes.Clear();
+            thumbViewer.ClearImages();
             tvwDirTree.Nodes.Add(rootNode);
             tvwDirTree.PrepareForFiltering();
             //Also set the root folder path for ThumbViewer control
@@ -177,6 +180,7 @@ namespace FilesHunter
         {
             if (e.Node.Tag.ToString() == NodeType.Folder.ToString())
             {
+                thumbViewer.ClearImages();
                 PopulateFirstLevelChildrenInThumViewer(e.Node.Name);
             }
         }
@@ -192,26 +196,21 @@ namespace FilesHunter
             {
                 //Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
                 var folderImage = iml4TreeView.Images[0];
-                var ms = new MemoryStream();
-                ImageCodecInfo pngCodec = GetEncoderInfo("image/png");
-                var myEncoder = System.Drawing.Imaging.Encoder.Quality;
-                var encoderParam = new EncoderParameter(myEncoder, 90L);    //Quality level 75
-                var myEncoderParameters = new EncoderParameters(1);
-                myEncoderParameters.Param[0] = encoderParam;
-                folderImage.Save(ms, pngCodec, myEncoderParameters);
-                thumbViewer.AddImageItem(ms.GetBuffer(), dir.Name, relativeFolderPath);
+                var imageData = ThumbnailViewer.ImageToBinary(folderImage);
+                thumbViewer.AddImageItem(imageData, dir.Name, relativeFolderPath);
+            }
+            foreach (FileInfo file in directoryInfo.GetFiles()) 
+            { 
+                var fileImage = iml4TreeView.Images[1];
+                if (ImageExtensions.Contains(file.Extension?.ToUpper()))
+                {
+                    fileImage = Image.FromFile(file.FullName);
+                }
+                var imageData = ThumbnailViewer.ImageToBinary(fileImage);
+                thumbViewer.AddImageItem(imageData, file.Name, relativeFolderPath);
             }
 
         }
-        private static ImageCodecInfo GetEncoderInfo(string mimeType)
-        {
-            foreach (ImageCodecInfo codec in ImageCodecInfo.GetImageEncoders())
-                if (codec.MimeType == mimeType)
-                    return codec;
-
-            return null;
-        }
-
 
     }
 }

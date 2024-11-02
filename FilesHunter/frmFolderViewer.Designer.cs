@@ -38,7 +38,6 @@
             this.txtFileLocation = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.btnSearchDuplicates = new System.Windows.Forms.Button();
             this.btnSearchByRegex = new System.Windows.Forms.Button();
             this.btnSearchByExtn = new System.Windows.Forms.Button();
@@ -55,6 +54,7 @@
             this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
             this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
+            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -79,8 +79,8 @@
             this.splitContainer1.Panel2.Controls.Add(this.btnOpenDialog);
             this.splitContainer1.Panel2.Controls.Add(this.txtFileLocation);
             this.splitContainer1.Panel2.Controls.Add(this.label1);
-            this.splitContainer1.Size = new System.Drawing.Size(1487, 804);
-            this.splitContainer1.SplitterDistance = 495;
+            this.splitContainer1.Size = new System.Drawing.Size(1533, 804);
+            this.splitContainer1.SplitterDistance = 510;
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -162,19 +162,10 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Location = new System.Drawing.Point(512, 54);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(972, 747);
+            this.groupBox1.Size = new System.Drawing.Size(1008, 747);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search Files or Folders";
-            // 
-            // thumbViewer
-            // 
-            this.thumbViewer.Location = new System.Drawing.Point(10, 114);
-            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-            this.thumbViewer.Name = "thumbViewer";
-            this.thumbViewer.RootFolderPath = null;
-            this.thumbViewer.Size = new System.Drawing.Size(952, 596);
-            this.thumbViewer.TabIndex = 16;
             // 
             // btnSearchDuplicates
             // 
@@ -302,11 +293,20 @@
             this.imlShowPad.ImageSize = new System.Drawing.Size(32, 32);
             this.imlShowPad.TransparentColor = System.Drawing.Color.Transparent;
             // 
+            // thumbViewer
+            // 
+            this.thumbViewer.Location = new System.Drawing.Point(10, 114);
+            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+            this.thumbViewer.Name = "thumbViewer";
+            this.thumbViewer.RootFolderPath = null;
+            this.thumbViewer.Size = new System.Drawing.Size(985, 596);
+            this.thumbViewer.TabIndex = 16;
+            // 
             // frmFolderViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1487, 804);
+            this.ClientSize = new System.Drawing.Size(1533, 804);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.splitContainer1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

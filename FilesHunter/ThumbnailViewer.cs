@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,13 +22,25 @@ namespace FilesHunter
             InitializeComponent();
         }
 
-        private Image BinaryToImage(byte[] binaryData)
+        public static Image BinaryToImage(byte[] binaryData)
         {
             if (binaryData == null) return null;
             byte[] buffer = binaryData.ToArray();
             MemoryStream memStream = new MemoryStream();
             memStream.Write(buffer, 0, buffer.Length);
             return Image.FromStream(memStream);
+        }
+
+        public static Byte[] ImageToBinary(Image input)
+        {
+            var ms = new MemoryStream();
+            ImageCodecInfo pngCodec = GetEncoderInfo("image/png");
+            var myEncoder = System.Drawing.Imaging.Encoder.Quality;
+            var encoderParam = new EncoderParameter(myEncoder, 90L);    //Quality level 75
+            var myEncoderParameters = new EncoderParameters(1);
+            myEncoderParameters.Param[0] = encoderParam;
+            input.Save(ms, pngCodec, myEncoderParameters);
+            return ms.ToArray();
         }
 
         public void AddImageItem(byte[] binary, string imgName, string relativeFolderPath)
@@ -48,7 +61,16 @@ namespace FilesHunter
         public void ClearImages()
         {
             imlTiles.Images.Clear();
+            lvwTiles.Items.Clear();
             ImageList.Clear();
+        }
+        private static ImageCodecInfo GetEncoderInfo(string mimeType)
+        {
+            foreach (ImageCodecInfo codec in ImageCodecInfo.GetImageEncoders())
+                if (codec.MimeType == mimeType)
+                    return codec;
+
+            return null;
         }
 
         private void MakeThumbnail(byte[] binary, string imgName, string folderPath)
@@ -88,8 +110,9 @@ namespace FilesHunter
                 Form previewForm = new Form();
                 previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
                 previewForm.MinimizeBox = false;
-                previewForm.Size = new System.Drawing.Size(800, 600);
+                previewForm.Size = new System.Drawing.Size(1000, 860);
                 previewForm.StartPosition = FormStartPosition.CenterScreen;
+                previewForm.AutoScroll = true;
 
                 PictureBox view = new PictureBox();
                 view.Dock = DockStyle.Fill;
