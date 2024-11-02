@@ -59,6 +59,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThumbnailViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ThumbnailViewer.Designer.cs">
+      <DependentUpon>ThumbnailViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="TreeViewHelper.cs" />
     <EmbeddedResource Include="frmFolderViewer.resx">
       <DependentUpon>frmFolderViewer.cs</DependentUpon>
@@ -76,6 +82,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="ThumbnailViewer.resx">
+      <DependentUpon>ThumbnailViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

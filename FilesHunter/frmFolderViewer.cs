@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using StorageAnalyzerService;
 using System.Diagnostics;
 using System.IO;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace FilesHunter
 {
@@ -23,7 +25,7 @@ namespace FilesHunter
 
         void frmFolderViewer_Load(object sender, EventArgs e)
         {
-            fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyPictures;
+            fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
         }
 
         private void btnOpenDialog_Click(object sender, EventArgs e)
@@ -44,6 +46,8 @@ namespace FilesHunter
             var rootNode = browser.BuildNodesForTreeView();
             tvwDirTree.Nodes.Add(rootNode);
             tvwDirTree.PrepareForFiltering();
+            //Also set the root folder path for ThumbViewer control
+            thumbViewer.RootFolderPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -168,5 +172,46 @@ namespace FilesHunter
             }
             tvwDirTree.FilterNodes(result);
         }
+
+        private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Node.Tag.ToString() == NodeType.Folder.ToString())
+            {
+                PopulateFirstLevelChildrenInThumViewer(e.Node.Name);
+            }
+        }
+
+
+        private void PopulateFirstLevelChildrenInThumViewer(string relativeFolderPath)
+        {
+            thumbViewer.ClearImages();
+            var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
+            var parentFolderPath = Path.Combine(rootParentDirPath, relativeFolderPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(parentFolderPath);
+            foreach (DirectoryInfo dir in directoryInfo.GetDirectories())
+            {
+                //Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
+                var folderImage = iml4TreeView.Images[0];
+                var ms = new MemoryStream();
+                ImageCodecInfo pngCodec = GetEncoderInfo("image/png");
+                var myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                var encoderParam = new EncoderParameter(myEncoder, 90L);    //Quality level 75
+                var myEncoderParameters = new EncoderParameters(1);
+                myEncoderParameters.Param[0] = encoderParam;
+                folderImage.Save(ms, pngCodec, myEncoderParameters);
+                thumbViewer.AddImageItem(ms.GetBuffer(), dir.Name, relativeFolderPath);
+            }
+
+        }
+        private static ImageCodecInfo GetEncoderInfo(string mimeType)
+        {
+            foreach (ImageCodecInfo codec in ImageCodecInfo.GetImageEncoders())
+                if (codec.MimeType == mimeType)
+                    return codec;
+
+            return null;
+        }
+
+
     }
 }

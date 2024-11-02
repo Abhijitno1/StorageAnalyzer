@@ -31,12 +31,14 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmFolderViewer));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.tvwDirTree = new System.Windows.Forms.TreeView();
             this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
             this.btnLoadTreeview = new System.Windows.Forms.Button();
             this.btnOpenDialog = new System.Windows.Forms.Button();
             this.txtFileLocation = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.btnSearchDuplicates = new System.Windows.Forms.Button();
             this.btnSearchByRegex = new System.Windows.Forms.Button();
             this.btnSearchByExtn = new System.Windows.Forms.Button();
@@ -50,9 +52,7 @@
             this.btnSearch = new System.Windows.Forms.Button();
             this.txtSearchName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.tvwDirTree = new System.Windows.Forms.TreeView();
             this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
-            this.lvFilesShow = new System.Windows.Forms.ListView();
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
             this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -84,12 +84,25 @@
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
+            // tvwDirTree
+            // 
+            this.tvwDirTree.ImageIndex = 0;
+            this.tvwDirTree.ImageList = this.iml4TreeView;
+            this.tvwDirTree.Location = new System.Drawing.Point(4, 2);
+            this.tvwDirTree.Margin = new System.Windows.Forms.Padding(4);
+            this.tvwDirTree.Name = "tvwDirTree";
+            this.tvwDirTree.SelectedImageIndex = 2;
+            this.tvwDirTree.ShowNodeToolTips = true;
+            this.tvwDirTree.Size = new System.Drawing.Size(487, 796);
+            this.tvwDirTree.TabIndex = 1;
+            this.tvwDirTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvwDirTree_NodeMouseClick);
+            // 
             // iml4TreeView
             // 
             this.iml4TreeView.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("iml4TreeView.ImageStream")));
             this.iml4TreeView.TransparentColor = System.Drawing.Color.Transparent;
-            this.iml4TreeView.Images.SetKeyName(0, "folder.ico");
-            this.iml4TreeView.Images.SetKeyName(1, "Generic_Document.ico");
+            this.iml4TreeView.Images.SetKeyName(0, "folder_closed");
+            this.iml4TreeView.Images.SetKeyName(1, "file");
             this.iml4TreeView.Images.SetKeyName(2, "folder_open.ico");
             // 
             // btnLoadTreeview
@@ -133,7 +146,7 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.lvFilesShow);
+            this.groupBox1.Controls.Add(this.thumbViewer);
             this.groupBox1.Controls.Add(this.btnSearchDuplicates);
             this.groupBox1.Controls.Add(this.btnSearchByRegex);
             this.groupBox1.Controls.Add(this.btnSearchByExtn);
@@ -153,6 +166,15 @@
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search Files or Folders";
+            // 
+            // thumbViewer
+            // 
+            this.thumbViewer.Location = new System.Drawing.Point(10, 114);
+            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+            this.thumbViewer.Name = "thumbViewer";
+            this.thumbViewer.RootFolderPath = null;
+            this.thumbViewer.Size = new System.Drawing.Size(952, 596);
+            this.thumbViewer.TabIndex = 16;
             // 
             // btnSearchDuplicates
             // 
@@ -274,34 +296,11 @@
             this.label2.TabIndex = 0;
             this.label2.Text = "File/Folder Name";
             // 
-            // tvwDirTree
-            // 
-            this.tvwDirTree.ImageIndex = 0;
-            this.tvwDirTree.ImageList = this.iml4TreeView;
-            this.tvwDirTree.Location = new System.Drawing.Point(4, 2);
-            this.tvwDirTree.Margin = new System.Windows.Forms.Padding(4);
-            this.tvwDirTree.Name = "tvwDirTree";
-            this.tvwDirTree.SelectedImageIndex = 2;
-            this.tvwDirTree.ShowNodeToolTips = true;
-            this.tvwDirTree.Size = new System.Drawing.Size(487, 796);
-            this.tvwDirTree.TabIndex = 1;
-            // 
             // imlShowPad
             // 
             this.imlShowPad.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
             this.imlShowPad.ImageSize = new System.Drawing.Size(32, 32);
             this.imlShowPad.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // lvFilesShow
-            // 
-            this.lvFilesShow.HideSelection = false;
-            this.lvFilesShow.LargeImageList = this.imlShowPad;
-            this.lvFilesShow.Location = new System.Drawing.Point(13, 127);
-            this.lvFilesShow.Name = "lvFilesShow";
-            this.lvFilesShow.Size = new System.Drawing.Size(953, 584);
-            this.lvFilesShow.SmallImageList = this.imlShowPad;
-            this.lvFilesShow.TabIndex = 15;
-            this.lvFilesShow.UseCompatibleStateImageBehavior = false;
             // 
             // frmFolderViewer
             // 
@@ -350,8 +349,8 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.TreeView tvwDirTree;
     private System.Windows.Forms.ImageList imlShowPad;
-    private System.Windows.Forms.ListView lvFilesShow;
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
         private System.Windows.Forms.OpenFileDialog ofdFileLocation;
+        private ThumbnailViewer thumbViewer;
     }
 }

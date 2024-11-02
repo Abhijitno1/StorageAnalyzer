@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace StorageAnalyzerService
 {
@@ -26,11 +27,15 @@ namespace StorageAnalyzerService
             return null;
         }
 
-        public static TreeNode AddDirectoryToTree(DirectoryInfo targetDir, TreeNode parentTreeNode)
+        public TreeNode AddDirectoryToTree(DirectoryInfo targetDir, TreeNode parentTreeNode)
         {
             var childTreeNode = new TreeNode();
+            childTreeNode.Name = childTreeNode.Parent == null ? targetDir.Name
+                : childTreeNode.Parent.Name + "\\" + targetDir.Name;
             childTreeNode.Name = targetDir.Name;
             childTreeNode.Text = targetDir.Name;
+            childTreeNode.Tag = "Folder";
+            childTreeNode.ImageIndex = FolderImageIndex;
             childTreeNode.ToolTipText = targetDir.FullName;
 
             if (parentTreeNode != null) //This is not a root directory
@@ -55,13 +60,22 @@ namespace StorageAnalyzerService
         }
 
         // Insert logic for processing found files here.
-        public static void AddFileToTree(FileInfo targetFile, TreeNode parentNode)
+        public void AddFileToTree(FileInfo targetFile, TreeNode parentNode)
         {
             var childTreeNode = new TreeNode();
-            childTreeNode.Name = targetFile.Name;
+            childTreeNode.Name = childTreeNode.Parent == null ? targetFile.Name
+                : childTreeNode.Parent.Name + "\\" + targetFile.Name;
             childTreeNode.Text = targetFile.Name;
+            childTreeNode.Tag = NodeType.File.ToString();
+            childTreeNode.ImageIndex = FileImageIndex;
             childTreeNode.ToolTipText = targetFile.FullName;
             parentNode.Nodes.Add(childTreeNode);
         }
+    }
+
+    public enum NodeType
+    {
+        Folder,
+        File
     }
 }
