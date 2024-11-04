@@ -195,13 +195,13 @@ namespace FilesHunter
             foreach (DirectoryInfo dir in directoryInfo.GetDirectories())
             {
                 //Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
-                var folderImage = iml4TreeView.Images[0];
+                var folderImage = imlShowPad.Images[0];
                 var imageData = ThumbnailViewer.ImageToBinary(folderImage);
                 thumbViewer.AddImageItem(imageData, dir.Name, relativeFolderPath);
             }
             foreach (FileInfo file in directoryInfo.GetFiles()) 
             { 
-                var fileImage = iml4TreeView.Images[1];
+                var fileImage = imlShowPad.Images[1];
                 if (ImageExtensions.Contains(file.Extension?.ToUpper()))
                 {
                     fileImage = Image.FromFile(file.FullName);

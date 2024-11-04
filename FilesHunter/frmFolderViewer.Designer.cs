@@ -38,6 +38,7 @@
             this.txtFileLocation = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.btnSearchDuplicates = new System.Windows.Forms.Button();
             this.btnSearchByRegex = new System.Windows.Forms.Button();
             this.btnSearchByExtn = new System.Windows.Forms.Button();
@@ -54,7 +55,6 @@
             this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
             this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
-            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -166,6 +166,15 @@
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search Files or Folders";
+            // 
+            // thumbViewer
+            // 
+            this.thumbViewer.Location = new System.Drawing.Point(10, 114);
+            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+            this.thumbViewer.Name = "thumbViewer";
+            this.thumbViewer.RootFolderPath = null;
+            this.thumbViewer.Size = new System.Drawing.Size(985, 596);
+            this.thumbViewer.TabIndex = 16;
             // 
             // btnSearchDuplicates
             // 
@@ -289,18 +298,15 @@
             // 
             // imlShowPad
             // 
-            this.imlShowPad.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imlShowPad.ImageSize = new System.Drawing.Size(32, 32);
+            this.imlShowPad.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlShowPad.ImageStream")));
             this.imlShowPad.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // thumbViewer
-            // 
-            this.thumbViewer.Location = new System.Drawing.Point(10, 114);
-            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-            this.thumbViewer.Name = "thumbViewer";
-            this.thumbViewer.RootFolderPath = null;
-            this.thumbViewer.Size = new System.Drawing.Size(985, 596);
-            this.thumbViewer.TabIndex = 16;
+            this.imlShowPad.Images.SetKeyName(0, "Folder.png");
+            this.imlShowPad.Images.SetKeyName(1, "File.png");
+            this.imlShowPad.Images.SetKeyName(2, "text file.png");
+            this.imlShowPad.Images.SetKeyName(3, "word doc.png");
+            this.imlShowPad.Images.SetKeyName(4, "pdf doc.png");
+            this.imlShowPad.Images.SetKeyName(5, "Video.png");
+            this.imlShowPad.Images.SetKeyName(6, "Music.png");
             // 
             // frmFolderViewer
             // 
