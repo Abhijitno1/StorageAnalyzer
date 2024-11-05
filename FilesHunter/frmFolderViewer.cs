@@ -206,6 +206,18 @@ namespace FilesHunter
                 {
                     fileImage = Image.FromFile(file.FullName);
                 }
+                else if (file.Extension.ToUpper() == ".TXT")
+                {
+                    fileImage = imlShowPad.Images[2];
+                }
+                else if (file.Extension.ToUpper() == ".DOC" || file.Extension.ToUpper() == ".DOCX")
+                {
+                    fileImage = imlShowPad.Images[3];
+                }
+                else if (file.Extension.ToUpper() == ".PDF")
+                {
+                    fileImage = imlShowPad.Images[4];
+                }
                 var imageData = ThumbnailViewer.ImageToBinary(fileImage);
                 thumbViewer.AddImageItem(imageData, file.Name, relativeFolderPath);
             }
