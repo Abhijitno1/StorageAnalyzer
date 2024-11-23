@@ -28,37 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.lvwTiles = new System.Windows.Forms.ListView();
-            this.imlTiles = new System.Windows.Forms.ImageList(this.components);
-            this.SuspendLayout();
-            // 
-            // lvwTiles
-            // 
-            this.lvwTiles.HideSelection = false;
-            this.lvwTiles.LargeImageList = this.imlTiles;
-            this.lvwTiles.Location = new System.Drawing.Point(3, 0);
-            this.lvwTiles.Name = "lvwTiles";
-            this.lvwTiles.Size = new System.Drawing.Size(1057, 590);
-            this.lvwTiles.SmallImageList = this.imlTiles;
-            this.lvwTiles.TabIndex = 0;
-            this.lvwTiles.UseCompatibleStateImageBehavior = false;
-            this.lvwTiles.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseDoubleClick);
-            // 
-            // imlTiles
-            // 
-            this.imlTiles.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imlTiles.ImageSize = new System.Drawing.Size(128, 128);
-            this.imlTiles.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // ThumbnailViewer
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.lvwTiles);
-            this.Name = "ThumbnailViewer";
-            this.Size = new System.Drawing.Size(1061, 593);
-            this.ResumeLayout(false);
+			this.components = new System.ComponentModel.Container();
+			this.lvwTiles = new System.Windows.Forms.ListView();
+			this.imlTiles = new System.Windows.Forms.ImageList(this.components);
+			this.SuspendLayout();
+			// 
+			// lvwTiles
+			// 
+			this.lvwTiles.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvwTiles.HideSelection = false;
+			this.lvwTiles.LargeImageList = this.imlTiles;
+			this.lvwTiles.Location = new System.Drawing.Point(0, 0);
+			this.lvwTiles.Name = "lvwTiles";
+			this.lvwTiles.Size = new System.Drawing.Size(1061, 593);
+			this.lvwTiles.SmallImageList = this.imlTiles;
+			this.lvwTiles.TabIndex = 0;
+			this.lvwTiles.UseCompatibleStateImageBehavior = false;
+			this.lvwTiles.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseDoubleClick);
+			// 
+			// imlTiles
+			// 
+			this.imlTiles.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+			this.imlTiles.ImageSize = new System.Drawing.Size(128, 128);
+			this.imlTiles.TransparentColor = System.Drawing.Color.Transparent;
+			// 
+			// ThumbnailViewer
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScroll = true;
+			this.Controls.Add(this.lvwTiles);
+			this.Name = "ThumbnailViewer";
+			this.Size = new System.Drawing.Size(1061, 593);
+			this.ResumeLayout(false);
 
         }
 

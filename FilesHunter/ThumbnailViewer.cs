@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StorageAnalyzerService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,9 +22,14 @@ namespace FilesHunter
 
         public event GetDataDelegate GetPreviewData;
 
-        public ThumbnailViewer()
+        public delegate void OpenFolderDelegate(string itemName, string itemPath);
+        public event OpenFolderDelegate OpenFolderToViewContents;
+
+
+		public ThumbnailViewer()
         {
-            InitializeComponent();
+			//Ref: https://stackoverflow.com/questions/4710145/how-can-i-get-scrollbars-on-picturebox
+			InitializeComponent();
         }
 
         public static Image BinaryToImage(byte[] binaryData)
@@ -47,12 +53,12 @@ namespace FilesHunter
             return ms.ToArray();
         }
 
-        public void AddImageItem(byte[] binary, string imgName, string relativeFolderPath)
+        public void AddImageItem(NodeType nodeType, byte[] binary, string imgName, string relativeFolderPath)
         {
             this.Cursor = Cursors.WaitCursor;
 
             // Create a Thumnail of Image and add Thumbnail to Panel
-            MakeThumbnail(binary, imgName, relativeFolderPath);
+            MakeThumbnail(nodeType, binary, imgName, relativeFolderPath);
 
             GC.GetTotalMemory(true);
 
@@ -73,9 +79,8 @@ namespace FilesHunter
             return null;
         }
 
-        private void MakeThumbnail(byte[] binary, string imgName, string folderPath)
+        private void MakeThumbnail(NodeType nodeType, byte[] binary, string imgName, string folderPath)
         {
-
             // Set thumbnail image
             MemoryStream ms = new MemoryStream();
             var thumbImage = Image.FromStream(new MemoryStream(binary))
@@ -88,6 +93,7 @@ namespace FilesHunter
             var listItem = new ListViewItem();
             listItem.Name = folderPath;
             listItem.Text = imgName;
+            listItem.Tag = nodeType.ToString();
             listItem.ImageIndex = imlTiles.Images.Count - 1;
             lvwTiles.Items.Add(listItem);
         }
@@ -107,11 +113,14 @@ namespace FilesHunter
             }
             if (clickedItem != null)
             {
-				PreviewMedia();
+                if (lvwTiles.SelectedItems[0].Tag.ToString() == NodeType.File.ToString())
+                    PreviewMedia();
+                else
+                    if (OpenFolderToViewContents != null) OpenFolderToViewContents(clickedItem.Text, clickedItem.Name);
             }
         }
 
-        private void PreviewMedia()
+		private void PreviewMedia()
         {
 			int index = lvwTiles.SelectedIndices[0];
             var fileName = lvwTiles.SelectedItems[0].Text;

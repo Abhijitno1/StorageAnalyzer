@@ -50,11 +50,12 @@ namespace FilesHunter
 				rtbSlate.Visible = false;
 				picView.Visible = false;
 
-				var tempFilePathName = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+				var tempFilePathName = Path.Combine(Path.GetTempPath(), fileName);
+				//Path.GetTempFileName()																					
 				//Change the extension of temp file so that media player is happy to play the file
-				var extn = Path.GetExtension(fileName);
-				var halfName = tempFilePathName.Substring(0, tempFilePathName.LastIndexOf('.'));
-				tempFilePathName = halfName + extn;
+				//var extn = Path.GetExtension(fileName);
+				//var halfName = tempFilePathName.Substring(0, tempFilePathName.LastIndexOf('.'));
+				//tempFilePathName = halfName + extn;
 				File.WriteAllBytes(tempFilePathName, (byte[])fileData);
 
 				axWMP.URL = tempFilePathName;
@@ -69,14 +70,11 @@ namespace FilesHunter
 			}
 			else
 			{
-				var tempFilePathName = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-				//Change the extension of temp file so that media player is happy to play the file
-				var extn = Path.GetExtension(fileName);
-				var halfName = tempFilePathName.Substring(0, tempFilePathName.LastIndexOf('.'));
-				tempFilePathName = halfName + extn;
+				var tempFilePathName = Path.Combine(Path.GetTempPath(), fileName);
 				File.WriteAllBytes(tempFilePathName, (byte[])fileData);
 
 				ShellExecute("\"" + tempFilePathName + "\"");
+				return;
 			}
 			this.ShowDialog();
 		}

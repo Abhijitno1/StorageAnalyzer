@@ -20,10 +20,17 @@ namespace FilesHunter
         private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
         public frmFolderViewer()
         {
-            InitializeComponent();
+			InitializeComponent();
             this.Load += frmFolderViewer_Load;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
+			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
         }
+
+		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
+		{
+			thumbViewer.ClearImages();
+			PopulateFirstLevelChildrenInThumViewer(itemPath + @"\" + itemName);
+		}
 
 		private void ThumbViewer_GetPreviewData(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData)
 		{
@@ -208,7 +215,7 @@ namespace FilesHunter
                 //Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
                 var folderImage = imlShowPad.Images[0];
                 var imageData = ThumbnailViewer.ImageToBinary(folderImage);
-                thumbViewer.AddImageItem(imageData, dir.Name, relativeFolderPath);
+                thumbViewer.AddImageItem(NodeType.Folder, imageData, dir.Name, relativeFolderPath);
             }
             foreach (FileInfo file in directoryInfo.GetFiles()) 
             { 
@@ -238,7 +245,7 @@ namespace FilesHunter
                     fileImage = imlShowPad.Images[5];
                 }
                 var imageData = ThumbnailViewer.ImageToBinary(fileImage);
-                thumbViewer.AddImageItem(imageData, file.Name, relativeFolderPath);
+                thumbViewer.AddImageItem(NodeType.File, imageData, file.Name, relativeFolderPath);
             }
 
         }
