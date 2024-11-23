@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,8 +15,11 @@ namespace FilesHunter
 {
     public partial class ThumbnailViewer : UserControl
     {
-        public List<byte[]> ImageList { get; private set; }
         public string RootFolderPath { get; set; }
+
+        public delegate void GetDataDelegate(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData);
+
+        public event GetDataDelegate GetPreviewData;
 
         public ThumbnailViewer()
         {
@@ -47,9 +51,6 @@ namespace FilesHunter
         {
             this.Cursor = Cursors.WaitCursor;
 
-            // Add binary data to List
-            ImageList.Add(binary);
-
             // Create a Thumnail of Image and add Thumbnail to Panel
             MakeThumbnail(binary, imgName, relativeFolderPath);
 
@@ -62,7 +63,6 @@ namespace FilesHunter
         {
             imlTiles.Images.Clear();
             lvwTiles.Items.Clear();
-            ImageList.Clear();
         }
         private static ImageCodecInfo GetEncoderInfo(string mimeType)
         {
@@ -107,28 +107,49 @@ namespace FilesHunter
             }
             if (clickedItem != null)
             {
-                Form previewForm = new Form();
-                previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-                previewForm.MinimizeBox = false;
-                previewForm.Size = new System.Drawing.Size(1000, 860);
-                previewForm.StartPosition = FormStartPosition.CenterScreen;
-                previewForm.AutoScroll = true;
-
-                PictureBox view = new PictureBox();
-                view.Dock = DockStyle.Fill;
-
-                int index = lvwTiles.SelectedIndices[0];
-                view.Image = BinaryToImage(ImageList[index]);
-
-                view.SizeMode = PictureBoxSizeMode.Zoom;
-                previewForm.Controls.Add(view);
-                previewForm.ShowDialog();
+				PreviewMedia();
             }
         }
 
-        private void ThumbnailViewer_Load(object sender, EventArgs e)
+        private void PreviewMedia()
         {
-            ImageList = new List<byte[]>();
-        }
+			int index = lvwTiles.SelectedIndices[0];
+            var fileName = lvwTiles.SelectedItems[0].Text;
+            var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+			var extn = Path.GetExtension(fileName);
+            frmMediaPreview.MediaType curMediaType = frmMediaPreview.MediaType.Other;
+            if ((new string[] { ".rtf", ".txt" }).Contains(extn))
+                curMediaType = frmMediaPreview.MediaType.Text;
+			else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp", ".svg" }).Contains(extn))
+				curMediaType = frmMediaPreview.MediaType.Image;
+			else if ((new string[] { ".mp4", ".wmv", ".asf", ".mp3", ".wma" }).Contains(extn))
+				curMediaType = frmMediaPreview.MediaType.Video;
+
+            object fileData = null;
+            if (GetPreviewData != null) GetPreviewData(fileName, $"{RootFolderPath}\\{itemRelativePath}", curMediaType, out fileData);
+            frmMediaPreview previewForm = new frmMediaPreview();
+            previewForm.ShowMedia(curMediaType, fileName, fileData);
+		}
+
+		//private void OldPreivewForm()
+  //      {
+		//	Form previewForm = new Form();
+		//	previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+		//	previewForm.MinimizeBox = false;
+		//	previewForm.Size = new System.Drawing.Size(1000, 860);
+		//	previewForm.StartPosition = FormStartPosition.CenterScreen;
+		//	previewForm.AutoScroll = true;
+
+		//	PictureBox view = new PictureBox();
+		//	view.Dock = DockStyle.Fill;
+
+		//	int index = lvwTiles.SelectedIndices[0];
+		//	view.Image = BinaryToImage(ImageList[index]);
+
+		//	view.SizeMode = PictureBoxSizeMode.Zoom;
+		//	previewForm.Controls.Add(view);
+		//	previewForm.ShowDialog();
+		//}
+
     }
 }

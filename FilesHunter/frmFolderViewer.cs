@@ -22,10 +22,21 @@ namespace FilesHunter
         {
             InitializeComponent();
             this.Load += frmFolderViewer_Load;
+			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
         }
 
-        void frmFolderViewer_Load(object sender, EventArgs e)
+		private void ThumbViewer_GetPreviewData(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData)
+		{
+            var filePathName = Path.Combine(itemPath, itemName);
+            if (itemType == frmMediaPreview.MediaType.Text)
+                fileData = File.ReadAllText(filePathName);
+            else
+                fileData = File.ReadAllBytes(filePathName);
+		}
+
+		void frmFolderViewer_Load(object sender, EventArgs e)
         {
+            
             fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
         }
 
@@ -217,6 +228,14 @@ namespace FilesHunter
                 else if (file.Extension.ToUpper() == ".PDF")
                 {
                     fileImage = imlShowPad.Images[4];
+                }
+                else if (file.Extension.ToUpper() == ".MP4")
+                {
+                    fileImage = imlShowPad.Images[5];
+                }
+                else if (file.Extension.ToUpper() == ".M4A" || file.Extension.ToUpper() == ".MP3")
+                {
+                    fileImage = imlShowPad.Images[5];
                 }
                 var imageData = ThumbnailViewer.ImageToBinary(fileImage);
                 thumbViewer.AddImageItem(imageData, file.Name, relativeFolderPath);

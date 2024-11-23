@@ -58,7 +58,6 @@
             this.Controls.Add(this.lvwTiles);
             this.Name = "ThumbnailViewer";
             this.Size = new System.Drawing.Size(1061, 593);
-            this.Load += new System.EventHandler(this.ThumbnailViewer_Load);
             this.ResumeLayout(false);
 
         }
