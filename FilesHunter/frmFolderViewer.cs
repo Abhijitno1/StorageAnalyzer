@@ -18,16 +18,21 @@ namespace FilesHunter
     public partial class frmFolderViewer : Form
     {
         private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
-        public frmFolderViewer()
+        int panel1OrigWidth, panel2OrigWidth;
+
+		public frmFolderViewer()
         {
 			InitializeComponent();
             this.Load += frmFolderViewer_Load;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
-        }
+            this.panel1OrigWidth = splitContainer1.Panel1.Width;
+			this.panel2OrigWidth = splitContainer1.Panel2.Width;
+		}
 
 		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
 		{
+            ShowSearchResultsInTreeview(itemName);
 			thumbViewer.ClearImages();
 			PopulateFirstLevelChildrenInThumViewer(itemPath + @"\" + itemName);
 		}
@@ -43,7 +48,6 @@ namespace FilesHunter
 
 		void frmFolderViewer_Load(object sender, EventArgs e)
         {
-            
             fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
         }
 
@@ -92,11 +96,13 @@ namespace FilesHunter
 
         private void ShowSearchResultsInTreeview(string foundItem)
         {
-            var foundNodes = tvwDirTree.Nodes.Find(foundItem, true);
-            if (foundNodes.Any())
-                foundNodes[0].BackColor= Color.Yellow;
-            
-        }
+            var foundNode = FindTreeNode(tvwDirTree.Nodes[0], foundItem);
+            if (foundNode != null)
+            {
+				tvwDirTree.SelectedNode = foundNode;
+                foundNode.Expand();
+			}
+		}
 
         private void DecolorizeTreeNode(TreeNode currentNode)
         {
@@ -109,7 +115,7 @@ namespace FilesHunter
 
         private void btnDecolorizeTreeview_Click(object sender, EventArgs e)
         {
-            //ClearSearchResultsInTreeview();
+            ClearSearchResultsInTreeview();
             tvwDirTree.ClearFilters();
         }
 
@@ -250,5 +256,33 @@ namespace FilesHunter
 
         }
 
-    }
+		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+		{
+            tvwDirTree.Width += splitContainer1.Panel1.Width - panel1OrigWidth;
+			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
+		}
+
+		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively
+		private TreeNode FindTreeNode(TreeNode node, string value2Find)
+		{
+			foreach (TreeNode child in node.Nodes)
+			{
+				if (child.Text == value2Find)
+				{
+					return child;
+				}
+
+				if (child.Nodes.Count>0)
+				{
+					TreeNode found = FindTreeNode(child, value2Find);
+					if (found != null)
+					{
+						return found;
+					}
+				}
+			}
+			return null;
+		}
+
+	}
 }
