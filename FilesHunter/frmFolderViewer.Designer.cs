@@ -55,6 +55,7 @@
 			this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
 			this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
 			this.thumbViewer = new FilesHunter.ThumbnailViewer();
+			this.btnSaveFolderData = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -76,6 +77,7 @@
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
+			this.splitContainer1.Panel2.Controls.Add(this.btnSaveFolderData);
 			this.splitContainer1.Panel2.Controls.Add(this.btnLoadTreeview);
 			this.splitContainer1.Panel2.Controls.Add(this.btnOpenDialog);
 			this.splitContainer1.Panel2.Controls.Add(this.txtFileLocation);
@@ -112,7 +114,7 @@
 			// 
 			this.btnLoadTreeview.Location = new System.Drawing.Point(796, 12);
 			this.btnLoadTreeview.Name = "btnLoadTreeview";
-			this.btnLoadTreeview.Size = new System.Drawing.Size(110, 25);
+			this.btnLoadTreeview.Size = new System.Drawing.Size(82, 25);
 			this.btnLoadTreeview.TabIndex = 11;
 			this.btnLoadTreeview.Text = "Load Treeview";
 			this.btnLoadTreeview.UseVisualStyleBackColor = true;
@@ -166,7 +168,7 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Location = new System.Drawing.Point(5, 43);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(1018, 761);
+			this.groupBox1.Size = new System.Drawing.Size(1017, 761);
 			this.groupBox1.TabIndex = 7;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Search Files or Folders";
@@ -314,6 +316,16 @@
 			this.thumbViewer.Size = new System.Drawing.Size(985, 596);
 			this.thumbViewer.TabIndex = 16;
 			// 
+			// btnSaveFolderData
+			// 
+			this.btnSaveFolderData.Location = new System.Drawing.Point(884, 12);
+			this.btnSaveFolderData.Name = "btnSaveFolderData";
+			this.btnSaveFolderData.Size = new System.Drawing.Size(82, 25);
+			this.btnSaveFolderData.TabIndex = 12;
+			this.btnSaveFolderData.Text = "Save Treeview";
+			this.btnSaveFolderData.UseVisualStyleBackColor = true;
+			this.btnSaveFolderData.Click += new System.EventHandler(this.btnSaveFolderData_Click);
+			// 
 			// frmFolderViewer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -364,5 +376,6 @@
 		private System.Windows.Forms.Button btnOpenDialog;
 		private System.Windows.Forms.TextBox txtFileLocation;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button btnSaveFolderData;
 	}
 }

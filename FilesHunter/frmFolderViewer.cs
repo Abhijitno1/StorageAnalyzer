@@ -262,6 +262,13 @@ namespace FilesHunter
 			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
 		}
 
+		private void btnSaveFolderData_Click(object sender, EventArgs e)
+		{
+			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+			saver.RootFolderPath = txtFileLocation.Text.Trim();
+            saver.SaveMap();
+		}
+
 		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively
 		private TreeNode FindTreeNode(TreeNode node, string value2Find)
 		{
