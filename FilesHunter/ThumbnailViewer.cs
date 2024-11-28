@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FilesHunter
 {
@@ -19,12 +20,16 @@ namespace FilesHunter
         public string RootFolderPath { get; set; }
 
         public delegate void GetDataDelegate(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData);
-
         public event GetDataDelegate GetPreviewData;
 
         public delegate void OpenFolderDelegate(string itemName, string itemPath);
         public event OpenFolderDelegate OpenFolderToViewContents;
 
+        public delegate void DeleteResourceDelegate(string itemName, string itemPath);
+		public event DeleteResourceDelegate DeleteResource;
+
+		public delegate void SaveResourceDelegate(string itemName, string itemPath);
+		public event SaveResourceDelegate SaveResource;
 
 		public ThumbnailViewer()
         {
@@ -143,8 +148,38 @@ namespace FilesHunter
 			}
 		}
 
+		private void tsMnuItmDeleteFromDB_Click(object sender, EventArgs e)
+		{
+			var fileName = lvwTiles.SelectedItems[0].Text;
+			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+			if (DeleteResource != null)
+			{
+				DeleteResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
+			}
+		}
+
+		private void lvwTiles_MouseClick(object sender, MouseEventArgs e)
+		{
+			//Ref: https://stackoverflow.com/questions/13437889/showing-a-context-menu-for-an-item-in-a-listview
+			if (e.Button == MouseButtons.Right)
+			{
+				var focusedItem = lvwTiles.FocusedItem;
+				if (focusedItem != null && focusedItem.Bounds.Contains(e.Location))
+				{
+					listViewContextMenu.Show(Cursor.Position);
+				}
+			}
+		}
+
+		private void tsMnuItmSaveToDisk_Click(object sender, EventArgs e)
+		{
+			var fileName = lvwTiles.SelectedItems[0].Text;
+			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+            MessageBox.Show($"Saving DB File {RootFolderPath}\\{itemRelativePath}\\{fileName} to disk");
+		}
+
 		//private void OldPreivewForm()
-        //{
+		//{
 		//	Form previewForm = new Form();
 		//	previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
 		//	previewForm.MinimizeBox = false;
@@ -163,5 +198,5 @@ namespace FilesHunter
 		//	previewForm.ShowDialog();
 		//}
 
-    }
+	}
 }

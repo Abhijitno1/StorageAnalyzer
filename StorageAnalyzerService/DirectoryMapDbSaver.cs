@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,21 @@ namespace StorageAnalyzerService
 			};
 			dbContext.FolderMaps.Add(folderMap);
 			dbContext.SaveChanges();
+		}
+
+		public void UpdateMap(XmlDocument editedDoc)
+		{
+			var identifier = editedDoc.DocumentElement.Attributes["fullPath"].Value;
+			if (identifier != null)
+			{
+				var foundRec = dbContext.FolderMaps.Where(folderMap=> folderMap.AbsolutePath == identifier);
+				if (foundRec.Any())
+				{
+					var rec2Update = foundRec.First();
+					rec2Update.DirectoryXml = editedDoc.DocumentElement.OuterXml;
+					dbContext.SaveChanges();
+				}
+			}
 		}
 
 		private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
@@ -96,6 +112,18 @@ namespace StorageAnalyzerService
 				fileElm.SetAttribute("DbId", modak.Id.ToString());
 			}
 		}
+
+		public bool DeleteModak(int dbId)
+		{
+			var foundModak = dbContext.Modaks.Find(dbId);
+			if (foundModak != null)
+			{
+				dbContext.Modaks.Remove(foundModak);
+				return true;
+			}
+			return false;
+		}
+
 
 	}
 }

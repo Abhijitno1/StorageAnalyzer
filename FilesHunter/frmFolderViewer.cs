@@ -273,6 +273,10 @@ namespace FilesHunter
 		{
             tvwDirTree.Width += splitContainer1.Panel1.Width - panel1OrigWidth;
 			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
+
+            //Reset the panel widths to track future changes
+			panel1OrigWidth = splitContainer1.Panel1.Width;
+			panel2OrigWidth = splitContainer1.Panel2.Width;
 		}
 
 		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively

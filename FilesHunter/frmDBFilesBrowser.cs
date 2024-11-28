@@ -16,7 +16,7 @@ namespace FilesHunter
 	public partial class frmDBFilesBrowser : Form
 	{
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
-		int panel1OrigWidth, panel2OrigWidth;
+		int panel1OrigWidth, panel2OrigWidth, formOrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
 
 		public frmDBFilesBrowser()
@@ -25,8 +25,29 @@ namespace FilesHunter
 			this.Load += FrmDBFilesBrowser_Load;
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
+			this.thumbViewer.DeleteResource += ThumbViewer_DeleteResource;
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
+			this.formOrigHeight = this.Height;
+		}
+
+		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
+		{
+			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
+			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+			if (selectedNode != null)
+			{
+				var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+				var parentNode = selectedNode.ParentNode;
+				if (parentNode != null)
+				{
+					parentNode.RemoveChild(selectedNode);
+					DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+					saver.DeleteModak(resourceDbId);
+					saver.UpdateMap(currentFolderNaksha);
+				}
+			}
 		}
 
 		private void ThumbViewer_GetPreviewData(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData)
@@ -177,15 +198,53 @@ namespace FilesHunter
 			}
 		}
 
+		private void frmDBFilesBrowser_Resize(object sender, EventArgs e)
+		{
+			if (this.formOrigHeight == 0) return;	//Dont do anything on initial form load
+
+			var heightDiff = this.Height - this.formOrigHeight;
+			//var widthDiff = this.Width - this.formOrigWidth;
+			//tvwDirTree.Width += widthDiff / 2;
+			tvwDirTree.Height += heightDiff;
+			//thumbViewer.Width += widthDiff / 2;
+			thumbViewer.Height += heightDiff;
+			grpFolderDetails.Height += heightDiff;
+
+			this.formOrigHeight = this.Height;
+			//this.formOrigWidth = this.Width;
+		}
+
 		private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
-			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
+			bool proceed = false;
+			if (e.Button == MouseButtons.left)
+			{
+				var focusedItem = tvwDirTree.SelectedNode;
+				//Trying to check whether node action is select, not expand
+				if (focusedItem != null && focusedItem.Bounds.Contains(e.Location))
+				{
+					proceed = true;
+				}
+			}
+
+			if (proceed && e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
 			{
 				var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
 				var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
 				var relativePath = e.Node.Name.Substring(offset);
 				PopulateFirstLevelChildrenInThumViewer(relativePath);
 			}
+		}
+
+		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+		{
+			tvwDirTree.Width += splitContainer1.Panel1.Width - panel1OrigWidth;
+			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
+			grpFolderDetails.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
+
+			//Reset the panel widths to track future changes
+			panel1OrigWidth = splitContainer1.Panel1.Width;
+			panel2OrigWidth = splitContainer1.Panel2.Width;
 		}
 
 		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively

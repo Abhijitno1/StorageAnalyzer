@@ -16,7 +16,8 @@ namespace FilesHunter
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmDBFilesBrowser());
-        }
+			Application.Run(new frmDBFilesBrowser());
+			//Application.Run(new frmFolderViewer());
+		}
     }
 }

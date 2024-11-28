@@ -15,7 +15,7 @@ namespace FilesHunter
 {
     /*
      * This form will allow user to browse FolderMap XML files created for Backed Up folders
-     */ 
+     */
     public partial class frmFolderBrowser : Form
     {
         public frmFolderBrowser()
@@ -62,7 +62,7 @@ namespace FilesHunter
 
         private void ClearSearchResultsInTreeview()
         {
-            if (tvwDirTree.Nodes.Count>0)
+            if (tvwDirTree.Nodes.Count > 0)
             {
                 //tvwDirTree.BackColor = Color.White;
                 var rootNode = tvwDirTree.Nodes[0];
@@ -74,8 +74,8 @@ namespace FilesHunter
         {
             var foundNodes = tvwDirTree.Nodes.Find(foundItem, true);
             if (foundNodes.Any())
-                foundNodes[0].BackColor= Color.Yellow;
-            
+                foundNodes[0].BackColor = Color.Yellow;
+
         }
 
         private void DecolorizeTreeNode(TreeNode currentNode)
