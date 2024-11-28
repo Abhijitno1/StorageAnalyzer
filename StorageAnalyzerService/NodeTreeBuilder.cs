@@ -26,7 +26,14 @@ namespace StorageAnalyzerService
             return rootNode;
         }
 
-        private void AddNodesToTree(TreeNode currentNode, XmlNode xmlNode)
+		public TreeNode BuildNodesForTreeView(XmlDocument document)
+		{
+			var rootNode = new TreeNode();
+			AddNodesToTree(rootNode, document.DocumentElement);
+			return rootNode;
+		}
+
+		private void AddNodesToTree(TreeNode currentNode, XmlNode xmlNode)
         {
             currentNode.Name = xmlNode.ParentNode is XmlDocument ? xmlNode.Attributes["fullPath"].Value
                 : currentNode.Parent.Name + "\\" + xmlNode.Attributes["name"].Value;
@@ -35,6 +42,7 @@ namespace StorageAnalyzerService
             {
                 currentNode.ImageIndex = xmlNode.Name == "file" ? FileImageIndex : FolderImageIndex;
             }
+            currentNode.Tag = xmlNode.Name;
             currentNode.ToolTipText = currentNode.Name;
 
             for (int i = 0; i < xmlNode.ChildNodes.Count; i++)

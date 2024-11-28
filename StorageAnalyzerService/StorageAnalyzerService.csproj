@@ -160,6 +160,7 @@
     <Compile Include="CommonMethods.cs" />
     <Compile Include="DbModels\FolderMap.cs" />
     <Compile Include="DirectoryMapComparer.cs" />
+    <Compile Include="DirectoryMapDbReader.cs" />
     <Compile Include="DirNodeTreeBuilder.cs" />
     <Compile Include="DirectoryMapDbSaver.cs" />
     <Compile Include="DbModels\ApplicationDbContext.cs" />

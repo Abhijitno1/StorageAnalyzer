@@ -160,6 +160,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmDBFilesBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDBFilesBrowser.Designer.cs">
+      <DependentUpon>frmDBFilesBrowser.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmFolderViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -187,6 +193,9 @@
       <DependentUpon>ThumbnailViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="TreeViewHelper.cs" />
+    <EmbeddedResource Include="frmDBFilesBrowser.resx">
+      <DependentUpon>frmDBFilesBrowser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmFolderViewer.resx">
       <DependentUpon>frmFolderViewer.cs</DependentUpon>
     </EmbeddedResource>

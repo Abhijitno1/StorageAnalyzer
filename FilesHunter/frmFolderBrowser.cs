@@ -13,6 +13,9 @@ using System.IO;
 
 namespace FilesHunter
 {
+    /*
+     * This form will allow user to browse FolderMap XML files created for Backed Up folders
+     */ 
     public partial class frmFolderBrowser : Form
     {
         public frmFolderBrowser()

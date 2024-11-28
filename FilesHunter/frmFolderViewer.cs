@@ -15,7 +15,11 @@ using System.Drawing.Drawing2D;
 
 namespace FilesHunter
 {
-    public partial class frmFolderViewer : Form
+	 /*
+	  * This form will allow user to browse Folders and files physically stored on the disk similar to windows file explorer.
+	  * This for is only used for testing purpose before migrating actual data to DB.
+	  */
+	public partial class frmFolderViewer : Form
     {
         private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
         int panel1OrigWidth, panel2OrigWidth;
@@ -32,7 +36,7 @@ namespace FilesHunter
 
 		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
 		{
-            ShowSearchResultsInTreeview(itemName);
+			ExpandSelectedFolderInTreeView(itemName);
 			thumbViewer.ClearImages();
 			PopulateFirstLevelChildrenInThumViewer(itemPath + @"\" + itemName);
 		}
@@ -94,7 +98,16 @@ namespace FilesHunter
             }
         }
 
-        private void ShowSearchResultsInTreeview(string foundItem)
+		private void ExpandSelectedFolderInTreeView(string foundItem)
+		{
+			var foundNode = FindTreeNode(tvwDirTree.Nodes[0], foundItem);
+			if (foundNode != null)
+			{
+				tvwDirTree.SelectedNode = foundNode;
+				foundNode.Expand();
+			}
+		}
+		private void ShowSearchResultsInTreeview(string foundItem)
         {
             var foundNode = FindTreeNode(tvwDirTree.Nodes[0], foundItem);
             if (foundNode != null)
@@ -260,13 +273,6 @@ namespace FilesHunter
 		{
             tvwDirTree.Width += splitContainer1.Panel1.Width - panel1OrigWidth;
 			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;
-		}
-
-		private void btnSaveFolderData_Click(object sender, EventArgs e)
-		{
-			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-			saver.RootFolderPath = txtFileLocation.Text.Trim();
-            saver.SaveMap();
 		}
 
 		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively

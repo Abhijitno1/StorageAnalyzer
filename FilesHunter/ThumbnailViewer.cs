@@ -135,13 +135,16 @@ namespace FilesHunter
 				curMediaType = frmMediaPreview.MediaType.Video;
 
             object fileData = null;
-            if (GetPreviewData != null) GetPreviewData(fileName, $"{RootFolderPath}\\{itemRelativePath}", curMediaType, out fileData);
-            frmMediaPreview previewForm = new frmMediaPreview();
-            previewForm.ShowMedia(curMediaType, fileName, fileData);
+            if (GetPreviewData != null)
+            {
+				GetPreviewData(fileName, $"{RootFolderPath}\\{itemRelativePath}", curMediaType, out fileData);
+				frmMediaPreview previewForm = new frmMediaPreview();
+				previewForm.ShowMedia(curMediaType, fileName, fileData);
+			}
 		}
 
 		//private void OldPreivewForm()
-  //      {
+        //{
 		//	Form previewForm = new Form();
 		//	previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
 		//	previewForm.MinimizeBox = false;

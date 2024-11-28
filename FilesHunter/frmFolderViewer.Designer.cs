@@ -39,6 +39,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.label4 = new System.Windows.Forms.Label();
+			this.thumbViewer = new FilesHunter.ThumbnailViewer();
 			this.btnSearchDuplicates = new System.Windows.Forms.Button();
 			this.btnSearchByRegex = new System.Windows.Forms.Button();
 			this.btnSearchByExtn = new System.Windows.Forms.Button();
@@ -54,8 +55,6 @@
 			this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
 			this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
 			this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
-			this.thumbViewer = new FilesHunter.ThumbnailViewer();
-			this.btnSaveFolderData = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -77,7 +76,6 @@
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
-			this.splitContainer1.Panel2.Controls.Add(this.btnSaveFolderData);
 			this.splitContainer1.Panel2.Controls.Add(this.btnLoadTreeview);
 			this.splitContainer1.Panel2.Controls.Add(this.btnOpenDialog);
 			this.splitContainer1.Panel2.Controls.Add(this.txtFileLocation);
@@ -130,6 +128,7 @@
 			this.btnOpenDialog.TabIndex = 10;
 			this.btnOpenDialog.Text = "...";
 			this.btnOpenDialog.UseVisualStyleBackColor = true;
+			this.btnOpenDialog.Click += new System.EventHandler(this.btnOpenDialog_Click);
 			// 
 			// txtFileLocation
 			// 
@@ -168,7 +167,7 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Location = new System.Drawing.Point(5, 43);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(1017, 761);
+			this.groupBox1.Size = new System.Drawing.Size(1016, 761);
 			this.groupBox1.TabIndex = 7;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Search Files or Folders";
@@ -182,6 +181,17 @@
 			this.label4.Size = new System.Drawing.Size(105, 20);
 			this.label4.TabIndex = 8;
 			this.label4.Text = "File Location";
+			// 
+			// thumbViewer
+			// 
+			this.thumbViewer.AutoScroll = true;
+			this.thumbViewer.AutoSize = true;
+			this.thumbViewer.Location = new System.Drawing.Point(4, 114);
+			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+			this.thumbViewer.Name = "thumbViewer";
+			this.thumbViewer.RootFolderPath = null;
+			this.thumbViewer.Size = new System.Drawing.Size(985, 596);
+			this.thumbViewer.TabIndex = 16;
 			// 
 			// btnSearchDuplicates
 			// 
@@ -305,27 +315,6 @@
 			this.imlShowPad.Images.SetKeyName(5, "Video.png");
 			this.imlShowPad.Images.SetKeyName(6, "Music.png");
 			// 
-			// thumbViewer
-			// 
-			this.thumbViewer.AutoScroll = true;
-			this.thumbViewer.AutoSize = true;
-			this.thumbViewer.Location = new System.Drawing.Point(4, 114);
-			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-			this.thumbViewer.Name = "thumbViewer";
-			this.thumbViewer.RootFolderPath = null;
-			this.thumbViewer.Size = new System.Drawing.Size(985, 596);
-			this.thumbViewer.TabIndex = 16;
-			// 
-			// btnSaveFolderData
-			// 
-			this.btnSaveFolderData.Location = new System.Drawing.Point(884, 12);
-			this.btnSaveFolderData.Name = "btnSaveFolderData";
-			this.btnSaveFolderData.Size = new System.Drawing.Size(82, 25);
-			this.btnSaveFolderData.TabIndex = 12;
-			this.btnSaveFolderData.Text = "Save Treeview";
-			this.btnSaveFolderData.UseVisualStyleBackColor = true;
-			this.btnSaveFolderData.Click += new System.EventHandler(this.btnSaveFolderData_Click);
-			// 
 			// frmFolderViewer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -376,6 +365,5 @@
 		private System.Windows.Forms.Button btnOpenDialog;
 		private System.Windows.Forms.TextBox txtFileLocation;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button btnSaveFolderData;
 	}
 }
