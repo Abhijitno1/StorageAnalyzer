@@ -57,7 +57,7 @@
 			this.splitButton1 = new FilesHunter.SplitButton();
 			this.label4 = new System.Windows.Forms.Label();
 			this.btnSaveLocation = new System.Windows.Forms.Button();
-			this.txtSaveLocation = new System.Windows.Forms.TextBox();
+			this.txtNewItemLocation = new System.Windows.Forms.TextBox();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -306,7 +306,7 @@
 			this.pnlBottom.Controls.Add(this.splitButton1);
 			this.pnlBottom.Controls.Add(this.label4);
 			this.pnlBottom.Controls.Add(this.btnSaveLocation);
-			this.pnlBottom.Controls.Add(this.txtSaveLocation);
+			this.pnlBottom.Controls.Add(this.txtNewItemLocation);
 			this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.pnlBottom.Location = new System.Drawing.Point(0, 763);
 			this.pnlBottom.Name = "pnlBottom";
@@ -343,13 +343,13 @@
 			this.btnSaveLocation.Text = "...";
 			this.btnSaveLocation.UseVisualStyleBackColor = true;
 			// 
-			// txtSaveLocation
+			// txtNewItemLocation
 			// 
-			this.txtSaveLocation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.txtSaveLocation.Location = new System.Drawing.Point(112, 14);
-			this.txtSaveLocation.Name = "txtSaveLocation";
-			this.txtSaveLocation.Size = new System.Drawing.Size(650, 22);
-			this.txtSaveLocation.TabIndex = 13;
+			this.txtNewItemLocation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.txtNewItemLocation.Location = new System.Drawing.Point(112, 14);
+			this.txtNewItemLocation.Name = "txtNewItemLocation";
+			this.txtNewItemLocation.Size = new System.Drawing.Size(650, 22);
+			this.txtNewItemLocation.TabIndex = 13;
 			// 
 			// splitContainer2
 			// 
@@ -398,7 +398,7 @@
 		private System.Windows.Forms.Panel pnlBottom;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Button btnSaveLocation;
-		private System.Windows.Forms.TextBox txtSaveLocation;
+		private System.Windows.Forms.TextBox txtNewItemLocation;
 		private System.Windows.Forms.Panel pnlFolderSelector;
 		private System.Windows.Forms.Button btnSaveFolderData;
 		private System.Windows.Forms.Button btnLoadTreeview;

@@ -105,9 +105,9 @@ namespace StorageAnalyzerService
 				var fileData = new byte[fs.Length];
 				//ToDo: Optiomize this file read in future
 				fs.Read(fileData, 0, (int)fs.Length);
+				fs.Dispose();
 				modak.PicData = fileData;
-				dbContext.Modaks.Add(modak);
-				dbContext.SaveChanges();
+				InsertModakIntoDb(modak);
 				//Ref: https://stackoverflow.com/questions/5212751/how-can-i-retrieve-id-of-inserted-entity-using-entity-framework
 				fileElm.SetAttribute("DbId", modak.Id.ToString());
 			}
@@ -124,6 +124,12 @@ namespace StorageAnalyzerService
 			return false;
 		}
 
+		public bool InsertModakIntoDb(Modak modak)
+		{
+			dbContext.Modaks.Add(modak);
+			dbContext.SaveChanges();
+			return true;
+		}
 
 	}
 }

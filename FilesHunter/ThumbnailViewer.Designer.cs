@@ -43,6 +43,7 @@
 			this.lvwTiles.HideSelection = false;
 			this.lvwTiles.LargeImageList = this.imlTiles;
 			this.lvwTiles.Location = new System.Drawing.Point(0, 0);
+			this.lvwTiles.MultiSelect = false;
 			this.lvwTiles.Name = "lvwTiles";
 			this.lvwTiles.Size = new System.Drawing.Size(1061, 593);
 			this.lvwTiles.SmallImageList = this.imlTiles;
@@ -64,12 +65,12 @@
             this.tsMnuItmSaveToDisk,
             this.tsMnuItmDeleteFromDB});
 			this.listViewContextMenu.Name = "listViewContextMenu";
-			this.listViewContextMenu.Size = new System.Drawing.Size(211, 80);
+			this.listViewContextMenu.Size = new System.Drawing.Size(183, 52);
 			// 
 			// tsMnuItmSaveToDisk
 			// 
 			this.tsMnuItmSaveToDisk.Name = "tsMnuItmSaveToDisk";
-			this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(210, 24);
+			this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(182, 24);
 			this.tsMnuItmSaveToDisk.Text = "Save to Disk";
 			this.tsMnuItmSaveToDisk.ToolTipText = "Save this resource to Disk";
 			this.tsMnuItmSaveToDisk.Click += new System.EventHandler(this.tsMnuItmSaveToDisk_Click);
@@ -77,7 +78,7 @@
 			// tsMnuItmDeleteFromDB
 			// 
 			this.tsMnuItmDeleteFromDB.Name = "tsMnuItmDeleteFromDB";
-			this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(210, 24);
+			this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(182, 24);
 			this.tsMnuItmDeleteFromDB.Text = "Delete from DB";
 			this.tsMnuItmDeleteFromDB.ToolTipText = "Delete this resource from DB";
 			this.tsMnuItmDeleteFromDB.Click += new System.EventHandler(this.tsMnuItmDeleteFromDB_Click);

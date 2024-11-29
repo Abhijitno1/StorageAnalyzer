@@ -70,7 +70,21 @@ namespace FilesHunter
             this.Cursor = Cursors.Default;
         }
 
-        public void ClearImages()
+        public string GetSelectedItemPath()
+        {
+            if (lvwTiles.SelectedItems.Count > 0)
+            {
+                var fileName = lvwTiles.SelectedItems[0].Text;
+                var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+                return itemRelativePath + "\\" + fileName;
+            }
+            else
+            { 
+                return null;
+            }
+		}
+
+		public void ClearImages()
         {
             imlTiles.Images.Clear();
             lvwTiles.Items.Clear();

@@ -1,4 +1,5 @@
 ﻿using StorageAnalyzerService;
+using StorageAnalyzerService.DbModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,7 +35,40 @@ namespace FilesHunter
 
 		private void SplitButton1_MenuItemClick(object sender, EventArgs e)
 		{
-			MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
+			//MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
+			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+			var inputFilePathName = txtNewItemLocation.Text.Trim();
+			var fileName = Path.GetFileName(inputFilePathName);
+			var stream = File.OpenRead(inputFilePathName);
+			var fileSize = stream.Length;
+			var creationDateTime = File.GetCreationTime(inputFilePathName);
+			var fileData = new byte[fileSize];
+			//ToDo: Optiomize this file read in future
+			stream.Read(fileData, 0, (int)fileSize);
+			stream.Dispose();
+			var relativePath = "\\" + fileName; //ToDo: This should vary based on currently double clicked folder in ThumbViewer when viewing foler details
+			Modak modak = new Modak()
+			{
+				Title = fileName,
+				RelativePath = relativePath,
+				PicData = fileData
+			};
+			saver.InsertModakIntoDb(modak);
+			var dbId = modak.Id;
+
+			var selectedCommand = (sender as ToolStripMenuItem).Tag.ToString();
+			if (selectedCommand == "addatend")
+			{
+				var newElm = currentFolderNaksha.CreateElement("file");
+				//File: name, extension, creationdate, size | folder: name, creationdate
+				newElm.SetAttribute("name", fileName);
+				newElm.SetAttribute("extension", Path.GetExtension(fileName));
+				newElm.SetAttribute("creationDate", creationDateTime.ToString("dd-MMM-yyyy"));
+				newElm.SetAttribute("size", fileSize.ToString());
+				newElm.SetAttribute("DbId", dbId.ToString());
+				currentFolderNaksha.DocumentElement.AppendChild(newElm);
+			}
+			saver.UpdateMap(currentFolderNaksha);
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
