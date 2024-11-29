@@ -26,9 +26,15 @@ namespace FilesHunter
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
 			this.thumbViewer.DeleteResource += ThumbViewer_DeleteResource;
+			this.splitButton1.MenuItemClick += SplitButton1_MenuItemClick;
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
+		}
+
+		private void SplitButton1_MenuItemClick(object sender, EventArgs e)
+		{
+			MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
@@ -217,7 +223,7 @@ namespace FilesHunter
 		private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
 			bool proceed = false;
-			if (e.Button == MouseButtons.left)
+			if (e.Button == MouseButtons.Left)
 			{
 				var focusedItem = tvwDirTree.SelectedNode;
 				//Trying to check whether node action is select, not expand

@@ -37,6 +37,7 @@
 			this.tvwDirTree = new System.Windows.Forms.TreeView();
 			this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
 			this.grpFolderDetails = new System.Windows.Forms.GroupBox();
+			this.thumbViewer = new FilesHunter.ThumbnailViewer();
 			this.btnSearchDuplicates = new System.Windows.Forms.Button();
 			this.btnSearchByRegex = new System.Windows.Forms.Button();
 			this.btnSearchByExtn = new System.Windows.Forms.Button();
@@ -53,11 +54,11 @@
 			this.txtFileLocation = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.pnlBottom = new System.Windows.Forms.Panel();
+			this.splitButton1 = new FilesHunter.SplitButton();
 			this.label4 = new System.Windows.Forms.Label();
-			this.btnSaveResults = new System.Windows.Forms.Button();
 			this.btnSaveLocation = new System.Windows.Forms.Button();
 			this.txtSaveLocation = new System.Windows.Forms.TextBox();
-			this.thumbViewer = new FilesHunter.ThumbnailViewer();
+			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -65,6 +66,8 @@
 			this.grpFolderDetails.SuspendLayout();
 			this.pnlFolderSelector.SuspendLayout();
 			this.pnlBottom.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+			this.splitContainer2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// imlShowPad
@@ -141,6 +144,17 @@
 			this.grpFolderDetails.TabIndex = 16;
 			this.grpFolderDetails.TabStop = false;
 			this.grpFolderDetails.Text = "Search Folders and Files";
+			// 
+			// thumbViewer
+			// 
+			this.thumbViewer.AutoScroll = true;
+			this.thumbViewer.AutoSize = true;
+			this.thumbViewer.Location = new System.Drawing.Point(19, 92);
+			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+			this.thumbViewer.Name = "thumbViewer";
+			this.thumbViewer.RootFolderPath = null;
+			this.thumbViewer.Size = new System.Drawing.Size(985, 615);
+			this.thumbViewer.TabIndex = 36;
 			// 
 			// btnSearchDuplicates
 			// 
@@ -289,8 +303,8 @@
 			// 
 			// pnlBottom
 			// 
+			this.pnlBottom.Controls.Add(this.splitButton1);
 			this.pnlBottom.Controls.Add(this.label4);
-			this.pnlBottom.Controls.Add(this.btnSaveResults);
 			this.pnlBottom.Controls.Add(this.btnSaveLocation);
 			this.pnlBottom.Controls.Add(this.txtSaveLocation);
 			this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -298,6 +312,13 @@
 			this.pnlBottom.Name = "pnlBottom";
 			this.pnlBottom.Size = new System.Drawing.Size(1036, 50);
 			this.pnlBottom.TabIndex = 13;
+			// 
+			// splitButton1
+			// 
+			this.splitButton1.Location = new System.Drawing.Point(826, 12);
+			this.splitButton1.Name = "splitButton1";
+			this.splitButton1.Size = new System.Drawing.Size(125, 29);
+			this.splitButton1.TabIndex = 16;
 			// 
 			// label4
 			// 
@@ -309,16 +330,6 @@
 			this.label4.Size = new System.Drawing.Size(83, 16);
 			this.label4.TabIndex = 12;
 			this.label4.Text = "File Location";
-			// 
-			// btnSaveResults
-			// 
-			this.btnSaveResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.btnSaveResults.Location = new System.Drawing.Point(800, 14);
-			this.btnSaveResults.Name = "btnSaveResults";
-			this.btnSaveResults.Size = new System.Drawing.Size(99, 25);
-			this.btnSaveResults.TabIndex = 15;
-			this.btnSaveResults.Text = "Save Results";
-			this.btnSaveResults.UseVisualStyleBackColor = true;
 			// 
 			// btnSaveLocation
 			// 
@@ -340,16 +351,14 @@
 			this.txtSaveLocation.Size = new System.Drawing.Size(650, 22);
 			this.txtSaveLocation.TabIndex = 13;
 			// 
-			// thumbViewer
+			// splitContainer2
 			// 
-			this.thumbViewer.AutoScroll = true;
-			this.thumbViewer.AutoSize = true;
-			this.thumbViewer.Location = new System.Drawing.Point(19, 92);
-			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-			this.thumbViewer.Name = "thumbViewer";
-			this.thumbViewer.RootFolderPath = null;
-			this.thumbViewer.Size = new System.Drawing.Size(985, 615);
-			this.thumbViewer.TabIndex = 36;
+			this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer2.Name = "splitContainer2";
+			this.splitContainer2.Size = new System.Drawing.Size(1542, 813);
+			this.splitContainer2.SplitterDistance = 514;
+			this.splitContainer2.TabIndex = 2;
 			// 
 			// frmDBFilesBrowser
 			// 
@@ -357,6 +366,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1542, 813);
 			this.Controls.Add(this.splitContainer1);
+			this.Controls.Add(this.splitContainer2);
 			this.Name = "frmDBFilesBrowser";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "DB Files Browser";
@@ -371,6 +381,8 @@
 			this.pnlFolderSelector.PerformLayout();
 			this.pnlBottom.ResumeLayout(false);
 			this.pnlBottom.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+			this.splitContainer2.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -385,7 +397,6 @@
 		private System.Windows.Forms.ImageList iml4TreeView;
 		private System.Windows.Forms.Panel pnlBottom;
 		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Button btnSaveResults;
 		private System.Windows.Forms.Button btnSaveLocation;
 		private System.Windows.Forms.TextBox txtSaveLocation;
 		private System.Windows.Forms.Panel pnlFolderSelector;
@@ -405,5 +416,7 @@
 		private System.Windows.Forms.Button btnSearch;
 		private System.Windows.Forms.TextBox txtSearchName;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.SplitContainer splitContainer2;
+		private SplitButton splitButton1;
 	}
 }
