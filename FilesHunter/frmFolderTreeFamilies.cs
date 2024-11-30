@@ -70,6 +70,7 @@ namespace FilesHunter
 
 		private void lstFolderHrchies_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			if (lstFolderHrchies.SelectedItem == null) return;
 			this.SelectedFolderTree = lstFolderHrchies.SelectedItem.ToString();
 			this.DialogResult = DialogResult.OK;
 			this.Close();

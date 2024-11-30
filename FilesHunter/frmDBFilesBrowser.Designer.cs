@@ -30,7 +30,7 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDBFilesBrowser));
-			this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
+			this.ofdFilePicker = new System.Windows.Forms.OpenFileDialog();
 			this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tvwDirTree = new System.Windows.Forms.TreeView();
@@ -56,6 +56,7 @@
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.thumbViewer = new FilesHunter.ThumbnailViewer();
 			this.splitButton1 = new FilesHunter.SplitButton();
+			this.sfdFileSaver = new System.Windows.Forms.SaveFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -66,6 +67,10 @@
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
 			this.splitContainer2.SuspendLayout();
 			this.SuspendLayout();
+			// 
+			// ofdFilePicker
+			// 
+			this.ofdFilePicker.Title = "Pick File from Disk";
 			// 
 			// imlShowPad
 			// 
@@ -336,6 +341,10 @@
 			this.splitButton1.Size = new System.Drawing.Size(125, 29);
 			this.splitButton1.TabIndex = 16;
 			// 
+			// sfdFileSaver
+			// 
+			this.sfdFileSaver.Title = "Save File to Disk";
+			// 
 			// frmDBFilesBrowser
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -365,7 +374,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.OpenFileDialog ofdFileLocation;
+		private System.Windows.Forms.OpenFileDialog ofdFilePicker;
 		private System.Windows.Forms.ImageList imlShowPad;
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.TreeView tvwDirTree;
@@ -391,5 +400,6 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.SplitContainer splitContainer2;
 		private SplitButton splitButton1;
+		private System.Windows.Forms.SaveFileDialog sfdFileSaver;
 	}
 }

@@ -29,10 +29,32 @@ namespace FilesHunter
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
 			this.thumbViewer.DeleteResource += ThumbViewer_DeleteResource;
+			this.thumbViewer.SaveResource += ThumbViewer_SaveResource;
 			this.splitButton1.MenuItemClick += SplitButton1_MenuItemClick;
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
+		}
+
+		private void ThumbViewer_SaveResource(string itemName, string itemPath)
+		{
+			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
+			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+			if (selectedNode != null)
+			{
+				var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+				var saveAbsolutePath = currentFolderNaksha.DocumentElement.Attributes["fullPath"].Value + relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
+				sfdFileSaver.FileName = saveAbsolutePath;	//ToDo: Set Initial directory and filename separately instead of full path for file name here
+				var dlgResult = sfdFileSaver.ShowDialog();
+				if (dlgResult == DialogResult.OK)
+				{
+					saveAbsolutePath = sfdFileSaver.FileName;
+					DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
+					var fileData = dbReader.GetModak(resourceDbId);
+					File.WriteAllBytes(saveAbsolutePath, fileData);
+				}
+			}
 		}
 
 		private void SplitButton1_MenuItemClick(object sender, EventArgs e)
@@ -170,7 +192,7 @@ namespace FilesHunter
 				fileData = reader.GetModak(fileId);
 				if (itemType == frmMediaPreview.MediaType.Text)
 				{
-					fileData = Convert.ToBase64String((byte[])fileData);
+					fileData = Encoding.UTF8.GetString((byte[])fileData);
 				}
 			}
 			else 
@@ -198,6 +220,10 @@ namespace FilesHunter
 					reader.RootFolderPath = form.SelectedFolderTree;
 					currentFolderNaksha = reader.GetMap();
 					TreeViewRefreshState();
+					//Select first node in treeview by default
+					var rootNode = tvwDirTree.Nodes[0];
+					rootNode.Expand();
+					tvwDirTree.SelectedNode = rootNode;
 				}
 			}
 		}
@@ -322,10 +348,10 @@ namespace FilesHunter
 
 		private void btnSaveLocation_Click(object sender, EventArgs e)
 		{
-			var dialogResult = ofdFileLocation.ShowDialog();
+			var dialogResult = ofdFilePicker.ShowDialog();
 			if (dialogResult == DialogResult.OK)
 			{
-				txtNewItemLocation.Text = ofdFileLocation.FileName;
+				txtNewItemLocation.Text = ofdFilePicker.FileName;
 			}
 		}
 

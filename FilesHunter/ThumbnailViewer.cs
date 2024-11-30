@@ -189,7 +189,10 @@ namespace FilesHunter
 		{
 			var fileName = lvwTiles.SelectedItems[0].Text;
 			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
-            MessageBox.Show($"Saving DB File {RootFolderPath}\\{itemRelativePath}\\{fileName} to disk");
+            if (SaveResource != null)
+            {
+				SaveResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
+			}
 		}
 
 		//private void OldPreivewForm()
