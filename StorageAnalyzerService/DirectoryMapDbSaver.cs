@@ -48,6 +48,17 @@ namespace StorageAnalyzerService
 			}
 		}
 
+		public bool DeleteFolderMap(string absolutePath)
+		{
+			var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
+			if (foundFolderMaps.Any())
+			{
+				dbContext.FolderMaps.Remove(foundFolderMaps.First());
+				return dbContext.SaveChanges() > 0;
+			}
+			return false;
+		}
+
 		private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
 		{
 			var folderNode = xmlDoc.CreateElement("folder");

@@ -32,7 +32,6 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDBFilesBrowser));
 			this.ofdFileLocation = new System.Windows.Forms.OpenFileDialog();
 			this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
-			this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tvwDirTree = new System.Windows.Forms.TreeView();
 			this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
@@ -47,11 +46,9 @@
 			this.txtSearchName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.pnlFolderSelector = new System.Windows.Forms.Panel();
-			this.btnSaveFolderData = new System.Windows.Forms.Button();
 			this.btnLoadTreeview = new System.Windows.Forms.Button();
-			this.btnOpenDialog = new System.Windows.Forms.Button();
 			this.txtFileLocation = new System.Windows.Forms.TextBox();
-			this.label1 = new System.Windows.Forms.Label();
+			this.lblHierarchyName = new System.Windows.Forms.Label();
 			this.pnlBottom = new System.Windows.Forms.Panel();
 			this.label4 = new System.Windows.Forms.Label();
 			this.btnSaveLocation = new System.Windows.Forms.Button();
@@ -230,26 +227,14 @@
 			// 
 			// pnlFolderSelector
 			// 
-			this.pnlFolderSelector.Controls.Add(this.btnSaveFolderData);
 			this.pnlFolderSelector.Controls.Add(this.btnLoadTreeview);
-			this.pnlFolderSelector.Controls.Add(this.btnOpenDialog);
 			this.pnlFolderSelector.Controls.Add(this.txtFileLocation);
-			this.pnlFolderSelector.Controls.Add(this.label1);
+			this.pnlFolderSelector.Controls.Add(this.lblHierarchyName);
 			this.pnlFolderSelector.Dock = System.Windows.Forms.DockStyle.Top;
 			this.pnlFolderSelector.Location = new System.Drawing.Point(0, 0);
 			this.pnlFolderSelector.Name = "pnlFolderSelector";
 			this.pnlFolderSelector.Size = new System.Drawing.Size(1036, 52);
 			this.pnlFolderSelector.TabIndex = 15;
-			// 
-			// btnSaveFolderData
-			// 
-			this.btnSaveFolderData.Location = new System.Drawing.Point(888, 12);
-			this.btnSaveFolderData.Name = "btnSaveFolderData";
-			this.btnSaveFolderData.Size = new System.Drawing.Size(82, 25);
-			this.btnSaveFolderData.TabIndex = 17;
-			this.btnSaveFolderData.Text = "Save Treeview";
-			this.btnSaveFolderData.UseVisualStyleBackColor = true;
-			this.btnSaveFolderData.Click += new System.EventHandler(this.btnSaveFolderData_Click);
 			// 
 			// btnLoadTreeview
 			// 
@@ -261,34 +246,24 @@
 			this.btnLoadTreeview.UseVisualStyleBackColor = true;
 			this.btnLoadTreeview.Click += new System.EventHandler(this.btnLoadTreeview_Click);
 			// 
-			// btnOpenDialog
-			// 
-			this.btnOpenDialog.AutoSize = true;
-			this.btnOpenDialog.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.btnOpenDialog.Location = new System.Drawing.Point(764, 10);
-			this.btnOpenDialog.Name = "btnOpenDialog";
-			this.btnOpenDialog.Size = new System.Drawing.Size(26, 26);
-			this.btnOpenDialog.TabIndex = 15;
-			this.btnOpenDialog.Text = "...";
-			this.btnOpenDialog.UseVisualStyleBackColor = true;
-			this.btnOpenDialog.Click += new System.EventHandler(this.btnOpenDialog_Click);
-			// 
 			// txtFileLocation
 			// 
+			this.txtFileLocation.BackColor = System.Drawing.SystemColors.ButtonHighlight;
 			this.txtFileLocation.Location = new System.Drawing.Point(123, 12);
 			this.txtFileLocation.Name = "txtFileLocation";
+			this.txtFileLocation.ReadOnly = true;
 			this.txtFileLocation.Size = new System.Drawing.Size(629, 22);
 			this.txtFileLocation.TabIndex = 14;
 			// 
-			// label1
+			// lblHierarchyName
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(15, 12);
-			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(83, 16);
-			this.label1.TabIndex = 13;
-			this.label1.Text = "File Location";
+			this.lblHierarchyName.AutoSize = true;
+			this.lblHierarchyName.Location = new System.Drawing.Point(15, 12);
+			this.lblHierarchyName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.lblHierarchyName.Name = "lblHierarchyName";
+			this.lblHierarchyName.Size = new System.Drawing.Size(90, 16);
+			this.lblHierarchyName.TabIndex = 13;
+			this.lblHierarchyName.Text = "File Hierarchy";
 			// 
 			// pnlBottom
 			// 
@@ -324,6 +299,7 @@
 			this.btnSaveLocation.TabIndex = 14;
 			this.btnSaveLocation.Text = "...";
 			this.btnSaveLocation.UseVisualStyleBackColor = true;
+			this.btnSaveLocation.Click += new System.EventHandler(this.btnSaveLocation_Click);
 			// 
 			// txtNewItemLocation
 			// 
@@ -391,7 +367,6 @@
 
 		private System.Windows.Forms.OpenFileDialog ofdFileLocation;
 		private System.Windows.Forms.ImageList imlShowPad;
-		private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.TreeView tvwDirTree;
 		private System.Windows.Forms.ImageList iml4TreeView;
@@ -400,11 +375,9 @@
 		private System.Windows.Forms.Button btnSaveLocation;
 		private System.Windows.Forms.TextBox txtNewItemLocation;
 		private System.Windows.Forms.Panel pnlFolderSelector;
-		private System.Windows.Forms.Button btnSaveFolderData;
 		private System.Windows.Forms.Button btnLoadTreeview;
-		private System.Windows.Forms.Button btnOpenDialog;
 		private System.Windows.Forms.TextBox txtFileLocation;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label lblHierarchyName;
 		private System.Windows.Forms.GroupBox grpFolderDetails;
 		private ThumbnailViewer thumbViewer;
 		private System.Windows.Forms.Button btnSearchDuplicates;

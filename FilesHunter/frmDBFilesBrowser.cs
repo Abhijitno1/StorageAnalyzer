@@ -26,7 +26,6 @@ namespace FilesHunter
 		public frmDBFilesBrowser()
 		{
 			InitializeComponent();
-			this.Load += FrmDBFilesBrowser_Load;
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
 			this.thumbViewer.DeleteResource += ThumbViewer_DeleteResource;
@@ -171,7 +170,7 @@ namespace FilesHunter
 				fileData = reader.GetModak(fileId);
 				if (itemType == frmMediaPreview.MediaType.Text)
 				{
-					fileData = Encoding.Default.GetString((byte[])fileData);
+					fileData = Convert.ToBase64String((byte[])fileData);
 				}
 			}
 			else 
@@ -187,28 +186,20 @@ namespace FilesHunter
 			PopulateFirstLevelChildrenInThumViewer();
 		}
 
-		private void btnOpenDialog_Click(object sender, EventArgs e)
-		{
-			DialogResult result = fbdFolderLocation.ShowDialog();
-			if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbdFolderLocation.SelectedPath))
-			{
-				txtFileLocation.Text = fbdFolderLocation.SelectedPath;
-			}
-		}
-
-		private void btnSaveFolderData_Click(object sender, EventArgs e)
-		{
-			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-			saver.RootFolderPath = txtFileLocation.Text.Trim();
-			saver.SaveMap();
-		}
-
 		private void btnLoadTreeview_Click(object sender, EventArgs e)
 		{
-			DirectoryMapDbReader reader = new DirectoryMapDbReader();
-			reader.RootFolderPath = txtFileLocation.Text.Trim();
-			currentFolderNaksha = reader.GetMap();
-			TreeViewRefreshState();
+			using (var form = new frmFolderTreeFamilies())
+			{
+				var result = form.ShowDialog();
+				if (result == DialogResult.OK)
+				{
+					txtFileLocation.Text = form.SelectedFolderTree;
+					DirectoryMapDbReader reader = new DirectoryMapDbReader();
+					reader.RootFolderPath = form.SelectedFolderTree;
+					currentFolderNaksha = reader.GetMap();
+					TreeViewRefreshState();
+				}
+			}
 		}
 
 		private void TreeViewRefreshState()
@@ -220,11 +211,6 @@ namespace FilesHunter
 			tvwDirTree.Nodes.Clear();
 			tvwDirTree.Nodes.Add(rootNode);
 			tvwDirTree.PrepareForFiltering();
-		}
-
-		private void FrmDBFilesBrowser_Load(object sender, EventArgs e)
-		{
-			fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
 		}
 
 		private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
@@ -332,6 +318,15 @@ namespace FilesHunter
 
 			this.formOrigHeight = this.Height;
 			//this.formOrigWidth = this.Width;
+		}
+
+		private void btnSaveLocation_Click(object sender, EventArgs e)
+		{
+			var dialogResult = ofdFileLocation.ShowDialog();
+			if (dialogResult == DialogResult.OK)
+			{
+				txtNewItemLocation.Text = ofdFileLocation.FileName;
+			}
 		}
 
 		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)

@@ -23,6 +23,11 @@ namespace StorageAnalyzerService
 			return retDoc;
 		}
 
+		public IEnumerable<string> GetAllFolderMapsList()
+		{
+			return dbContext.FolderMaps.Select(k => k.AbsolutePath).ToList();
+		}
+
 		public Byte[] GetModak(int dbId)
 		{
 			byte[] output = null;
