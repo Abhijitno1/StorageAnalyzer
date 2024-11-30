@@ -44,23 +44,7 @@ namespace FilesHunter
 			splitMenuStrip.Show(this, new Point(0, this.Height), ToolStripDropDownDirection.AboveRight);
 		}
 
-		private void insertToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			if (MenuItemClick!=null)
-			{
-				MenuItemClick(sender, e);
-			}
-		}
-
-		private void addAtEndToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			if (MenuItemClick != null)
-			{
-				MenuItemClick(sender, e);
-			}
-		}
-
-		private void insertAfterToolStripMenuItem_Click(object sender, EventArgs e)
+		private void toolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (MenuItemClick != null)
 			{

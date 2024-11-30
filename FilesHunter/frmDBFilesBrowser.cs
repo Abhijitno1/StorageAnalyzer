@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace FilesHunter
 {
@@ -19,6 +21,7 @@ namespace FilesHunter
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
 		int panel1OrigWidth, panel2OrigWidth, formOrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
+		string currentHierarchyParentPath;
 
 		public frmDBFilesBrowser()
 		{
@@ -37,38 +40,100 @@ namespace FilesHunter
 		{
 			//MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
 			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-			var inputFilePathName = txtNewItemLocation.Text.Trim();
-			var fileName = Path.GetFileName(inputFilePathName);
-			var stream = File.OpenRead(inputFilePathName);
-			var fileSize = stream.Length;
-			var creationDateTime = File.GetCreationTime(inputFilePathName);
-			var fileData = new byte[fileSize];
-			//ToDo: Optiomize this file read in future
-			stream.Read(fileData, 0, (int)fileSize);
-			stream.Dispose();
-			var relativePath = "\\" + fileName; //ToDo: This should vary based on currently double clicked folder in ThumbViewer when viewing foler details
-			Modak modak = new Modak()
-			{
-				Title = fileName,
-				RelativePath = relativePath,
-				PicData = fileData
-			};
-			saver.InsertModakIntoDb(modak);
-			var dbId = modak.Id;
-
+			var selectedItemPath = thumbViewer.GetSelectedItemPath();
 			var selectedCommand = (sender as ToolStripMenuItem).Tag.ToString();
-			if (selectedCommand == "addatend")
+			XmlElement newElm = null;
+			//Omit the topmost folder of hierarchy for storing relativ path in DB.
+			var modakRelPath = string.Empty;
+			if (currentHierarchyParentPath.IndexOf('\\', 1) > -1)
+				modakRelPath = currentHierarchyParentPath.Substring(currentHierarchyParentPath.IndexOf('\\', 1));
+
+			Func<string, bool> isFileOperation = (string selectCommand) => selectedCommand != "folderaddatend";
+			if (isFileOperation(selectedCommand))
 			{
-				var newElm = currentFolderNaksha.CreateElement("file");
+				var inputFilePathName = txtNewItemLocation.Text.Trim();
+				var fileName = Path.GetFileName(inputFilePathName);
+				var stream = File.OpenRead(inputFilePathName);
+				var fileSize = stream.Length;
+				var creationDateTime = File.GetCreationTime(inputFilePathName);
+				var fileData = new byte[fileSize];
+				//ToDo: Optiomize this file read in future
+				stream.Read(fileData, 0, (int)fileSize);
+				stream.Dispose();
+				Modak modak = new Modak()
+				{
+					Title = fileName,
+					PicData = fileData,
+					RelativePath = modakRelPath + "\\" + fileName
+				};
+				newElm = currentFolderNaksha.CreateElement("file");
 				//File: name, extension, creationdate, size | folder: name, creationdate
 				newElm.SetAttribute("name", fileName);
 				newElm.SetAttribute("extension", Path.GetExtension(fileName));
 				newElm.SetAttribute("creationDate", creationDateTime.ToString("dd-MMM-yyyy"));
 				newElm.SetAttribute("size", fileSize.ToString());
-				newElm.SetAttribute("DbId", dbId.ToString());
-				currentFolderNaksha.DocumentElement.AppendChild(newElm);
+
+				switch (selectedCommand)
+				{
+					case "fileaddatend":
+						var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
+						var selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+						if (selectedXmlNode != null)
+							selectedXmlNode.AppendChild(newElm);
+						break;
+					case "fileinsertbefore":
+						if (selectedItemPath == null)
+						{
+							MessageBox.Show("Please select an item from listview to insert file before", "Validation Error");
+							return;
+						}
+						filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(selectedItemPath, NodeType.File);
+						selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+						if (selectedXmlNode != null && selectedXmlNode.ParentNode != null)
+							selectedXmlNode.ParentNode.InsertBefore(newElm, selectedXmlNode);
+
+						break;
+					case "fileinsertafter":
+						if (selectedItemPath == null)
+						{
+							MessageBox.Show("Please select an item from listview to insert file after", "Validation Error");
+							return;
+						}
+						filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(selectedItemPath, NodeType.File);
+						selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+						if (selectedXmlNode != null && selectedXmlNode.ParentNode != null)
+							selectedXmlNode.ParentNode.InsertAfter(newElm, selectedXmlNode);
+
+						break;
+				}
+
+				saver.InsertModakIntoDb(modak);
+				newElm.SetAttribute("DbId", modak.Id.ToString());
+			}
+			else //Add folder at end of currently selected folder view
+			{
+				var folderName = txtNewItemLocation.Text.Trim();
+				if (string.IsNullOrWhiteSpace(folderName))
+				{
+					MessageBox.Show("Please enter a folder name to add", "Validation Error");
+					return;
+				}
+				newElm = currentFolderNaksha.CreateElement("folder");
+				//File: name, extension, creationdate, size | folder: name, creationdate
+				newElm.SetAttribute("name", folderName);
+				newElm.SetAttribute("creationDate", DateTime.Today.ToString("dd-MMM-yyyy"));
+				var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
+				var selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+				if (selectedXmlNode != null)
+					selectedXmlNode.AppendChild(newElm);
+				else
+					currentFolderNaksha.DocumentElement.AppendChild(newElm);
 			}
 			saver.UpdateMap(currentFolderNaksha);
+
+			//Refresh the treeview and listview
+			TreeViewRefreshState();
+			ThumbViewerRefreshState();
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
@@ -86,6 +151,10 @@ namespace FilesHunter
 					DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
 					saver.DeleteModak(resourceDbId);
 					saver.UpdateMap(currentFolderNaksha);
+
+					//Refresh the treeview and listview
+					TreeViewRefreshState();
+					ThumbViewerRefreshState();
 				}
 			}
 		}
@@ -114,8 +183,8 @@ namespace FilesHunter
 		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
 		{
 			ExpandSelectedFolderInTreeView(itemName);
-			thumbViewer.ClearImages();
-			PopulateFirstLevelChildrenInThumViewer(itemPath + @"\" + itemName);
+			currentHierarchyParentPath = itemPath + @"\" + itemName;
+			PopulateFirstLevelChildrenInThumViewer();
 		}
 
 		private void btnOpenDialog_Click(object sender, EventArgs e)
@@ -139,10 +208,16 @@ namespace FilesHunter
 			DirectoryMapDbReader reader = new DirectoryMapDbReader();
 			reader.RootFolderPath = txtFileLocation.Text.Trim();
 			currentFolderNaksha = reader.GetMap();
+			TreeViewRefreshState();
+		}
+
+		private void TreeViewRefreshState()
+		{
 			NodeTreeBuilder browser = new NodeTreeBuilder();
 			browser.FolderImageIndex = 0;
 			browser.FileImageIndex = 1;
 			var rootNode = browser.BuildNodesForTreeView(currentFolderNaksha);
+			tvwDirTree.Nodes.Clear();
 			tvwDirTree.Nodes.Add(rootNode);
 			tvwDirTree.PrepareForFiltering();
 		}
@@ -171,10 +246,15 @@ namespace FilesHunter
 			return filterClause;
 		}
 
-		private void PopulateFirstLevelChildrenInThumViewer(string relativeFolderPath)
+		private void ThumbViewerRefreshState()
+		{
+			PopulateFirstLevelChildrenInThumViewer();
+		}
+
+		private void PopulateFirstLevelChildrenInThumViewer()
 		{
 			thumbViewer.ClearImages();
-			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.Folder);
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			DirectoryMapDbReader reader = new DirectoryMapDbReader();
 
@@ -188,7 +268,7 @@ namespace FilesHunter
 					//Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
 					var folderImage = imlShowPad.Images[0];
 					imageData = ThumbnailViewer.ImageToBinary(folderImage);
-					thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, relativeFolderPath);
+					thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentPath);
 				}
 				else if (childNode.Name == "file")
 				{
@@ -223,7 +303,7 @@ namespace FilesHunter
 					{
 						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[1]);
 					}
-					thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, relativeFolderPath);
+					thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, currentHierarchyParentPath);
 				}
 			}
 		}
@@ -254,25 +334,22 @@ namespace FilesHunter
 			//this.formOrigWidth = this.Width;
 		}
 
-		private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			bool proceed = false;
-			if (e.Button == MouseButtons.Left)
+			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
+			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
+			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
 			{
-				var focusedItem = tvwDirTree.SelectedNode;
-				//Trying to check whether node action is select, not expand
-				if (focusedItem != null && focusedItem.Bounds.Contains(e.Location))
-				{
-					proceed = true;
-				}
-			}
-
-			if (proceed && e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
-			{
-				var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
-				var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
 				var relativePath = e.Node.Name.Substring(offset);
-				PopulateFirstLevelChildrenInThumViewer(relativePath);
+				currentHierarchyParentPath = relativePath;
+				PopulateFirstLevelChildrenInThumViewer();
+			}
+			else if (e.Node.Tag.ToString().ToLower() == NodeType.File.ToString().ToLower())
+			{
+				//We show folder details for parent folder of selected file in tree view
+				var relativePath = e.Node.Parent.Name.Substring(offset);
+				currentHierarchyParentPath = relativePath;
+				PopulateFirstLevelChildrenInThumViewer();
 			}
 		}
 

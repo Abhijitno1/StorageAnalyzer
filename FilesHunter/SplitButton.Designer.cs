@@ -31,10 +31,11 @@
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplitButton));
 			this.btnMain = new System.Windows.Forms.Button();
-			this.splitMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.addFolderAtEndMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.addAtEndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.insertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.insertAfterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.splitMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.splitMenuStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -52,39 +53,48 @@
 			this.btnMain.UseVisualStyleBackColor = true;
 			this.btnMain.Click += new System.EventHandler(this.btnMain_Click);
 			// 
-			// splitMenuStrip
+			// addFolderAtEndMenuItem
 			// 
-			this.splitMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.splitMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addAtEndToolStripMenuItem,
-            this.insertToolStripMenuItem,
-            this.insertAfterToolStripMenuItem});
-			this.splitMenuStrip.Name = "splitMenuStrip";
-			this.splitMenuStrip.Size = new System.Drawing.Size(167, 76);
+			this.addFolderAtEndMenuItem.Name = "addFolderAtEndMenuItem";
+			this.addFolderAtEndMenuItem.Size = new System.Drawing.Size(210, 24);
+			this.addFolderAtEndMenuItem.Tag = "folderaddatend";
+			this.addFolderAtEndMenuItem.Text = "Add Folder At End";
+			this.addFolderAtEndMenuItem.Click += new System.EventHandler(this.toolStripMenuItem_Click);
 			// 
 			// addAtEndToolStripMenuItem
 			// 
 			this.addAtEndToolStripMenuItem.Name = "addAtEndToolStripMenuItem";
-			this.addAtEndToolStripMenuItem.Size = new System.Drawing.Size(166, 24);
-			this.addAtEndToolStripMenuItem.Tag = "addatend";
-			this.addAtEndToolStripMenuItem.Text = "Add At End";
-			this.addAtEndToolStripMenuItem.Click += new System.EventHandler(this.addAtEndToolStripMenuItem_Click);
+			this.addAtEndToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+			this.addAtEndToolStripMenuItem.Tag = "fileaddatend";
+			this.addAtEndToolStripMenuItem.Text = "Add File At End";
+			this.addAtEndToolStripMenuItem.Click += new System.EventHandler(this.toolStripMenuItem_Click);
 			// 
 			// insertToolStripMenuItem
 			// 
 			this.insertToolStripMenuItem.Name = "insertToolStripMenuItem";
-			this.insertToolStripMenuItem.Size = new System.Drawing.Size(166, 24);
-			this.insertToolStripMenuItem.Tag = "insertbefore";
-			this.insertToolStripMenuItem.Text = "Insert  Before";
-			this.insertToolStripMenuItem.Click += new System.EventHandler(this.insertToolStripMenuItem_Click);
+			this.insertToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+			this.insertToolStripMenuItem.Tag = "fileinsertbefore";
+			this.insertToolStripMenuItem.Text = "Insert File Before";
+			this.insertToolStripMenuItem.Click += new System.EventHandler(this.toolStripMenuItem_Click);
 			// 
 			// insertAfterToolStripMenuItem
 			// 
 			this.insertAfterToolStripMenuItem.Name = "insertAfterToolStripMenuItem";
-			this.insertAfterToolStripMenuItem.Size = new System.Drawing.Size(166, 24);
-			this.insertAfterToolStripMenuItem.Tag = "insertafter";
-			this.insertAfterToolStripMenuItem.Text = "Insert After";
-			this.insertAfterToolStripMenuItem.Click += new System.EventHandler(this.insertAfterToolStripMenuItem_Click);
+			this.insertAfterToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+			this.insertAfterToolStripMenuItem.Tag = "fileinsertafter";
+			this.insertAfterToolStripMenuItem.Text = "Insert File After";
+			this.insertAfterToolStripMenuItem.Click += new System.EventHandler(this.toolStripMenuItem_Click);
+			// 
+			// splitMenuStrip
+			// 
+			this.splitMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+			this.splitMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addFolderAtEndMenuItem,
+            this.addAtEndToolStripMenuItem,
+            this.insertToolStripMenuItem,
+            this.insertAfterToolStripMenuItem});
+			this.splitMenuStrip.Name = "splitMenuStrip";
+			this.splitMenuStrip.Size = new System.Drawing.Size(211, 128);
 			// 
 			// SplitButton
 			// 
@@ -100,9 +110,10 @@
 
 		#endregion
 		private System.Windows.Forms.Button btnMain;
-		private System.Windows.Forms.ContextMenuStrip splitMenuStrip;
+		private System.Windows.Forms.ToolStripMenuItem addFolderAtEndMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addAtEndToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem insertToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem insertAfterToolStripMenuItem;
+		private System.Windows.Forms.ContextMenuStrip splitMenuStrip;
 	}
 }
