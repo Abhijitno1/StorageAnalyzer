@@ -210,6 +210,7 @@
       <DependentUpon>ThumbnailViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="TreeViewHelper.cs" />
+    <Compile Include="WinFormsPrompt.cs" />
     <EmbeddedResource Include="frmDBFilesBrowser.resx">
       <DependentUpon>frmDBFilesBrowser.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -34,6 +34,7 @@
 			this.listViewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.tsMnuItmSaveToDisk = new System.Windows.Forms.ToolStripMenuItem();
 			this.tsMnuItmDeleteFromDB = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsMnuItmRenameIt = new System.Windows.Forms.ToolStripMenuItem();
 			this.listViewContextMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -63,14 +64,15 @@
 			this.listViewContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.listViewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMnuItmSaveToDisk,
-            this.tsMnuItmDeleteFromDB});
+            this.tsMnuItmDeleteFromDB,
+            this.tsMnuItmRenameIt});
 			this.listViewContextMenu.Name = "listViewContextMenu";
-			this.listViewContextMenu.Size = new System.Drawing.Size(183, 52);
+			this.listViewContextMenu.Size = new System.Drawing.Size(211, 104);
 			// 
 			// tsMnuItmSaveToDisk
 			// 
 			this.tsMnuItmSaveToDisk.Name = "tsMnuItmSaveToDisk";
-			this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(182, 24);
+			this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(210, 24);
 			this.tsMnuItmSaveToDisk.Text = "Save to Disk";
 			this.tsMnuItmSaveToDisk.ToolTipText = "Save this resource to Disk";
 			this.tsMnuItmSaveToDisk.Click += new System.EventHandler(this.tsMnuItmSaveToDisk_Click);
@@ -78,10 +80,18 @@
 			// tsMnuItmDeleteFromDB
 			// 
 			this.tsMnuItmDeleteFromDB.Name = "tsMnuItmDeleteFromDB";
-			this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(182, 24);
+			this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(210, 24);
 			this.tsMnuItmDeleteFromDB.Text = "Delete from DB";
 			this.tsMnuItmDeleteFromDB.ToolTipText = "Delete this resource from DB";
 			this.tsMnuItmDeleteFromDB.Click += new System.EventHandler(this.tsMnuItmDeleteFromDB_Click);
+			// 
+			// tsMnuItmRenameIt
+			// 
+			this.tsMnuItmRenameIt.Name = "tsMnuItmRenameIt";
+			this.tsMnuItmRenameIt.Size = new System.Drawing.Size(210, 24);
+			this.tsMnuItmRenameIt.Text = "Rename It";
+			this.tsMnuItmRenameIt.ToolTipText = "Rename this resource";
+			this.tsMnuItmRenameIt.Click += new System.EventHandler(this.tsMnuItmRenameIt_Click);
 			// 
 			// ThumbnailViewer
 			// 
@@ -103,5 +113,6 @@
 		private System.Windows.Forms.ContextMenuStrip listViewContextMenu;
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmSaveToDisk;
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmDeleteFromDB;
+		private System.Windows.Forms.ToolStripMenuItem tsMnuItmRenameIt;
 	}
 }

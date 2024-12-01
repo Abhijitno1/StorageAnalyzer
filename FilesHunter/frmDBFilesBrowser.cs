@@ -30,12 +30,45 @@ namespace FilesHunter
 			this.thumbViewer.GetPreviewData += ThumbViewer_GetPreviewData;
 			this.thumbViewer.DeleteResource += ThumbViewer_DeleteResource;
 			this.thumbViewer.SaveResource += ThumbViewer_SaveResource;
+			this.thumbViewer.RenameResource += ThumbViewer_RenameResource;
 			this.splitButton1.MenuItemClick += SplitButton1_MenuItemClick;
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
 		}
 
+		private void ThumbViewer_RenameResource(string itemName, string itemPath)
+		{
+			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
+			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+			if (selectedNode != null)
+			{
+				var newName = WinFormsPrompt.ShowDialog("Please enter new name for selected resource", "Rename Resource in DB");
+				if (newName != null)
+				{
+					DirectoryMapDbSaver dbSaver = new DirectoryMapDbSaver();
+
+					//change resource name in xml node
+					selectedNode.Attributes["name"].Value = newName;
+					dbSaver.UpdateMap(currentFolderNaksha);
+
+					//change resource name in DB related object
+					relativeFolderPath = relativeFolderPath.Substring(0, relativeFolderPath.LastIndexOf('\\') +1) + newName;
+					Modak modak = new Modak()
+					{
+						Id = Convert.ToInt32(selectedNode.Attributes["DbId"].Value),
+						Title = newName,
+						RelativePath = relativeFolderPath
+					};
+					dbSaver.UpdateModak(modak);
+
+					//Refresh the treeview and listview
+					TreeViewRefreshState();
+					//ThumbViewerRefreshState();
+				}
+			}
+		}
 		private void ThumbViewer_SaveResource(string itemName, string itemPath)
 		{
 			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
@@ -44,6 +77,7 @@ namespace FilesHunter
 			if (selectedNode != null)
 			{
 				var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+				//Strip off root folder name from relativeFolderPath variable while creating absolute folder path for default save location
 				var saveAbsolutePath = currentFolderNaksha.DocumentElement.Attributes["fullPath"].Value + relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
 				sfdFileSaver.FileName = saveAbsolutePath;	//ToDo: Set Initial directory and filename separately instead of full path for file name here
 				var dlgResult = sfdFileSaver.ShowDialog();
@@ -72,6 +106,7 @@ namespace FilesHunter
 			Func<string, bool> isFileOperation = (string selectCommand) => selectedCommand != "folderaddatend";
 			if (isFileOperation(selectedCommand))
 			{
+				//ToDo: Add selected file validation
 				var inputFilePathName = txtNewItemLocation.Text.Trim();
 				var fileName = Path.GetFileName(inputFilePathName);
 				var stream = File.OpenRead(inputFilePathName);
@@ -88,7 +123,6 @@ namespace FilesHunter
 					RelativePath = modakRelPath + "\\" + fileName
 				};
 				newElm = currentFolderNaksha.CreateElement("file");
-				//File: name, extension, creationdate, size | folder: name, creationdate
 				newElm.SetAttribute("name", fileName);
 				newElm.SetAttribute("extension", Path.GetExtension(fileName));
 				newElm.SetAttribute("creationDate", creationDateTime.ToString("dd-MMM-yyyy"));
@@ -154,7 +188,7 @@ namespace FilesHunter
 
 			//Refresh the treeview and listview
 			TreeViewRefreshState();
-			ThumbViewerRefreshState();
+			//ThumbViewerRefreshState();
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
@@ -175,7 +209,7 @@ namespace FilesHunter
 
 					//Refresh the treeview and listview
 					TreeViewRefreshState();
-					ThumbViewerRefreshState();
+					//ThumbViewerRefreshState();
 				}
 			}
 		}
@@ -220,10 +254,6 @@ namespace FilesHunter
 					reader.RootFolderPath = form.SelectedFolderTree;
 					currentFolderNaksha = reader.GetMap();
 					TreeViewRefreshState();
-					//Select first node in treeview by default
-					var rootNode = tvwDirTree.Nodes[0];
-					rootNode.Expand();
-					tvwDirTree.SelectedNode = rootNode;
 				}
 			}
 		}
@@ -237,6 +267,10 @@ namespace FilesHunter
 			tvwDirTree.Nodes.Clear();
 			tvwDirTree.Nodes.Add(rootNode);
 			tvwDirTree.PrepareForFiltering();
+
+			//Select first node in treeview by default
+			rootNode.Expand();
+			tvwDirTree.SelectedNode = rootNode;
 		}
 
 		private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
@@ -306,7 +340,7 @@ namespace FilesHunter
 					{
 						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[6]);
 					}
-					else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp", ".svg" }).Contains(fileExtn))
+					else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(fileExtn))
 					{
 						var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
 						imageData = reader.GetModak(fileId);

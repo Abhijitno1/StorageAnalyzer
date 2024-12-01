@@ -124,6 +124,17 @@ namespace StorageAnalyzerService
 			}
 		}
 
+		public bool UpdateModak(Modak modak)
+		{
+			var foundModak = dbContext.Modaks.Find(modak.Id);
+			if (foundModak != null)
+			{
+				foundModak.Title = modak.Title;
+				foundModak.RelativePath = modak.RelativePath;
+			}
+			return dbContext.SaveChanges() > 0;
+		}
+
 		public bool DeleteModak(int dbId)
 		{
 			var foundModak = dbContext.Modaks.Find(dbId);

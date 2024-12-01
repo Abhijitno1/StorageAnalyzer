@@ -31,6 +31,9 @@ namespace FilesHunter
 		public delegate void SaveResourceDelegate(string itemName, string itemPath);
 		public event SaveResourceDelegate SaveResource;
 
+		public delegate void RenameResourceDelegate(string itemName, string itemPath);
+		public event RenameResourceDelegate RenameResource;
+
 		public ThumbnailViewer()
         {
 			//Ref: https://stackoverflow.com/questions/4710145/how-can-i-get-scrollbars-on-picturebox
@@ -148,7 +151,8 @@ namespace FilesHunter
             frmMediaPreview.MediaType curMediaType = frmMediaPreview.MediaType.Other;
             if ((new string[] { ".rtf", ".txt" }).Contains(extn))
                 curMediaType = frmMediaPreview.MediaType.Text;
-			else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp", ".svg" }).Contains(extn))
+            //Note: Below we include only image types supported by picturebox for viewing 
+			else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(extn))
 				curMediaType = frmMediaPreview.MediaType.Image;
 			else if ((new string[] { ".mp4", ".wmv", ".asf", ".mp3", ".wma" }).Contains(extn))
 				curMediaType = frmMediaPreview.MediaType.Video;
@@ -192,6 +196,16 @@ namespace FilesHunter
             if (SaveResource != null)
             {
 				SaveResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
+			}
+		}
+
+		private void tsMnuItmRenameIt_Click(object sender, EventArgs e)
+		{
+			var fileName = lvwTiles.SelectedItems[0].Text;
+			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+			if (RenameResource != null)
+			{
+				RenameResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
 			}
 		}
 
