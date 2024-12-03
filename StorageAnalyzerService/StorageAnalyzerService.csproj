@@ -157,6 +157,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CNodeTreeBuilder.cs" />
     <Compile Include="CommonMethods.cs" />
     <Compile Include="DbModels\FolderMap.cs" />
     <Compile Include="DirectoryMapComparer.cs" />
@@ -174,6 +175,14 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="usercontrols\CTreeNode.cs" />
+    <Compile Include="usercontrols\CTreeNodeCollection.cs" />
+    <Compile Include="usercontrols\cTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="usercontrols\cTreeView.Designer.cs">
+      <DependentUpon>cTreeView.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

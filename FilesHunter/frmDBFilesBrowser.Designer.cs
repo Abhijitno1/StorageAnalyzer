@@ -33,13 +33,13 @@
 			this.ofdFilePicker = new System.Windows.Forms.OpenFileDialog();
 			this.imlShowPad = new System.Windows.Forms.ImageList(this.components);
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-			this.tvwDirTree = new System.Windows.Forms.TreeView();
-			this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
+			this.tvwDirTree = new FilesHunter.UserControls.CTreeView();
 			this.grpFolderDetails = new System.Windows.Forms.GroupBox();
+			this.thumbViewer = new FilesHunter.ThumbnailViewer();
 			this.btnSearchDuplicates = new System.Windows.Forms.Button();
 			this.btnSearchByRegex = new System.Windows.Forms.Button();
 			this.btnSearchByExtn = new System.Windows.Forms.Button();
-			this.btnDecolorizeTreeview = new System.Windows.Forms.Button();
+			this.btnClearFilter = new System.Windows.Forms.Button();
 			this.cboSearchType = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.btnSearch = new System.Windows.Forms.Button();
@@ -50,12 +50,12 @@
 			this.txtFileLocation = new System.Windows.Forms.TextBox();
 			this.lblHierarchyName = new System.Windows.Forms.Label();
 			this.pnlBottom = new System.Windows.Forms.Panel();
+			this.splitButton1 = new FilesHunter.SplitButton();
 			this.label4 = new System.Windows.Forms.Label();
 			this.btnSaveLocation = new System.Windows.Forms.Button();
 			this.txtNewItemLocation = new System.Windows.Forms.TextBox();
+			this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-			this.thumbViewer = new FilesHunter.ThumbnailViewer();
-			this.splitButton1 = new FilesHunter.SplitButton();
 			this.sfdFileSaver = new System.Windows.Forms.SaveFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -109,24 +109,12 @@
 			// 
 			// tvwDirTree
 			// 
-			this.tvwDirTree.ImageIndex = 0;
-			this.tvwDirTree.ImageList = this.iml4TreeView;
-			this.tvwDirTree.Location = new System.Drawing.Point(4, 2);
-			this.tvwDirTree.Margin = new System.Windows.Forms.Padding(4);
+			this.tvwDirTree.Location = new System.Drawing.Point(3, 0);
 			this.tvwDirTree.Name = "tvwDirTree";
-			this.tvwDirTree.SelectedImageIndex = 2;
-			this.tvwDirTree.ShowNodeToolTips = true;
-			this.tvwDirTree.Size = new System.Drawing.Size(487, 796);
-			this.tvwDirTree.TabIndex = 1;
+			this.tvwDirTree.SelectedNode = null;
+			this.tvwDirTree.Size = new System.Drawing.Size(495, 804);
+			this.tvwDirTree.TabIndex = 2;
 			this.tvwDirTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvwDirTree_AfterSelect);
-			// 
-			// iml4TreeView
-			// 
-			this.iml4TreeView.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("iml4TreeView.ImageStream")));
-			this.iml4TreeView.TransparentColor = System.Drawing.Color.Transparent;
-			this.iml4TreeView.Images.SetKeyName(0, "folder_closed");
-			this.iml4TreeView.Images.SetKeyName(1, "file");
-			this.iml4TreeView.Images.SetKeyName(2, "folder_open.ico");
 			// 
 			// grpFolderDetails
 			// 
@@ -134,7 +122,7 @@
 			this.grpFolderDetails.Controls.Add(this.btnSearchDuplicates);
 			this.grpFolderDetails.Controls.Add(this.btnSearchByRegex);
 			this.grpFolderDetails.Controls.Add(this.btnSearchByExtn);
-			this.grpFolderDetails.Controls.Add(this.btnDecolorizeTreeview);
+			this.grpFolderDetails.Controls.Add(this.btnClearFilter);
 			this.grpFolderDetails.Controls.Add(this.cboSearchType);
 			this.grpFolderDetails.Controls.Add(this.label3);
 			this.grpFolderDetails.Controls.Add(this.btnSearch);
@@ -146,6 +134,17 @@
 			this.grpFolderDetails.TabIndex = 16;
 			this.grpFolderDetails.TabStop = false;
 			this.grpFolderDetails.Text = "Search Folders and Files";
+			// 
+			// thumbViewer
+			// 
+			this.thumbViewer.AutoScroll = true;
+			this.thumbViewer.AutoSize = true;
+			this.thumbViewer.Location = new System.Drawing.Point(19, 92);
+			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+			this.thumbViewer.Name = "thumbViewer";
+			this.thumbViewer.RootFolderPath = null;
+			this.thumbViewer.Size = new System.Drawing.Size(985, 615);
+			this.thumbViewer.TabIndex = 36;
 			// 
 			// btnSearchDuplicates
 			// 
@@ -174,27 +173,28 @@
 			this.btnSearchByExtn.Text = "Search Multiple Extensions";
 			this.btnSearchByExtn.UseVisualStyleBackColor = true;
 			// 
-			// btnDecolorizeTreeview
+			// btnClearFilter
 			// 
-			this.btnDecolorizeTreeview.Location = new System.Drawing.Point(524, 53);
-			this.btnDecolorizeTreeview.Name = "btnDecolorizeTreeview";
-			this.btnDecolorizeTreeview.Size = new System.Drawing.Size(119, 32);
-			this.btnDecolorizeTreeview.TabIndex = 32;
-			this.btnDecolorizeTreeview.Text = "Clear Filter";
-			this.btnDecolorizeTreeview.UseVisualStyleBackColor = true;
+			this.btnClearFilter.Location = new System.Drawing.Point(897, 14);
+			this.btnClearFilter.Name = "btnClearFilter";
+			this.btnClearFilter.Size = new System.Drawing.Size(98, 32);
+			this.btnClearFilter.TabIndex = 32;
+			this.btnClearFilter.Text = "Clear Filter";
+			this.btnClearFilter.UseVisualStyleBackColor = true;
+			this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
 			// 
 			// cboSearchType
 			// 
-			this.cboSearchType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cboSearchType.FormattingEnabled = true;
 			this.cboSearchType.Items.AddRange(new object[] {
+            "Files and Folders",
             "Files Only",
-            "Folders Only",
-            "Files and Folders"});
-			this.cboSearchType.Location = new System.Drawing.Point(641, 21);
+            "Folders Only"});
+			this.cboSearchType.Location = new System.Drawing.Point(633, 19);
 			this.cboSearchType.Name = "cboSearchType";
-			this.cboSearchType.Size = new System.Drawing.Size(121, 24);
+			this.cboSearchType.Size = new System.Drawing.Size(146, 24);
 			this.cboSearchType.TabIndex = 31;
+			this.cboSearchType.Text = "Files and Folders";
 			// 
 			// label3
 			// 
@@ -207,24 +207,25 @@
 			// 
 			// btnSearch
 			// 
-			this.btnSearch.Location = new System.Drawing.Point(24, 51);
+			this.btnSearch.Location = new System.Drawing.Point(788, 15);
 			this.btnSearch.Name = "btnSearch";
-			this.btnSearch.Size = new System.Drawing.Size(119, 31);
+			this.btnSearch.Size = new System.Drawing.Size(94, 31);
 			this.btnSearch.TabIndex = 29;
-			this.btnSearch.Text = "Search By Name";
+			this.btnSearch.Text = "Search";
 			this.btnSearch.UseVisualStyleBackColor = true;
+			this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
 			// 
 			// txtSearchName
 			// 
-			this.txtSearchName.Location = new System.Drawing.Point(168, 21);
+			this.txtSearchName.Location = new System.Drawing.Point(125, 21);
 			this.txtSearchName.Name = "txtSearchName";
-			this.txtSearchName.Size = new System.Drawing.Size(364, 22);
+			this.txtSearchName.Size = new System.Drawing.Size(407, 22);
 			this.txtSearchName.TabIndex = 28;
 			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(25, 24);
+			this.label2.Location = new System.Drawing.Point(7, 24);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(112, 16);
 			this.label2.TabIndex = 27;
@@ -282,6 +283,13 @@
 			this.pnlBottom.Size = new System.Drawing.Size(1036, 50);
 			this.pnlBottom.TabIndex = 13;
 			// 
+			// splitButton1
+			// 
+			this.splitButton1.Location = new System.Drawing.Point(826, 12);
+			this.splitButton1.Name = "splitButton1";
+			this.splitButton1.Size = new System.Drawing.Size(125, 29);
+			this.splitButton1.TabIndex = 16;
+			// 
 			// label4
 			// 
 			this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -314,6 +322,14 @@
 			this.txtNewItemLocation.Size = new System.Drawing.Size(650, 22);
 			this.txtNewItemLocation.TabIndex = 13;
 			// 
+			// iml4TreeView
+			// 
+			this.iml4TreeView.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("iml4TreeView.ImageStream")));
+			this.iml4TreeView.TransparentColor = System.Drawing.Color.Transparent;
+			this.iml4TreeView.Images.SetKeyName(0, "folder_closed");
+			this.iml4TreeView.Images.SetKeyName(1, "file");
+			this.iml4TreeView.Images.SetKeyName(2, "folder_open.ico");
+			// 
 			// splitContainer2
 			// 
 			this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -322,24 +338,6 @@
 			this.splitContainer2.Size = new System.Drawing.Size(1542, 813);
 			this.splitContainer2.SplitterDistance = 514;
 			this.splitContainer2.TabIndex = 2;
-			// 
-			// thumbViewer
-			// 
-			this.thumbViewer.AutoScroll = true;
-			this.thumbViewer.AutoSize = true;
-			this.thumbViewer.Location = new System.Drawing.Point(19, 92);
-			this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-			this.thumbViewer.Name = "thumbViewer";
-			this.thumbViewer.RootFolderPath = null;
-			this.thumbViewer.Size = new System.Drawing.Size(985, 615);
-			this.thumbViewer.TabIndex = 36;
-			// 
-			// splitButton1
-			// 
-			this.splitButton1.Location = new System.Drawing.Point(826, 12);
-			this.splitButton1.Name = "splitButton1";
-			this.splitButton1.Size = new System.Drawing.Size(125, 29);
-			this.splitButton1.TabIndex = 16;
 			// 
 			// sfdFileSaver
 			// 
@@ -377,7 +375,6 @@
 		private System.Windows.Forms.OpenFileDialog ofdFilePicker;
 		private System.Windows.Forms.ImageList imlShowPad;
 		private System.Windows.Forms.SplitContainer splitContainer1;
-		private System.Windows.Forms.TreeView tvwDirTree;
 		private System.Windows.Forms.ImageList iml4TreeView;
 		private System.Windows.Forms.Panel pnlBottom;
 		private System.Windows.Forms.Label label4;
@@ -392,7 +389,7 @@
 		private System.Windows.Forms.Button btnSearchDuplicates;
 		private System.Windows.Forms.Button btnSearchByRegex;
 		private System.Windows.Forms.Button btnSearchByExtn;
-		private System.Windows.Forms.Button btnDecolorizeTreeview;
+		private System.Windows.Forms.Button btnClearFilter;
 		private System.Windows.Forms.ComboBox cboSearchType;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Button btnSearch;
@@ -401,5 +398,6 @@
 		private System.Windows.Forms.SplitContainer splitContainer2;
 		private SplitButton splitButton1;
 		private System.Windows.Forms.SaveFileDialog sfdFileSaver;
+		private UserControls.CTreeView tvwDirTree;
 	}
 }

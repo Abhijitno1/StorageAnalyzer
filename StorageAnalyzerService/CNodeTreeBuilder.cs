@@ -6,34 +6,35 @@ using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FilesHunter.UserControls;
 
 namespace StorageAnalyzerService
 {
-    public class NodeTreeBuilder
+    public class CNodeTreeBuilder
     {
         public string InputFilePathName { get; set; }
         public int FolderImageIndex = -1;
         public int FileImageIndex = -1;
 
-        public TreeNode BuildNodesForTreeView()
+        public CTreeNode BuildNodesForTreeView()
         {
             var document = new XmlDocument();
             document.Load(InputFilePathName);
 
-            var rootNode = new TreeNode();
+            var rootNode = new CTreeNode();
             AddNodesToTree(rootNode, document.DocumentElement);
 
             return rootNode;
         }
 
-		public TreeNode BuildNodesForTreeView(XmlDocument document)
+		public CTreeNode BuildNodesForTreeView(XmlDocument document)
 		{
-			var rootNode = new TreeNode();
+			var rootNode = new CTreeNode();
 			AddNodesToTree(rootNode, document.DocumentElement);
 			return rootNode;
 		}
 
-		private void AddNodesToTree(TreeNode currentNode, XmlNode xmlNode)
+		private void AddNodesToTree(CTreeNode currentNode, XmlNode xmlNode)
         {
             currentNode.Name = xmlNode.ParentNode is XmlDocument ? xmlNode.Attributes["fullPath"].Value
                 : currentNode.Parent.Name + "\\" + xmlNode.Attributes["name"].Value;
@@ -48,7 +49,7 @@ namespace StorageAnalyzerService
             for (int i = 0; i < xmlNode.ChildNodes.Count; i++)
             {
                 var childXmlNode = xmlNode.ChildNodes[i];
-                var childTreeNode = new TreeNode();
+                var childTreeNode = new CTreeNode();
                 currentNode.Nodes.Add(childTreeNode);
                 AddNodesToTree(childTreeNode, childXmlNode);
             }

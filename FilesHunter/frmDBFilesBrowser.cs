@@ -1,4 +1,5 @@
-﻿using StorageAnalyzerService;
+﻿using FilesHunter.UserControls;
+using StorageAnalyzerService;
 using StorageAnalyzerService.DbModels;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace FilesHunter
 		int panel1OrigWidth, panel2OrigWidth, formOrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
 		string currentHierarchyParentPath;
+		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
 
 		public frmDBFilesBrowser()
 		{
@@ -65,7 +67,6 @@ namespace FilesHunter
 
 					//Refresh the treeview and listview
 					TreeViewRefreshState();
-					//ThumbViewerRefreshState();
 				}
 			}
 		}
@@ -188,7 +189,6 @@ namespace FilesHunter
 
 			//Refresh the treeview and listview
 			TreeViewRefreshState();
-			//ThumbViewerRefreshState();
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
@@ -209,7 +209,6 @@ namespace FilesHunter
 
 					//Refresh the treeview and listview
 					TreeViewRefreshState();
-					//ThumbViewerRefreshState();
 				}
 			}
 		}
@@ -260,7 +259,7 @@ namespace FilesHunter
 
 		private void TreeViewRefreshState()
 		{
-			NodeTreeBuilder browser = new NodeTreeBuilder();
+			CNodeTreeBuilder browser = new CNodeTreeBuilder();
 			browser.FolderImageIndex = 0;
 			browser.FileImageIndex = 1;
 			var rootNode = browser.BuildNodesForTreeView(currentFolderNaksha);
@@ -292,10 +291,6 @@ namespace FilesHunter
 			return filterClause;
 		}
 
-		private void ThumbViewerRefreshState()
-		{
-			PopulateFirstLevelChildrenInThumViewer();
-		}
 
 		private void PopulateFirstLevelChildrenInThumViewer()
 		{
@@ -311,45 +306,51 @@ namespace FilesHunter
 				if (childNode.Name == "folder")
 				{
 					var folderName = childNode.Attributes["name"].Value;
-					//Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
-					var folderImage = imlShowPad.Images[0];
-					imageData = ThumbnailViewer.ImageToBinary(folderImage);
-					thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentPath);
+					if (currentFiltererdNodes.Any(x => x.Text == folderName && x.Tag.ToString() == childNode.Name))
+					{
+						//Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
+						var folderImage = imlShowPad.Images[0];
+						imageData = ThumbnailViewer.ImageToBinary(folderImage);
+						thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentPath);
+					}
 				}
 				else if (childNode.Name == "file")
 				{
 					var fileName = childNode.Attributes["name"].Value;
-					var fileExtn = Path.GetExtension(fileName);
-					if ((new string[] { ".rtf", ".txt" }).Contains(fileExtn))
+					if (currentFiltererdNodes.Any(x => x.Text == fileName && x.Tag.ToString() == childNode.Name))
 					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[2]);
+						var fileExtn = Path.GetExtension(fileName);
+						if ((new string[] { ".rtf", ".txt" }).Contains(fileExtn))
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[2]);
+						}
+						else if ((new string[] { ".doc", ".docx" }).Contains(fileExtn))
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[3]);
+						}
+						else if ((new string[] { ".pdf" }).Contains(fileExtn))
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[4]);
+						}
+						else if ((new string[] { ".mp4", ".wmv", ".asf" }).Contains(fileExtn))
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[5]);
+						}
+						else if ((new string[] { ".mp3", ".wma" }).Contains(fileExtn))
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[6]);
+						}
+						else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(fileExtn))
+						{
+							var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
+							imageData = reader.GetModak(fileId);
+						}
+						else
+						{
+							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[1]);
+						}
+						thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, currentHierarchyParentPath);
 					}
-					else if ((new string[] { ".doc", ".docx" }).Contains(fileExtn))
-					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[3]);
-					}
-					else if ((new string[] { ".pdf" }).Contains(fileExtn))
-					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[4]);
-					}
-					else if ((new string[] { ".mp4", ".wmv", ".asf" }).Contains(fileExtn))
-					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[5]);
-					}
-					else if ((new string[] { ".mp3", ".wma" }).Contains(fileExtn))
-					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[6]);
-					}
-					else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(fileExtn))
-					{
-						var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
-						imageData = reader.GetModak(fileId);
-					}
-					else
-					{
-						imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[1]);
-					}
-					thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, currentHierarchyParentPath);
 				}
 			}
 		}
@@ -389,23 +390,59 @@ namespace FilesHunter
 			}
 		}
 
+		private void btnSearch_Click(object sender, EventArgs e)
+		{
+			tvwDirTree.Filter(FilterMethod);
+			//Select first node of tree so that Listview gets refreshed
+			tvwDirTree.SelectedNode = null;
+			tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
+		}
+
+		private bool FilterMethod(CTreeNode node)
+		{
+			if (cboSearchType.SelectedItem.ToString().ToLower() == "files only" && node.Tag.ToString() != "file")
+				return false;
+			if (cboSearchType.SelectedItem.ToString().ToLower() == "folders only" && node.Tag.ToString() != "folder")
+				return false;
+
+			return node.Text.ToLower().Contains(txtSearchName.Text.Trim().ToLower());
+		}
+
+		private void btnClearFilter_Click(object sender, EventArgs e)
+		{
+			txtSearchName.Text = string.Empty;
+			tvwDirTree.Filter((node) => true);
+			//Select first node of tree so that Listview gets refreshed
+			tvwDirTree.SelectedNode = null;
+			tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
+		}
+
 		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
 			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
+			TreeNode nazaraNode = null;
+
 			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
 			{
-				var relativePath = e.Node.Name.Substring(offset);
-				currentHierarchyParentPath = relativePath;
-				PopulateFirstLevelChildrenInThumViewer();
+				nazaraNode = e.Node;
 			}
 			else if (e.Node.Tag.ToString().ToLower() == NodeType.File.ToString().ToLower())
 			{
 				//We show folder details for parent folder of selected file in tree view
-				var relativePath = e.Node.Parent.Name.Substring(offset);
-				currentHierarchyParentPath = relativePath;
-				PopulateFirstLevelChildrenInThumViewer();
+				nazaraNode = e.Node.Parent;
 			}
+			var relativePath = nazaraNode.Name.Substring(offset);
+			currentHierarchyParentPath = relativePath;
+
+			currentFiltererdNodes.Clear();
+			foreach (CTreeNode child in nazaraNode.Nodes)
+			{
+				if (!child.Hidden)
+					currentFiltererdNodes.Add(child);
+			}
+
+			PopulateFirstLevelChildrenInThumViewer();
 		}
 
 		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
@@ -420,9 +457,9 @@ namespace FilesHunter
 		}
 
 		//Ref: https://stackoverflow.com/questions/23091773/find-treeview-node-recursively
-		private TreeNode FindTreeNode(TreeNode node, string value2Find)
+		private CTreeNode FindTreeNode(CTreeNode node, string value2Find)
 		{
-			foreach (TreeNode child in node.Nodes)
+			foreach (CTreeNode child in node.Nodes)
 			{
 				if (child.Text == value2Find)
 				{
@@ -431,7 +468,7 @@ namespace FilesHunter
 
 				if (child.Nodes.Count > 0)
 				{
-					TreeNode found = FindTreeNode(child, value2Find);
+					CTreeNode found = FindTreeNode(child, value2Find);
 					if (found != null)
 					{
 						return found;
