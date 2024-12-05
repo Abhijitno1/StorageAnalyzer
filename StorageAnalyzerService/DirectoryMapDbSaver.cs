@@ -53,6 +53,9 @@ namespace StorageAnalyzerService
 			var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
 			if (foundFolderMaps.Any())
 			{
+				//First remove any stored file dependencies in database
+				DeleteModaksForNaksha(absolutePath);
+				//Then remove folder map from Xml maps
 				dbContext.FolderMaps.Remove(foundFolderMaps.First());
 				return dbContext.SaveChanges() > 0;
 			}
@@ -124,6 +127,36 @@ namespace StorageAnalyzerService
 			}
 		}
 
+		public bool DeleteModaksForNaksha(string absolutePath)
+		{
+			var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
+			if (foundFolderMaps.Any())
+			{
+				var xml = foundFolderMaps.First().DirectoryXml;
+				var xmlDoc = new XmlDocument();
+				xmlDoc.LoadXml(xml);
+				DeleteFiles(xmlDoc.DocumentElement);
+			}
+			return true;
+		}
+
+		private bool DeleteFiles(XmlNode node)
+		{
+			foreach (XmlNode child in node.ChildNodes)
+			{
+				if (child.Name == "file")
+				{
+					var modakId = Convert.ToInt32(child.Attributes["DbId"].Value);
+					DeleteModak(modakId);
+				}
+				else
+				{
+					DeleteFiles(child);
+				}
+			}
+			return true;
+		}
+
 		public bool UpdateModak(Modak modak)
 		{
 			var foundModak = dbContext.Modaks.Find(modak.Id);
@@ -131,8 +164,9 @@ namespace StorageAnalyzerService
 			{
 				foundModak.Title = modak.Title;
 				foundModak.RelativePath = modak.RelativePath;
+				return dbContext.SaveChanges() > 0;
 			}
-			return dbContext.SaveChanges() > 0;
+			return false;
 		}
 
 		public bool DeleteModak(int dbId)
@@ -141,6 +175,7 @@ namespace StorageAnalyzerService
 			if (foundModak != null)
 			{
 				dbContext.Modaks.Remove(foundModak);
+				dbContext.SaveChanges();
 				return true;
 			}
 			return false;
