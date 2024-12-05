@@ -57,6 +57,10 @@
 			this.iml4TreeView = new System.Windows.Forms.ImageList(this.components);
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.sfdFileSaver = new System.Windows.Forms.SaveFileDialog();
+			this.tvwContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.tvwMenuCut = new System.Windows.Forms.ToolStripMenuItem();
+			this.tvwMenuCopy = new System.Windows.Forms.ToolStripMenuItem();
+			this.tvwMenuPaste = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -66,6 +70,7 @@
 			this.pnlBottom.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
 			this.splitContainer2.SuspendLayout();
+			this.tvwContextMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// ofdFilePicker
@@ -115,6 +120,7 @@
 			this.tvwDirTree.Size = new System.Drawing.Size(495, 804);
 			this.tvwDirTree.TabIndex = 2;
 			this.tvwDirTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvwDirTree_AfterSelect);
+			this.tvwDirTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvwDirTree_NodeMouseClick);
 			// 
 			// grpFolderDetails
 			// 
@@ -343,6 +349,41 @@
 			// 
 			this.sfdFileSaver.Title = "Save File to Disk";
 			// 
+			// tvwContextMenu
+			// 
+			this.tvwContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+			this.tvwContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tvwMenuCut,
+            this.tvwMenuCopy,
+            this.tvwMenuPaste});
+			this.tvwContextMenu.Name = "tvwContextMenu";
+			this.tvwContextMenu.Size = new System.Drawing.Size(211, 104);
+			this.tvwContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.tvwContextMenu_ItemClicked);
+			// 
+			// tvwMenuCut
+			// 
+			this.tvwMenuCut.AutoToolTip = true;
+			this.tvwMenuCut.Name = "tvwMenuCut";
+			this.tvwMenuCut.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuCut.Tag = "mnuCutModak";
+			this.tvwMenuCut.Text = "Cut";
+			// 
+			// tvwMenuCopy
+			// 
+			this.tvwMenuCopy.AutoToolTip = true;
+			this.tvwMenuCopy.Name = "tvwMenuCopy";
+			this.tvwMenuCopy.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuCopy.Tag = "mnuCopyModak";
+			this.tvwMenuCopy.Text = "Copy";
+			// 
+			// tvwMenuPaste
+			// 
+			this.tvwMenuPaste.AutoToolTip = true;
+			this.tvwMenuPaste.Name = "tvwMenuPaste";
+			this.tvwMenuPaste.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuPaste.Tag = "mnuPastModak";
+			this.tvwMenuPaste.Text = "Paste";
+			// 
 			// frmDBFilesBrowser
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -366,6 +407,7 @@
 			this.pnlBottom.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
 			this.splitContainer2.ResumeLayout(false);
+			this.tvwContextMenu.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -399,5 +441,9 @@
 		private SplitButton splitButton1;
 		private System.Windows.Forms.SaveFileDialog sfdFileSaver;
 		private UserControls.CTreeView tvwDirTree;
+		private System.Windows.Forms.ContextMenuStrip tvwContextMenu;
+		private System.Windows.Forms.ToolStripMenuItem tvwMenuCut;
+		private System.Windows.Forms.ToolStripMenuItem tvwMenuCopy;
+		private System.Windows.Forms.ToolStripMenuItem tvwMenuPaste;
 	}
 }

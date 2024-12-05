@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -415,6 +416,21 @@ namespace FilesHunter
 			//Select first node of tree so that Listview gets refreshed
 			tvwDirTree.SelectedNode = null;
 			tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
+		}
+
+		private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				tvwDirTree.SelectedNode = (CTreeNode)e.Node;
+				//Ref: https://stackoverflow.com/questions/32082280/right-click-on-node-in-treeview-and-have-a-menu-pop-up-with-the-option-of-open
+				tvwContextMenu.Show(Cursor.Position);
+			}
+		}
+
+		private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+		{
+			MessageBox.Show("You clicked " + e.ClickedItem.Text + " for " + tvwDirTree.SelectedNode.Text, "Dhamaka");
 		}
 
 		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
