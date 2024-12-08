@@ -135,12 +135,12 @@ namespace StorageAnalyzerService
 				var xml = foundFolderMaps.First().DirectoryXml;
 				var xmlDoc = new XmlDocument();
 				xmlDoc.LoadXml(xml);
-				DeleteFiles(xmlDoc.DocumentElement);
+				DeleteFiles4Node(xmlDoc.DocumentElement);
 			}
 			return true;
 		}
 
-		private bool DeleteFiles(XmlNode node)
+		public bool DeleteFiles4Node(XmlNode node)
 		{
 			foreach (XmlNode child in node.ChildNodes)
 			{
@@ -151,7 +151,7 @@ namespace StorageAnalyzerService
 				}
 				else
 				{
-					DeleteFiles(child);
+					DeleteFiles4Node(child);
 				}
 			}
 			return true;

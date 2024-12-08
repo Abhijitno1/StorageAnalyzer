@@ -68,7 +68,7 @@ namespace FilesHunter
 			lstFolderHrchies.Items.RemoveAt(lstFolderHrchies.SelectedIndex);
 		}
 
-		private void lstFolderHrchies_SelectedIndexChanged(object sender, EventArgs e)
+		private void lstFolderHrchies_MouseDoubleClick(object sender, MouseEventArgs e)
 		{
 			if (lstFolderHrchies.SelectedItem == null) return;
 			this.SelectedFolderTree = lstFolderHrchies.SelectedItem.ToString();

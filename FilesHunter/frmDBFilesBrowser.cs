@@ -56,7 +56,9 @@ namespace FilesHunter
 					selectedNode.Attributes["name"].Value = newName;
 					dbSaver.UpdateMap(currentFolderNaksha);
 
-					//change resource name in DB related object
+					//Strip off root folder name from relative folder path before saving Modak in DB
+					relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
+					//Change the file name portion in the relative path
 					relativeFolderPath = relativeFolderPath.Substring(0, relativeFolderPath.LastIndexOf('\\') +1) + newName;
 					Modak modak = new Modak()
 					{
@@ -192,24 +194,50 @@ namespace FilesHunter
 			TreeViewRefreshState();
 		}
 
-		private void ThumbViewer_DeleteResource(string itemName, string itemPath)
+		private void ThumbViewer_DeleteResource(string itemName, string itemPath, string nodeType)
 		{
 			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
-			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
-			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
-			if (selectedNode != null)
+			var filterClause = string.Empty;
+			if (nodeType == NodeType.File.ToString())
 			{
-				var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
-				var parentNode = selectedNode.ParentNode;
-				if (parentNode != null)
+				filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
+				var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+				if (selectedNode != null)
 				{
-					parentNode.RemoveChild(selectedNode);
-					DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-					saver.DeleteModak(resourceDbId);
-					saver.UpdateMap(currentFolderNaksha);
+					var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+					var parentNode = selectedNode.ParentNode;
+					if (parentNode != null)
+					{
+						parentNode.RemoveChild(selectedNode);
+						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						saver.DeleteModak(resourceDbId);
+						saver.UpdateMap(currentFolderNaksha);
 
-					//Refresh the treeview and listview
-					TreeViewRefreshState();
+						//Refresh the treeview and listview
+						TreeViewRefreshState();
+					}
+				}
+			}
+			else if (nodeType == NodeType.Folder.ToString())
+			{
+				filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.Folder);
+				var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+				if (selectedNode != null)
+				{
+					var parentNode = selectedNode.ParentNode;
+					if (parentNode != null)
+					{
+						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						
+						//Delete child files stored under this folder before deleting it. 
+						saver.DeleteFiles4Node(selectedNode);
+
+						parentNode.RemoveChild(selectedNode);
+						saver.UpdateMap(currentFolderNaksha);
+
+						//Refresh the treeview and listview
+						TreeViewRefreshState();
+					}
 				}
 			}
 		}
@@ -435,10 +463,7 @@ namespace FilesHunter
 
 		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
-			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
 			TreeNode nazaraNode = null;
-
 			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
 			{
 				nazaraNode = e.Node;
@@ -448,8 +473,7 @@ namespace FilesHunter
 				//We show folder details for parent folder of selected file in tree view
 				nazaraNode = e.Node.Parent;
 			}
-			var relativePath = nazaraNode.Name.Substring(offset);
-			currentHierarchyParentPath = relativePath;
+			SetCurrentHeirarchyPathForSelectedTreeNode(nazaraNode.Name);
 
 			currentFiltererdNodes.Clear();
 			foreach (CTreeNode child in nazaraNode.Nodes)
@@ -459,6 +483,14 @@ namespace FilesHunter
 			}
 
 			PopulateFirstLevelChildrenInThumViewer();
+		}
+
+		private void SetCurrentHeirarchyPathForSelectedTreeNode(string nodeName)
+		{
+			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
+			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
+			var relativePath = nodeName.Substring(offset);
+			currentHierarchyParentPath = relativePath;
 		}
 
 		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)

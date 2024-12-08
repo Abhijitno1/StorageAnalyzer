@@ -25,7 +25,7 @@ namespace FilesHunter
         public delegate void OpenFolderDelegate(string itemName, string itemPath);
         public event OpenFolderDelegate OpenFolderToViewContents;
 
-        public delegate void DeleteResourceDelegate(string itemName, string itemPath);
+        public delegate void DeleteResourceDelegate(string itemName, string itemPath, string nodeType);
 		public event DeleteResourceDelegate DeleteResource;
 
 		public delegate void SaveResourceDelegate(string itemName, string itemPath);
@@ -92,6 +92,7 @@ namespace FilesHunter
             imlTiles.Images.Clear();
             lvwTiles.Items.Clear();
         }
+
         private static ImageCodecInfo GetEncoderInfo(string mimeType)
         {
             foreach (ImageCodecInfo codec in ImageCodecInfo.GetImageEncoders())
@@ -148,15 +149,7 @@ namespace FilesHunter
             var fileName = lvwTiles.SelectedItems[0].Text;
             var itemRelativePath = lvwTiles.SelectedItems[0].Name;
 			var extn = Path.GetExtension(fileName);
-            frmMediaPreview.MediaType curMediaType = frmMediaPreview.MediaType.Other;
-            if ((new string[] { ".rtf", ".txt" }).Contains(extn))
-                curMediaType = frmMediaPreview.MediaType.Text;
-            //Note: Below we include only image types supported by picturebox for viewing 
-			else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(extn))
-				curMediaType = frmMediaPreview.MediaType.Image;
-			else if ((new string[] { ".mp4", ".wmv", ".asf", ".mp3", ".wma" }).Contains(extn))
-				curMediaType = frmMediaPreview.MediaType.Video;
-
+            frmMediaPreview.MediaType curMediaType = GetMediaTypeFromFileName(fileName);
             object fileData = null;
             if (GetPreviewData != null)
             {
@@ -166,15 +159,27 @@ namespace FilesHunter
 			}
 		}
 
-		private void tsMnuItmDeleteFromDB_Click(object sender, EventArgs e)
-		{
-			var fileName = lvwTiles.SelectedItems[0].Text;
-			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
-			if (DeleteResource != null)
-			{
-				DeleteResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
-			}
+        private frmMediaPreview.MediaType GetMediaTypeFromFileName(string fileName)
+        {
+			var extn = Path.GetExtension(fileName);
+			frmMediaPreview.MediaType curMediaType = frmMediaPreview.MediaType.Other;
+			if ((new string[] { ".rtf", ".txt" }).Contains(extn))
+				curMediaType = frmMediaPreview.MediaType.Text;
+			//Note: Below we include only image types supported by picturebox for viewing 
+			else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(extn))
+				curMediaType = frmMediaPreview.MediaType.Image;
+			else if ((new string[] { ".mp4", ".wmv", ".asf", ".mp3", ".wma" }).Contains(extn))
+				curMediaType = frmMediaPreview.MediaType.Video;
+            return curMediaType;
 		}
+
+        private void tsMnuItmDeleteFromDB_Click(object sender, EventArgs e)
+        {
+            var selectedListItem = lvwTiles.SelectedItems[0];
+			var fileName = selectedListItem.Text;
+            var itemRelativePath = selectedListItem.Name;
+            DeleteResource?.Invoke(fileName, itemRelativePath, selectedListItem.Tag.ToString());
+        }
 
 		private void lvwTiles_MouseClick(object sender, MouseEventArgs e)
 		{
@@ -195,7 +200,7 @@ namespace FilesHunter
 			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
             if (SaveResource != null)
             {
-				SaveResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
+				SaveResource(fileName, itemRelativePath);
 			}
 		}
 
@@ -205,7 +210,7 @@ namespace FilesHunter
 			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
 			if (RenameResource != null)
 			{
-				RenameResource(fileName, $"{RootFolderPath}\\{itemRelativePath}");
+				RenameResource(fileName, itemRelativePath);
 			}
 		}
 

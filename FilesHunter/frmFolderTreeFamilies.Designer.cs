@@ -134,7 +134,7 @@
 			this.lstFolderHrchies.Name = "lstFolderHrchies";
 			this.lstFolderHrchies.Size = new System.Drawing.Size(809, 340);
 			this.lstFolderHrchies.TabIndex = 3;
-			this.lstFolderHrchies.SelectedIndexChanged += new System.EventHandler(this.lstFolderHrchies_SelectedIndexChanged);
+			this.lstFolderHrchies.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstFolderHrchies_MouseDoubleClick);
 			// 
 			// frmFolderTreeFamilies
 			// 
