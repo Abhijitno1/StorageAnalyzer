@@ -357,14 +357,14 @@
             this.tvwMenuCopy,
             this.tvwMenuPaste});
 			this.tvwContextMenu.Name = "tvwContextMenu";
-			this.tvwContextMenu.Size = new System.Drawing.Size(211, 104);
+			this.tvwContextMenu.Size = new System.Drawing.Size(113, 76);
 			this.tvwContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.tvwContextMenu_ItemClicked);
 			// 
 			// tvwMenuCut
 			// 
 			this.tvwMenuCut.AutoToolTip = true;
 			this.tvwMenuCut.Name = "tvwMenuCut";
-			this.tvwMenuCut.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuCut.Size = new System.Drawing.Size(112, 24);
 			this.tvwMenuCut.Tag = "mnuCutModak";
 			this.tvwMenuCut.Text = "Cut";
 			// 
@@ -372,7 +372,7 @@
 			// 
 			this.tvwMenuCopy.AutoToolTip = true;
 			this.tvwMenuCopy.Name = "tvwMenuCopy";
-			this.tvwMenuCopy.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuCopy.Size = new System.Drawing.Size(112, 24);
 			this.tvwMenuCopy.Tag = "mnuCopyModak";
 			this.tvwMenuCopy.Text = "Copy";
 			// 
@@ -380,7 +380,7 @@
 			// 
 			this.tvwMenuPaste.AutoToolTip = true;
 			this.tvwMenuPaste.Name = "tvwMenuPaste";
-			this.tvwMenuPaste.Size = new System.Drawing.Size(210, 24);
+			this.tvwMenuPaste.Size = new System.Drawing.Size(112, 24);
 			this.tvwMenuPaste.Tag = "mnuPastModak";
 			this.tvwMenuPaste.Text = "Paste";
 			// 

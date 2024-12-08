@@ -23,7 +23,7 @@ namespace FilesHunter
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
 		int panel1OrigWidth, panel2OrigWidth, formOrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
-		string currentHierarchyParentPath;
+		string currentHierarchyParentPath, cutNodePath, copyNodePath;
 		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
 
 		public frmDBFilesBrowser()
@@ -458,7 +458,37 @@ namespace FilesHunter
 
 		private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
 		{
-			MessageBox.Show("You clicked " + e.ClickedItem.Text + " for " + tvwDirTree.SelectedNode.Text, "Dhamaka");
+
+			if (e.ClickedItem.Text == tvwMenuCut.Text) 
+			{
+				copyNodePath = null;
+				cutNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+			}
+			else if (e.ClickedItem.Text == tvwMenuCopy.Text)
+			{
+				cutNodePath = null;
+				copyNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+			}
+			else if (e.ClickedItem.Text == tvwMenuPaste.Text)
+			{
+				string destNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+				//ToDo: Check whether needed to strip off root folder name from relative folder path before saving Modak in DB
+				//destNodePath = destNodePath.Substring(destNodePath.IndexOf('\\'));
+
+				string destNodeName = destNodePath.Substring(destNodePath.LastIndexOf('\\') + 1);
+				string srcNodeName = null;
+				if (cutNodePath != null)
+				{
+					srcNodeName = cutNodePath.Substring(cutNodePath.LastIndexOf('\\') + 1);
+					//ToDo: Convert the below MessageBox into Confirmation prompt
+					MessageBox.Show($"Are you sure you want to paste Cut Node \"{srcNodeName}\" at \"{destNodeName}\"?", "File/Folder Move");
+				}
+				else if (copyNodePath != null)
+				{
+					srcNodeName = copyNodePath.Substring(copyNodePath.LastIndexOf('\\') + 1);
+					MessageBox.Show($"Are you sure you want to paste Copied Node \"{srcNodeName} at \"{destNodeName}\"?", "File/Folder Move");
+				}
+			}
 		}
 
 		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
@@ -473,7 +503,7 @@ namespace FilesHunter
 				//We show folder details for parent folder of selected file in tree view
 				nazaraNode = e.Node.Parent;
 			}
-			SetCurrentHeirarchyPathForSelectedTreeNode(nazaraNode.Name);
+			currentHierarchyParentPath = GetRelativePathForSelectedTreeNode(nazaraNode.Name);
 
 			currentFiltererdNodes.Clear();
 			foreach (CTreeNode child in nazaraNode.Nodes)
@@ -485,12 +515,12 @@ namespace FilesHunter
 			PopulateFirstLevelChildrenInThumViewer();
 		}
 
-		private void SetCurrentHeirarchyPathForSelectedTreeNode(string nodeName)
+		private string GetRelativePathForSelectedTreeNode(string nodeName)
 		{
 			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
 			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
 			var relativePath = nodeName.Substring(offset);
-			currentHierarchyParentPath = relativePath;
+			return relativePath;
 		}
 
 		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
