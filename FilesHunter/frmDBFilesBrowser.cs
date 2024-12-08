@@ -89,7 +89,7 @@ namespace FilesHunter
 				{
 					saveAbsolutePath = sfdFileSaver.FileName;
 					DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
-					var fileData = dbReader.GetModak(resourceDbId);
+					var fileData = dbReader.GetModakData(resourceDbId);
 					File.WriteAllBytes(saveAbsolutePath, fileData);
 				}
 			}
@@ -251,7 +251,7 @@ namespace FilesHunter
 			{
 				DirectoryMapDbReader reader = new DirectoryMapDbReader();
 				int fileId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
-				fileData = reader.GetModak(fileId);
+				fileData = reader.GetModakData(fileId);
 				if (itemType == frmMediaPreview.MediaType.Text)
 				{
 					fileData = Encoding.UTF8.GetString((byte[])fileData);
@@ -372,7 +372,7 @@ namespace FilesHunter
 						else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(fileExtn))
 						{
 							var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
-							imageData = reader.GetModak(fileId);
+							imageData = reader.GetModakData(fileId);
 						}
 						else
 						{
@@ -458,35 +458,145 @@ namespace FilesHunter
 
 		private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
 		{
+			var srcNodeType = NodeType.File.ToString();
 
 			if (e.ClickedItem.Text == tvwMenuCut.Text) 
 			{
 				copyNodePath = null;
 				cutNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+				srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
 			}
 			else if (e.ClickedItem.Text == tvwMenuCopy.Text)
 			{
 				cutNodePath = null;
 				copyNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+				srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
 			}
 			else if (e.ClickedItem.Text == tvwMenuPaste.Text)
 			{
+				//Moving to parent if a File node is selected as destination of paste action
 				string destNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
-				//ToDo: Check whether needed to strip off root folder name from relative folder path before saving Modak in DB
-				//destNodePath = destNodePath.Substring(destNodePath.IndexOf('\\'));
-
+				var nodeEndHere = destNodePath.LastIndexOf('\\') > -1 ? destNodePath.Substring(destNodePath.LastIndexOf('\\')) : destNodePath;
+				var destNodeType = nodeEndHere.IndexOf('.') == -1 ? NodeType.Folder : NodeType.File;
+				if (destNodeType == NodeType.File)
+				{
+					destNodePath = destNodePath.Substring(0, destNodePath.LastIndexOf('\\'));
+					//Change dest node type
+					destNodeType = NodeType.Folder;
+				}
 				string destNodeName = destNodePath.Substring(destNodePath.LastIndexOf('\\') + 1);
 				string srcNodeName = null;
+
 				if (cutNodePath != null)
 				{
+					//This is Cut and Paste operation
 					srcNodeName = cutNodePath.Substring(cutNodePath.LastIndexOf('\\') + 1);
-					//ToDo: Convert the below MessageBox into Confirmation prompt
-					MessageBox.Show($"Are you sure you want to paste Cut Node \"{srcNodeName}\" at \"{destNodeName}\"?", "File/Folder Move");
+					var result = WinFormsConfirm.ShowDialog($"Are you sure you want to paste Cut Node \"{srcNodeName}\" at \"{destNodeName}\"?", "File/Folder Move");
+					int resourceDbId = 0;
+					if (result == DialogResult.Yes)
+					{
+						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						DirectoryMapDbReader reader = new DirectoryMapDbReader();
+
+						if (srcNodeType == NodeType.File.ToString())
+						{
+							//Step 1: Remove xml node from its original position
+							var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(cutNodePath, NodeType.File);
+							var cutXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+							if (cutXmlNode != null)
+							{
+								resourceDbId = Convert.ToInt32(cutXmlNode.Attributes["DbId"].Value);
+								var parentNode = cutXmlNode.ParentNode;
+								if (parentNode != null)
+								{
+									parentNode.RemoveChild(cutXmlNode);
+								}
+							}
+
+							//Step 2: Append xml node at its new position
+							filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
+							var destXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+							if (destXmlNode != null )
+							{
+								if (destXmlNode.Name == "folder")
+								{
+									destXmlNode.AppendChild(cutXmlNode);
+								}
+								else 
+								{
+									destXmlNode = destXmlNode.ParentNode; //Get to the parent folder of selected destination file
+									destXmlNode.AppendChild(cutXmlNode); //Transfer the moved child to the new parent
+								}
+							}
+							saver.UpdateMap(currentFolderNaksha);
+
+							//Step 3: Update the relative path in Modak DB object
+							Modak updModak = reader.GetModak(resourceDbId);
+							updModak.RelativePath = destNodePath.Substring(destNodePath.IndexOf('\\', 1)) + "\\" + srcNodeName;
+							saver.UpdateModak(updModak);
+						}
+						else
+						{
+							MessageBox.Show("Folder Cut and Paste is not yet supported");
+						}
+
+						//Refresh the treeview and listview
+						TreeViewRefreshState();
+					}
 				}
 				else if (copyNodePath != null)
 				{
+					//This is copy paste operation
 					srcNodeName = copyNodePath.Substring(copyNodePath.LastIndexOf('\\') + 1);
-					MessageBox.Show($"Are you sure you want to paste Copied Node \"{srcNodeName} at \"{destNodeName}\"?", "File/Folder Move");
+					var result = WinFormsConfirm.ShowDialog($"Are you sure you want to paste Copied Node \"{srcNodeName} at \"{destNodeName}\"?", "File/Folder Move");
+					if (result == DialogResult.Yes)
+					{
+						XmlElement newElm;
+						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						DirectoryMapDbReader reader = new DirectoryMapDbReader();
+
+						if (srcNodeType == NodeType.File.ToString())
+						{
+							//Step 1: Get XML node corresponding to the treenode being copied
+							var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(copyNodePath, NodeType.File);
+							var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+
+							//Step 2: Create a copy of the existing node for duplication
+							newElm = currentFolderNaksha.CreateElement("file");
+							newElm.SetAttribute("name", selectedNode.Attributes["name"].Value);
+							newElm.SetAttribute("extension", selectedNode.Attributes["extension"].Value);
+							newElm.SetAttribute("creationDate", selectedNode.Attributes["creationDate"].Value);
+							newElm.SetAttribute("size", selectedNode.Attributes["size"].Value);
+
+							//Step 3: Create a copy of existing modak (filedata) object for storing in DB
+							var	resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+							var copyModak = reader.GetModak(resourceDbId);
+
+							filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
+							//Strip off top folder in hierarchy for storing relative path in DB and append the new file name to relative dest folder path
+							var modakRelPath = destNodePath.Substring(destNodePath.IndexOf('\\') + 1) + "\\" + srcNodeName;
+							//var fileName = selectedNode.Name;
+							var destParentNode = currentFolderNaksha.SelectSingleNode(filterClause);
+
+							Modak modak = new Modak()
+							{
+								Title = copyModak.Title,
+								PicData = copyModak.PicData,
+								RelativePath = modakRelPath
+							};
+							saver.InsertModakIntoDb(modak);
+							newElm.SetAttribute("DbId", modak.Id.ToString());
+							destParentNode.AppendChild(newElm);
+							saver.UpdateMap(currentFolderNaksha);
+						}
+						else
+						{
+							MessageBox.Show("Folder Copy and Paste is not yet supported");
+						}
+
+						//Refresh the treeview and listview
+						TreeViewRefreshState();
+					}
 				}
 			}
 		}

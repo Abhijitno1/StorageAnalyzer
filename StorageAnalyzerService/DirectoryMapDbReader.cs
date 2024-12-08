@@ -28,12 +28,17 @@ namespace StorageAnalyzerService
 			return dbContext.FolderMaps.Select(k => k.AbsolutePath).ToList();
 		}
 
-		public Byte[] GetModak(int dbId)
+		public Byte[] GetModakData(int dbId)
 		{
 			byte[] output = null;
 			var foundModak = dbContext.Modaks.Find(dbId);
 			if (foundModak != null) output = foundModak.PicData;
 			return output;
+		}
+
+		public Modak GetModak(int dbId)
+		{
+			return dbContext.Modaks.Find(dbId);
 		}
 	}
 }
