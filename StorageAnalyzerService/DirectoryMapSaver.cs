@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace StorageAnalyzerService
 {
@@ -58,17 +59,39 @@ namespace StorageAnalyzerService
 
         private void TraverseFiles(DirectoryInfo currentfolder)
         {
+            Func<string, bool> tryParseXml = (string word) =>
+            {
+                try
+                {
+                    XDocument.Parse($"<word>word</word>");
+                }
+                catch (Exception)
+                {
+					Console.WriteLine($"File: {word} will not be included.");
+                    return false;
+                }
+                return true;
+            };
             foreach (var childFile in currentfolder.EnumerateFiles())
             {
-                outWriter.WriteStartElement("file");
-                outWriter.WriteAttributeString("name", childFile.Name);
-                outWriter.WriteAttributeString("extension", childFile.Extension);
-                outWriter.WriteAttributeString("creationDate", childFile.CreationTime.ToString("dd-MMM-yyyy"));
-                outWriter.WriteAttributeString("size", childFile.Length.ToString());
-                //Console.WriteLine(childFile.Name);
-                //Console.WriteLine(childFile.Extension);
-                //Console.WriteLine(childFile.CreationTime.ToShortDateString());
-                outWriter.WriteEndElement();
+                try
+                {
+                    if (!tryParseXml(childFile.Name)) continue;
+                    outWriter.WriteStartElement("file");
+                    outWriter.WriteAttributeString("name", childFile.Name);
+                    outWriter.WriteAttributeString("extension", childFile.Extension);
+                    outWriter.WriteAttributeString("creationDate", childFile.CreationTime.ToString("dd-MMM-yyyy"));
+                    outWriter.WriteAttributeString("size", childFile.Length.ToString());
+                    //Console.WriteLine(childFile.Name);
+                    //Console.WriteLine(childFile.Extension);
+                    //Console.WriteLine(childFile.CreationTime.ToShortDateString());
+                    outWriter.WriteEndElement();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"File: {childFile.FullName} could not be included.");
+                    Console.WriteLine(ex);
+                }
             }
         }
     }
