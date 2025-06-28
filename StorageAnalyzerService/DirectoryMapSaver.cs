@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Web;
 
 namespace StorageAnalyzerService
 {
@@ -63,7 +64,7 @@ namespace StorageAnalyzerService
             {
                 try
                 {
-                    XDocument.Parse($"<word>word</word>");
+                    XDocument.Parse($"<word>{word}</word>");
                 }
                 catch (Exception)
                 {
@@ -76,9 +77,11 @@ namespace StorageAnalyzerService
             {
                 try
                 {
-                    if (!tryParseXml(childFile.Name)) continue;
+                    var fileName = HttpUtility.HtmlEncode(childFile.Name);
+
+					if (!tryParseXml(fileName)) continue;
                     outWriter.WriteStartElement("file");
-                    outWriter.WriteAttributeString("name", childFile.Name);
+                    outWriter.WriteAttributeString("name", fileName);
                     outWriter.WriteAttributeString("extension", childFile.Extension);
                     outWriter.WriteAttributeString("creationDate", childFile.CreationTime.ToString("dd-MMM-yyyy"));
                     outWriter.WriteAttributeString("size", childFile.Length.ToString());

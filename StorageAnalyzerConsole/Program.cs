@@ -18,7 +18,7 @@ namespace StorageAnalyzerConsole
 
         static void WriteDataFile()
         {
-            DirectoryMapSaver traverser = new DirectoryMapSaver();
+            DirectoryMapTextSaver traverser = new DirectoryMapTextSaver();
             traverser.RootFolderPath = ConfigurationManager.AppSettings["rootFolder"];
             traverser.OutputFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
             traverser.SaveMap();
