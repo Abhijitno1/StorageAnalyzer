@@ -10,7 +10,7 @@ namespace StorageAnalyzerService.DbModels
 	[Table("Modak")]
 	public class Modak
 	{
-		public int Id { get; set; }
+		public long Id { get; set; }
 		public string Title { get; set; }
 		public string RelativePath { get; set; }
 		public byte[] PicData { get; set; }
