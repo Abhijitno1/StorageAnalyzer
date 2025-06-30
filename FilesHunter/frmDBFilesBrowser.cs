@@ -70,7 +70,11 @@ namespace FilesHunter
 
 					//Refresh the treeview and listview
 					TreeViewRefreshState();
-				}
+
+                    var foundTreeNode = FindTreeNode(tvwDirTree.Nodes[0], newName);
+                    tvwDirTree.SelectedNode = foundTreeNode;
+                    tvwDirTree.Focus();
+                }
 			}
 		}
 		private void ThumbViewer_SaveResource(string itemName, string itemPath)
@@ -98,6 +102,11 @@ namespace FilesHunter
 		private void SplitButton1_MenuItemClick(object sender, EventArgs e)
 		{
 			//MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
+			var selectedTreeNode = tvwDirTree.SelectedNode;
+			if (selectedTreeNode.Tag.ToString() == "file")
+			{
+				selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
+            }
 			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
 			var selectedItemPath = thumbViewer.GetSelectedItemPath();
 			var selectedCommand = (sender as ToolStripMenuItem).Tag.ToString();
@@ -191,12 +200,17 @@ namespace FilesHunter
 			saver.UpdateMap(currentFolderNaksha);
 
 			//Refresh the treeview and listview
-			TreeViewRefreshState();
+			TreeViewRefreshState(selectedTreeNode);
 		}
 
 		private void ThumbViewer_DeleteResource(string itemName, string itemPath, string nodeType)
 		{
-			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+            var selectedTreeNode = tvwDirTree.SelectedNode;
+            if (selectedTreeNode.Tag.ToString() == "file")
+            {
+                selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
+            }
+            var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
 			var filterClause = string.Empty;
 			if (nodeType == NodeType.File.ToString())
 			{
@@ -214,7 +228,7 @@ namespace FilesHunter
 						saver.UpdateMap(currentFolderNaksha);
 
 						//Refresh the treeview and listview
-						TreeViewRefreshState();
+						TreeViewRefreshState(selectedTreeNode);
 					}
 				}
 			}
@@ -236,11 +250,11 @@ namespace FilesHunter
 						saver.UpdateMap(currentFolderNaksha);
 
 						//Refresh the treeview and listview
-						TreeViewRefreshState();
+						TreeViewRefreshState(selectedTreeNode);
 					}
 				}
 			}
-		}
+        }
 
 		private void ThumbViewer_GetPreviewData(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData)
 		{
@@ -268,6 +282,7 @@ namespace FilesHunter
 			ExpandSelectedFolderInTreeView(itemName);
 			currentHierarchyParentPath = itemPath + @"\" + itemName;
 			PopulateFirstLevelChildrenInThumViewer();
+			tvwDirTree.Focus();
 		}
 
 		private void btnLoadTreeview_Click(object sender, EventArgs e)
@@ -301,7 +316,15 @@ namespace FilesHunter
 			tvwDirTree.SelectedNode = rootNode;
 		}
 
-		private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
+		private void TreeViewRefreshState(CTreeNode selectedTreeNode)
+		{
+			TreeViewRefreshState();
+            tvwDirTree.SelectedNode = selectedTreeNode;
+            tvwDirTree.SelectedNode.Expand();
+            tvwDirTree.Focus();
+        }
+
+        private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
 		{
 			var folderSegments = relativeFolderPath.Split('\\');
 			var filterClause = "//";
@@ -474,16 +497,19 @@ namespace FilesHunter
 			}
 			else if (e.ClickedItem.Text == tvwMenuPaste.Text)
 			{
-				//Moving to parent if a File node is selected as destination of paste action
-				string destNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+                var selectedTreeNode = tvwDirTree.SelectedNode;
+                //Moving to parent if a File node is selected as destination of paste action
+                string destNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
 				var nodeEndHere = destNodePath.LastIndexOf('\\') > -1 ? destNodePath.Substring(destNodePath.LastIndexOf('\\')) : destNodePath;
 				var destNodeType = nodeEndHere.IndexOf('.') == -1 ? NodeType.Folder : NodeType.File;
 				if (destNodeType == NodeType.File)
 				{
+					//If file node is selected as destination then shift to it's parent folder as new destination
 					destNodePath = destNodePath.Substring(0, destNodePath.LastIndexOf('\\'));
-					//Change dest node type
+					//Change destination node type
 					destNodeType = NodeType.Folder;
-				}
+                    selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
+                }
 				string destNodeName = destNodePath.Substring(destNodePath.LastIndexOf('\\') + 1);
 				string srcNodeName = null;
 
@@ -541,8 +567,8 @@ namespace FilesHunter
 						}
 
 						//Refresh the treeview and listview
-						TreeViewRefreshState();
-					}
+						TreeViewRefreshState(selectedTreeNode);
+                    }
 				}
 				else if (copyNodePath != null)
 				{
@@ -595,9 +621,9 @@ namespace FilesHunter
 						}
 
 						//Refresh the treeview and listview
-						TreeViewRefreshState();
-					}
-				}
+						TreeViewRefreshState(selectedTreeNode);
+                    }
+                }
 			}
 		}
 
