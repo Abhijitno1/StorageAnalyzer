@@ -99,7 +99,8 @@ namespace FilesHunter.UserControls
 			}
 			set
 			{
-				base.SelectedNode = value;
+				var ND = (TreeNode)value;
+				base.SelectedNode = ND;
 			}
 		}
 

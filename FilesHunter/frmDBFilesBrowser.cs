@@ -25,8 +25,9 @@ namespace FilesHunter
 		XmlDocument currentFolderNaksha;
 		string currentHierarchyParentPath, cutNodePath, copyNodePath;
 		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
+		string srcNodeType = NodeType.File.ToString().ToLower();
 
-		public frmDBFilesBrowser()
+        public frmDBFilesBrowser()
 		{
 			InitializeComponent();
 			this.thumbViewer.OpenFolderToViewContents += ThumbViewer_OpenFolderToViewContents;
@@ -481,7 +482,6 @@ namespace FilesHunter
 
 		private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
 		{
-			var srcNodeType = NodeType.File.ToString();
 
 			if (e.ClickedItem.Text == tvwMenuCut.Text) 
 			{
@@ -524,7 +524,7 @@ namespace FilesHunter
 						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
 						DirectoryMapDbReader reader = new DirectoryMapDbReader();
 
-						if (srcNodeType == NodeType.File.ToString())
+						if (srcNodeType == NodeType.File.ToString().ToLower())
 						{
 							//Step 1: Remove xml node from its original position
 							var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(cutNodePath, NodeType.File);
@@ -581,7 +581,7 @@ namespace FilesHunter
 						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
 						DirectoryMapDbReader reader = new DirectoryMapDbReader();
 
-						if (srcNodeType == NodeType.File.ToString())
+						if (srcNodeType == NodeType.File.ToString().ToLower())
 						{
 							//Step 1: Get XML node corresponding to the treenode being copied
 							var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(copyNodePath, NodeType.File);
