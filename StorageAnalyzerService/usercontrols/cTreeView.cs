@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -99,8 +100,16 @@ namespace FilesHunter.UserControls
 			}
 			set
 			{
-				var ND = (TreeNode)value;
-				base.SelectedNode = ND;
+				if (value == null)
+				{
+					base.SelectedNode = null;
+				}
+				else
+				{
+					var foundNodes = base.Nodes.Find(value.Name, true);
+					if (foundNodes.Length > 0)
+						base.SelectedNode = foundNodes[0];
+                }
 			}
 		}
 
