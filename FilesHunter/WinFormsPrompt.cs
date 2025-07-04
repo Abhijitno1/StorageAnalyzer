@@ -9,7 +9,7 @@ namespace FilesHunter
 {
 	public static class WinFormsPrompt
 	{
-		public static string ShowDialog(string text, string caption)
+		public static string ShowDialog(string text, string caption, string defaultText = "")
 		{
 			Form prompt = new Form()
 			{
@@ -20,7 +20,7 @@ namespace FilesHunter
 				StartPosition = FormStartPosition.CenterScreen
 			};
 			Label textLabel = new Label() { Left = 50, Top = 20, Text = text };
-			TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400 };
+			TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400, Text = defaultText };
 			Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
 			confirmation.Click += (sender, e) => { prompt.Close(); };
 			prompt.Controls.Add(textBox);

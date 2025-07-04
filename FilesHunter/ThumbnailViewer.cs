@@ -28,7 +28,7 @@ namespace FilesHunter
         public delegate void DeleteResourceDelegate(string itemName, string itemPath, string nodeType);
 		public event DeleteResourceDelegate DeleteResource;
 
-		public delegate void SaveResourceDelegate(string itemName, string itemPath);
+		public delegate void SaveResourceDelegate(string itemName, string itemPath, string nodeType);
 		public event SaveResourceDelegate SaveResource;
 
 		public delegate void RenameResourceDelegate(string itemName, string itemPath);
@@ -196,11 +196,12 @@ namespace FilesHunter
 
 		private void tsMnuItmSaveToDisk_Click(object sender, EventArgs e)
 		{
-			var fileName = lvwTiles.SelectedItems[0].Text;
-			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+            var selectedListItem = lvwTiles.SelectedItems[0];
+            var fileName = selectedListItem.Text;
+			var itemRelativePath = selectedListItem.Name;
             if (SaveResource != null)
             {
-				SaveResource(fileName, itemRelativePath);
+				SaveResource(fileName, itemRelativePath, selectedListItem.Tag.ToString());
 			}
 		}
 

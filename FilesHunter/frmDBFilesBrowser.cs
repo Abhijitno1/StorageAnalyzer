@@ -48,7 +48,7 @@ namespace FilesHunter
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			if (selectedNode != null)
 			{
-				var newName = WinFormsPrompt.ShowDialog("Please enter new name for selected resource", "Rename Resource in DB");
+				var newName = WinFormsPrompt.ShowDialog("Please enter new name for selected resource", "Rename Resource in DB", itemName);
 				if (newName != null)
 				{
 					DirectoryMapDbSaver dbSaver = new DirectoryMapDbSaver();
@@ -78,29 +78,118 @@ namespace FilesHunter
                 }
 			}
 		}
-		private void ThumbViewer_SaveResource(string itemName, string itemPath)
+		private void ThumbViewer_SaveResource(string itemName, string itemPath, string nodeType)
 		{
-			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
-			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
-			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
+			var relativeFolderPath = itemPath.TrimStart('\\');
+			var rootFolderPath = currentFolderNaksha.DocumentElement.Attributes["fullPath"].Value;
+            var nodeTypeEnum = (NodeType)Enum.Parse(typeof(NodeType), nodeType);
+			string relativeFilePath = "", saveAbsolutePath = "", filterClause = "", fileName = "";
+			if (nodeTypeEnum == NodeType.File)
+			{
+                relativeFilePath = relativeFolderPath + @"\" + itemName;
+                filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFilePath, nodeTypeEnum);
+				relativeFolderPath += '\\';
+                //Strip off root folder name from relativeFolderPath variable while creating absolute folder path for default save location
+                relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\') + 1);
+				fileName = itemName;
+                //saveAbsolutePath = rootFolderPath + relativeFilePath.Substring(relativeFilePath.LastIndexOf('\\'));
+            }
+            else if (nodeTypeEnum == NodeType.Folder)
+			{
+                relativeFolderPath = relativeFolderPath + @"\" + itemName;
+                filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, nodeTypeEnum);
+                //Strip off root folder name from relativeFolderPath variable while creating absolute folder path for default save location
+                relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\') + 1);
+            }
+
+            var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			if (selectedNode != null)
 			{
-				var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
-				//Strip off root folder name from relativeFolderPath variable while creating absolute folder path for default save location
-				var saveAbsolutePath = currentFolderNaksha.DocumentElement.Attributes["fullPath"].Value + relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
-				sfdFileSaver.FileName = saveAbsolutePath;	//ToDo: Set Initial directory and filename separately instead of full path for file name here
-				var dlgResult = sfdFileSaver.ShowDialog();
-				if (dlgResult == DialogResult.OK)
-				{
-					saveAbsolutePath = sfdFileSaver.FileName;
-					DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
-					var fileData = dbReader.GetModakData(resourceDbId);
-					File.WriteAllBytes(saveAbsolutePath, fileData);
-				}
-			}
-		}
+                Action<XmlNode> saveSingleFileToDisk = (XmlNode curNode) =>
+                {
+                    var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
+                    DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
+                    var fileData = dbReader.GetModakData(resourceDbId);
+                    Debug.WriteLine("Writing file: " + saveAbsolutePath + " to disk");
+                    //File.WriteAllBytes(saveAbsolutePath, fileData);
+                };
+                Action<XmlNode> saveFileToDisk = (XmlNode curNode) =>
+                {
+                    var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
+                    DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
+                    var fileData = dbReader.GetModakData(resourceDbId);
+                    var childFilePathName = curNode.Attributes["name"].Value;
+					var iNode = curNode;
+					while (iNode.ParentNode != null && iNode.ParentNode.Name != "#document")
+					{
+						childFilePathName = iNode.ParentNode.Attributes["name"].Value + @"\" + childFilePathName;
+						iNode = iNode.ParentNode;
+					}
+                    childFilePathName = childFilePathName.Substring(childFilePathName.IndexOf(@"\") + 1);
+                    childFilePathName = Path.Combine(rootFolderPath, childFilePathName);
+                    //Debug.WriteLine("Writing file: " + childFilePathName + " to disk");
+                    File.WriteAllBytes(childFilePathName, fileData);
+                };
+                Action<XmlNode> createFolderOnDisk = (XmlNode curNode) =>
+                {
+                    var childFolderName = curNode.Attributes["name"].Value;
+                    var iNode = curNode;
+                    while (iNode.ParentNode != null && iNode.ParentNode.Name != "#document")
+                    {
+                        childFolderName = iNode.ParentNode.Attributes["name"].Value + @"\" + childFolderName;
+                        iNode = iNode.ParentNode;
+                    }
+                    childFolderName = childFolderName.Substring(childFolderName.IndexOf(@"\") + 1);
+                    childFolderName = Path.Combine(rootFolderPath, childFolderName);
+                    //Debug.WriteLine("creating Folder: " + childFolderName);
+                    Directory.CreateDirectory(childFolderName);
+                };
 
-		private void SplitButton1_MenuItemClick(object sender, EventArgs e)
+				if (nodeTypeEnum == NodeType.File)
+				{
+					var sfdFileSaver = new SaveFileDialog();
+					sfdFileSaver.InitialDirectory = Path.Combine(rootFolderPath, relativeFolderPath);
+                    sfdFileSaver.FileName = fileName;
+                    //Allow user to change default save path
+                    var dlgResult = sfdFileSaver.ShowDialog();
+
+					if (dlgResult == DialogResult.OK)
+					{
+						saveAbsolutePath = sfdFileSaver.FileName;
+						saveSingleFileToDisk(selectedNode);
+					}
+				}
+				else if (nodeTypeEnum == NodeType.Folder)
+				{
+					fbdFolderLocation.SelectedPath = Path.Combine(rootFolderPath, relativeFolderPath); ;
+					//Allow user to change default save path
+                    var dialogResult = fbdFolderLocation.ShowDialog();
+                    if (dialogResult == DialogResult.OK)
+                    {
+                        rootFolderPath = fbdFolderLocation.SelectedPath; //changing root folder path to user selection 
+                        IterateThruXmlHierarchy(selectedNode, relativeFolderPath, saveFileToDisk, createFolderOnDisk);
+                    }
+                }
+            }
+		}
+		private void IterateThruXmlHierarchy(XmlNode parentNode, string relativeFolderPath, Action<XmlNode> endNodeActionToCall, Action<XmlNode> interimNodeActionToCall)
+		{
+			interimNodeActionToCall(parentNode);
+            var childNodes = parentNode.ChildNodes;
+            foreach (XmlNode childNode in childNodes)
+            {
+                if (childNode.Name == "file")
+                {
+                    endNodeActionToCall(childNode);
+                }
+				else
+				{
+                    IterateThruXmlHierarchy(childNode, relativeFolderPath, endNodeActionToCall, interimNodeActionToCall);
+                }
+            }
+        }
+
+        private void SplitButton1_MenuItemClick(object sender, EventArgs e)
 		{
 			//MessageBox.Show("You clicked " + (sender as ToolStripMenuItem).Tag.ToString(), "Zoomri Tallaiyah");
 			var selectedTreeNode = tvwDirTree.SelectedNode;
