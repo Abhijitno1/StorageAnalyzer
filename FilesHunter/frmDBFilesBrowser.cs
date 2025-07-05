@@ -12,6 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Channels;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -417,8 +418,17 @@ namespace FilesHunter
 
         private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
 		{
-			var folderSegments = relativeFolderPath.Split('\\');
-			var filterClause = "//";
+            var folderSegments = new String[1];
+            //Regex.IsMatch(relativeFolderPath, "^[A-Za-z]:\\$") //This did not work
+            if (!string.IsNullOrEmpty(relativeFolderPath) && relativeFolderPath.Length==3 && relativeFolderPath.EndsWith(@":\"))
+			{
+				folderSegments[0] = relativeFolderPath;
+			}
+			else 
+			{
+                folderSegments = relativeFolderPath.Split('\\');
+            }
+            var filterClause = "//";
 			int j = 0;
 			for (j = 0; j < folderSegments.Length - 1; j++)
 			{
@@ -847,8 +857,19 @@ namespace FilesHunter
 
 		private string GetRelativePathForSelectedTreeNode(string nodeName)
 		{
-			var rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
-			var offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
+			var rootFolder = new DirectoryInfo(txtFileLocation.Text.Trim());
+			var rootParentDirPath = string.Empty;
+			var offset = 0;
+			if (rootFolder.Parent == null)
+			{
+				rootParentDirPath = rootFolder.Name;
+			}
+			else
+			{
+				rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
+			}
+			if (nodeName.Length > rootParentDirPath.Length)
+				offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
 			var relativePath = nodeName.Substring(offset);
 			return relativePath;
 		}

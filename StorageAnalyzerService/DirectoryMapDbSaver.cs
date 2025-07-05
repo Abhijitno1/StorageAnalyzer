@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,7 +17,7 @@ namespace StorageAnalyzerService
 	public class DirectoryMapDbSaver
 	{
 		public string RootFolderPath { get; set; }
-		ApplicationDbContext dbContext = new ApplicationDbContext();
+		//ApplicationDbContext dbContext = new ApplicationDbContext();
 		XmlDocument xmlDoc = new XmlDocument();
 
 		public void SaveMap()
@@ -29,37 +31,46 @@ namespace StorageAnalyzerService
 				AbsolutePath = RootFolderPath,
 				DirectoryXml = xml2save
 			};
-			dbContext.FolderMaps.Add(folderMap);
-			dbContext.SaveChanges();
-		}
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
+			{
+                dbContext.FolderMaps.Add(folderMap);
+                dbContext.SaveChanges();
+            }
+        }
 
 		public void UpdateMap(XmlDocument editedDoc)
 		{
-			var identifier = editedDoc.DocumentElement.Attributes["fullPath"].Value;
-			if (identifier != null)
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
 			{
-				var foundRec = dbContext.FolderMaps.Where(folderMap=> folderMap.AbsolutePath == identifier);
-				if (foundRec.Any())
-				{
-					var rec2Update = foundRec.First();
-					rec2Update.DirectoryXml = editedDoc.DocumentElement.OuterXml;
-					dbContext.SaveChanges();
-				}
-			}
-		}
+                var identifier = editedDoc.DocumentElement.Attributes["fullPath"].Value;
+                if (identifier != null)
+                {
+                    var foundRec = dbContext.FolderMaps.Where(folderMap => folderMap.AbsolutePath == identifier);
+                    if (foundRec.Any())
+                    {
+                        var rec2Update = foundRec.First();
+                        rec2Update.DirectoryXml = editedDoc.DocumentElement.OuterXml;
+                        dbContext.SaveChanges();
+                    }
+                }
+            }
+        }
 
 		public bool DeleteFolderMap(string absolutePath)
 		{
-			var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
-			if (foundFolderMaps.Any())
+			using (ApplicationDbContext dbContext = new ApplicationDbContext()) 
 			{
-				//First remove any stored file dependencies in database
-				DeleteModaksForNaksha(absolutePath);
-				//Then remove folder map from Xml maps
-				dbContext.FolderMaps.Remove(foundFolderMaps.First());
-				return dbContext.SaveChanges() > 0;
-			}
-			return false;
+                var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
+                if (foundFolderMaps.Any())
+                {
+                    //First remove any stored file dependencies in database
+                    DeleteModaksForNaksha(absolutePath);
+                    //Then remove folder map from Xml maps
+                    dbContext.FolderMaps.Remove(foundFolderMaps.First());
+                    return dbContext.SaveChanges() > 0;
+                }
+            }
+            return false;
 		}
 
 		private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
@@ -129,63 +140,78 @@ namespace StorageAnalyzerService
 
 		public bool DeleteModaksForNaksha(string absolutePath)
 		{
-			var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
-			if (foundFolderMaps.Any())
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
 			{
-				var xml = foundFolderMaps.First().DirectoryXml;
-				var xmlDoc = new XmlDocument();
-				xmlDoc.LoadXml(xml);
-				DeleteFiles4Node(xmlDoc.DocumentElement);
-			}
-			return true;
+                var foundFolderMaps = dbContext.FolderMaps.Where(k => k.AbsolutePath == absolutePath);
+                if (foundFolderMaps.Any())
+                {
+                    var xml = foundFolderMaps.First().DirectoryXml;
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(xml);
+                    DeleteFiles4Node(xmlDoc.DocumentElement);
+                }
+            }
+            return true;
 		}
 
 		public bool DeleteFiles4Node(XmlNode node)
 		{
-			foreach (XmlNode child in node.ChildNodes)
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
 			{
-				if (child.Name == "file")
-				{
-					var modakId = Convert.ToInt32(child.Attributes["DbId"].Value);
-					DeleteModak(modakId);
-				}
-				else
-				{
-					DeleteFiles4Node(child);
-				}
-			}
-			return true;
+                foreach (XmlNode child in node.ChildNodes)
+                {
+                    if (child.Name == "file")
+                    {
+                        var modakId = Convert.ToInt32(child.Attributes["DbId"].Value);
+                        DeleteModak(modakId);
+                    }
+                    else
+                    {
+                        DeleteFiles4Node(child);
+                    }
+                }
+            }
+            return true;
 		}
 
 		public bool UpdateModak(Modak modak)
 		{
-			var foundModak = dbContext.Modaks.Find(modak.Id);
-			if (foundModak != null)
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
 			{
-				foundModak.Title = modak.Title;
-				foundModak.RelativePath = modak.RelativePath;
-				return dbContext.SaveChanges() > 0;
-			}
-			return false;
+                var foundModak = dbContext.Modaks.Find(modak.Id);
+                if (foundModak != null)
+                {
+                    foundModak.Title = modak.Title;
+                    foundModak.RelativePath = modak.RelativePath;
+                    return dbContext.SaveChanges() > 0;
+                }
+            }
+            return false;
 		}
 
 		public bool DeleteModak(int dbId)
 		{
-			var foundModak = dbContext.Modaks.Find(dbId);
-			if (foundModak != null)
-			{
-				dbContext.Modaks.Remove(foundModak);
-				dbContext.SaveChanges();
-				return true;
+			using (ApplicationDbContext dbContext = new ApplicationDbContext())
+            {
+				var foundModak = dbContext.Modaks.Find(dbId);
+				if (foundModak != null)
+				{
+                    dbContext.Modaks.Remove(foundModak);
+                    dbContext.SaveChanges();
+					return true;
+				}
 			}
 			return false;
 		}
 
 		public bool InsertModakIntoDb(Modak modak)
 		{
-			dbContext.Modaks.Add(modak);
-			dbContext.SaveChanges();
-			return true;
+            using (ApplicationDbContext dbContext = new ApplicationDbContext())
+            {
+                dbContext.Modaks.Add(modak);
+                dbContext.SaveChanges();
+            }
+            return true;
 		}
 
 	}
