@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
@@ -769,13 +770,14 @@ namespace FilesHunter
                                 };
                             };
 
-                            Action<XmlNode, XmlNode> generateNodeHierarchyCopy = null;
-                            generateNodeHierarchyCopy = (copyXmlNode1, destXmlNode1) =>
+                            Action<XmlNode, XmlNode> insertModaks4ClinedNodes = null;
+                            insertModaks4ClinedNodes = (copyXmlNode1, destXmlNode1) =>
                             {
                                 foreach (XmlNode curNode in copyXmlNode1.ChildNodes)
                                 {
-                                    var newCopyXmlNode = curNode.CloneNode(true);
-                                    destXmlNode1.AppendChild(newCopyXmlNode);
+                                    var correspondingDestNode = destXmlNode1.ChildNodes.OfType<XmlNode>().Where(x =>
+                                        x.NodeType == XmlNodeType.Element && x.Attributes["name"].Value == curNode.Attributes["name"].Value)
+                                        .FirstOrDefault();
 
                                     if (curNode.Name == "file")
                                     {
@@ -788,19 +790,24 @@ namespace FilesHunter
                                         }
                                         relPath = relPath.Substring(relPath.IndexOf(@"\") + 1);
                                         var modakId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                                        var modak = reader.GetModak(modakId);
-                                        var copyOfModak = copyModak(modak);
+                                        var modak = reader.GetModak(modakId);				
+										var copyOfModak = copyModak(modak);
                                         copyOfModak.RelativePath = destParentNode.Attributes["name"].Value + "\\" + relPath;
-                                        saver.InsertModakIntoDb(copyOfModak);
-                                        (newCopyXmlNode as XmlElement).SetAttribute("DbId", copyOfModak.Id.ToString());
+										//Debug.WriteLine($"Inserting Modak with  Title = {copyOfModak.Title}, Relative Path = {copyOfModak.RelativePath}");
+										saver.InsertModakIntoDb(copyOfModak);
+                                        (correspondingDestNode as XmlElement).SetAttribute("DbId", copyOfModak.Id.ToString());
                                     }
                                     else
                                     {
-                                        generateNodeHierarchyCopy(curNode, newCopyXmlNode);
+                                        insertModaks4ClinedNodes(curNode, correspondingDestNode);
                                     }
                                 }
                             };
-							generateNodeHierarchyCopy(selectedNode, destParentNode);
+                            var copiedRoot = selectedNode.CloneNode(true);
+                            //Debug.WriteLine($"Adding Xml node = {copiedRoot.Attributes["name"].Value}, Node Type = {copiedRoot.Name}, Parent Node = {destParentNode.Attributes["name"].Value}");
+                            destParentNode.AppendChild(copiedRoot);
+                            insertModaks4ClinedNodes(selectedNode, copiedRoot);
+                            saver.UpdateMap(currentFolderNaksha);
                         }
 
                         //Refresh the treeview and listview
