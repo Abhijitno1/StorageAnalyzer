@@ -633,30 +633,71 @@ namespace FilesHunter
 							var destXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
 							if (destXmlNode != null )
 							{
-								if (destXmlNode.Name == "folder")
-								{
-									destXmlNode.AppendChild(cutXmlNode);
-								}
-								else 
-								{
-									destXmlNode = destXmlNode.ParentNode; //Get to the parent folder of selected destination file
-									destXmlNode.AppendChild(cutXmlNode); //Transfer the moved child to the new parent
-								}
-							}
-							saver.UpdateMap(currentFolderNaksha);
+                                destXmlNode.AppendChild(cutXmlNode);    // We are already making sure destination node is set as a folder
+                                saver.UpdateMap(currentFolderNaksha);
+                            }
 
-							//Step 3: Update the relative path in Modak DB object
-							Modak updModak = reader.GetModak(resourceDbId);
+                            //Step 3: Update the relative path in Modak DB object
+                            Modak updModak = reader.GetModak(resourceDbId);
 							updModak.RelativePath = destNodePath.Substring(destNodePath.IndexOf('\\', 1)) + "\\" + srcNodeName;
 							saver.UpdateModak(updModak);
 						}
 						else
 						{
-							MessageBox.Show("Folder Cut and Paste is not yet supported");
-						}
+                            //Step 1: Remove xml node from its original position
+                            var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(cutNodePath, NodeType.Folder);
+                            var cutXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+                            if (cutXmlNode != null)
+                            {
+                                var parentNode = cutXmlNode.ParentNode;
+                                if (parentNode != null)
+                                {
+                                    parentNode.RemoveChild(cutXmlNode);
+                                }
+                            }
 
-						//Refresh the treeview and listview
-						TreeViewRefreshState(selectedTreeNode);
+                            //Step 2: Append xml node at its new position
+                            filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
+                            var destXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+                            if (destXmlNode != null)
+                            {
+                                destXmlNode.AppendChild(cutXmlNode);    // We are already making sure destination node is set as a folder
+                                saver.UpdateMap(currentFolderNaksha);
+                            }
+
+                            //Step 3: Recursively Update the relative path in Modak DB objects associated with all descendants of source cut node
+                            Action<XmlNode> recursiveUpdatePathsOnModak = null;
+                            recursiveUpdatePathsOnModak = (cutXmlNode1) =>
+							{
+                                foreach (XmlNode curNode in cutXmlNode1.ChildNodes)
+                                {
+                                    if (curNode.Name == "file")
+                                    {
+										string relPath = curNode.Attributes["name"].Value;
+                                        var iNode = curNode;
+                                        while (iNode.ParentNode != null && iNode.ParentNode.Name != "#document")
+                                        {
+                                            relPath = iNode.ParentNode.Attributes["name"].Value + @"\" + relPath;
+                                            iNode = iNode.ParentNode;
+                                        }
+                                        relPath = relPath.Substring(relPath.IndexOf(@"\") + 1);
+                                        var modakId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
+                                        var modak = reader.GetModak(modakId);
+                                        modak.RelativePath = destXmlNode.Attributes["name"].Value + "\\" + relPath;
+                                        saver.UpdateModak(modak);
+                                    }
+                                    else
+                                    {
+                                        recursiveUpdatePathsOnModak(curNode);
+                                    }
+                                }
+                            };
+                            recursiveUpdatePathsOnModak(cutXmlNode);
+
+                        }
+
+                        //Refresh the treeview and listview
+                        TreeViewRefreshState(selectedTreeNode);
                     }
 				}
 				else if (copyNodePath != null)
@@ -676,8 +717,8 @@ namespace FilesHunter
 							var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(copyNodePath, NodeType.File);
 							var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 
-							//Step 2: Create a copy of the existing node for duplication
-							newElm = currentFolderNaksha.CreateElement("file");
+                            //Step 2: Create a copy of the existing node for duplication
+                            newElm = currentFolderNaksha.CreateElement("file");
 							newElm.SetAttribute("name", selectedNode.Attributes["name"].Value);
 							newElm.SetAttribute("extension", selectedNode.Attributes["extension"].Value);
 							newElm.SetAttribute("creationDate", selectedNode.Attributes["creationDate"].Value);
@@ -706,17 +747,74 @@ namespace FilesHunter
 						}
 						else
 						{
-							MessageBox.Show("Folder Copy and Paste is not yet supported");
-						}
+							//MessageBox.Show("Folder Copy and Paste is not yet supported");
+                            //Step 1: Get XML node corresponding to the treenode being copied
+                            var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(copyNodePath, NodeType.Folder);
+                            var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 
-						//Refresh the treeview and listview
-						TreeViewRefreshState(selectedTreeNode);
+                            //Step 2: Create a copy of the existing node hierarchy for duplication
+                            filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
+                            //Strip off top folder in hierarchy for storing relative path in DB and append the new file name to relative dest folder path
+                            var modakRelPath = destNodePath.Substring(destNodePath.IndexOf('\\') + 1) + "\\" + srcNodeName;
+                            //var fileName = selectedNode.Name;
+                            var destParentNode = currentFolderNaksha.SelectSingleNode(filterClause);
+
+                            Func<Modak, Modak> copyModak = (srcModak) =>
+                            { 
+                                return new Modak()
+                                {
+                                    Title = srcModak.Title,
+                                    PicData = srcModak.PicData,
+                                    RelativePath = srcModak.RelativePath
+                                };
+                            };
+
+                            Action<XmlNode, XmlNode> generateNodeHierarchyCopy = null;
+                            generateNodeHierarchyCopy = (copyXmlNode1, destXmlNode1) =>
+                            {
+                                foreach (XmlNode curNode in copyXmlNode1.ChildNodes)
+                                {
+                                    var newCopyXmlNode = curNode.CloneNode(true);
+                                    destXmlNode1.AppendChild(newCopyXmlNode);
+
+                                    if (curNode.Name == "file")
+                                    {
+                                        string relPath = curNode.Attributes["name"].Value;
+                                        var iNode = curNode;
+                                        while (iNode.ParentNode != null && iNode.ParentNode.Name != "#document")
+                                        {
+                                            relPath = iNode.ParentNode.Attributes["name"].Value + @"\" + relPath;
+                                            iNode = iNode.ParentNode;
+                                        }
+                                        relPath = relPath.Substring(relPath.IndexOf(@"\") + 1);
+                                        var modakId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
+                                        var modak = reader.GetModak(modakId);
+                                        var copyOfModak = copyModak(modak);
+                                        copyOfModak.RelativePath = destParentNode.Attributes["name"].Value + "\\" + relPath;
+                                        saver.InsertModakIntoDb(copyOfModak);
+                                        (newCopyXmlNode as XmlElement).SetAttribute("DbId", copyOfModak.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        generateNodeHierarchyCopy(curNode, newCopyXmlNode);
+                                    }
+                                }
+                            };
+							generateNodeHierarchyCopy(selectedNode, destParentNode);
+                        }
+
+                        //Refresh the treeview and listview
+                        TreeViewRefreshState(selectedTreeNode);
                     }
                 }
 			}
 		}
 
-		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
+		private void RecursiveUpdatePathsOnModak(XmlNode cutXmlNode, XmlNode destXmlNode)
+		{
+		}
+
+        private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 			TreeNode nazaraNode = null;
 			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
