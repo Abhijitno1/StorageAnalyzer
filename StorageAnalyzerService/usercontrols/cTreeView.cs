@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace FilesHunter.UserControls
 {
@@ -121,8 +122,25 @@ namespace FilesHunter.UserControls
 			}
 		}
 
+		public new void CollapseAll()
+		{
+			_CollapseNodes(Nodes);
+        }
 
-		public void Filter(Selector Filter)
+		private void _CollapseNodes(CTreeNodeCollection actualNodes)
+		{
+            for (var i = 0; i < actualNodes.Count; i++)
+            {
+				var curNode = actualNodes[i];
+                if (curNode.Nodes.Count > 0)
+                {
+                    _CollapseNodes(curNode.Nodes);
+                }
+                curNode.Collapse();
+            }
+        }
+
+        public void Filter(Selector Filter)
 		{
 			_Filter(Filter, this.Nodes);
 		}

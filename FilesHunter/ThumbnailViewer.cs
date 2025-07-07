@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+//using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FilesHunter
@@ -43,13 +44,12 @@ namespace FilesHunter
         public static Image BinaryToImage(byte[] binaryData)
         {
             if (binaryData == null) return null;
-            byte[] buffer = binaryData.ToArray();
             MemoryStream memStream = new MemoryStream();
-            memStream.Write(buffer, 0, buffer.Length);
+            memStream.Write(binaryData, 0, binaryData.Length);
             return Image.FromStream(memStream);
         }
 
-        public static Byte[] ImageToBinary(Image input)
+        public static Byte[] ImageToBinary(System.Drawing.Image input)
         {
             var ms = new MemoryStream();
             ImageCodecInfo pngCodec = GetEncoderInfo("image/png");
@@ -104,14 +104,16 @@ namespace FilesHunter
 
         private void MakeThumbnail(NodeType nodeType, byte[] binary, string imgName, string folderPath)
         {
-            // Set thumbnail image
-            MemoryStream ms = new MemoryStream();
-            var thumbImage = Image.FromStream(new MemoryStream(binary))
-                .GetThumbnailImage(imlTiles.ImageSize.Width - 2, imlTiles.ImageSize.Height - 2, null, new IntPtr());
-            ms.Close();
-
-            // Add to Imagelist and thereafter to listview
-            imlTiles.Images.Add(thumbImage);
+            Image thumbImage;
+            //Set thumbnail image
+            using (MemoryStream ms = new MemoryStream(binary))
+            {
+                var originalImage = System.Drawing.Image.FromStream(ms);
+                thumbImage = originalImage.GetThumbnailImage(imlTiles.ImageSize.Width - 2, imlTiles.ImageSize.Height - 2, null, new IntPtr());
+                //Add to Imagelist and thereafter to listview
+                imlTiles.Images.Add(thumbImage);
+                ms.Close();
+            }
 
             var listItem = new ListViewItem();
             listItem.Name = folderPath;

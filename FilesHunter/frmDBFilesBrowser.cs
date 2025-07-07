@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
+using SD = System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -113,7 +113,7 @@ namespace FilesHunter
                     DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
                     var fileData = dbReader.GetModakData(resourceDbId);
                     Debug.WriteLine("Writing file: " + saveAbsolutePath + " to disk");
-                    //File.WriteAllBytes(saveAbsolutePath, fileData);
+                    File.WriteAllBytes(saveAbsolutePath, fileData);
                 };
                 Action<XmlNode> saveFileToDisk = (XmlNode curNode) =>
                 {
@@ -462,7 +462,7 @@ namespace FilesHunter
 					if (currentFiltererdNodes.Any(x => x.Text == folderName && x.Tag.ToString() == childNode.Name))
 					{
 						//Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
-						var folderImage = imlShowPad.Images[0];
+						SD.Image folderImage = imlShowPad.Images[0];
 						imageData = ThumbnailViewer.ImageToBinary(folderImage);
 						thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentPath);
 					}
@@ -493,7 +493,7 @@ namespace FilesHunter
 						{
 							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[6]);
 						}
-						else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".avif", ".webp", ".tiff", ".bmp" }).Contains(fileExtn))
+						else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp" }).Contains(fileExtn))
 						{
 							var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
 							imageData = reader.GetModakData(fileId);
@@ -563,12 +563,14 @@ namespace FilesHunter
 
 		private void btnClearFilter_Click(object sender, EventArgs e)
 		{
-			txtSearchName.Text = string.Empty;
+			var curSelection = tvwDirTree.SelectedNode;
+            txtSearchName.Text = string.Empty;
+			tvwDirTree.CollapseAll();
 			tvwDirTree.Filter((node) => true);
 			//Select first node of tree so that Listview gets refreshed
-			tvwDirTree.SelectedNode = null;
-			tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
-		}
+			tvwDirTree.SelectedNode = curSelection;
+            tvwDirTree.SelectedNode.Expand();
+        }
 
 		private void tvwDirTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
@@ -827,10 +829,6 @@ namespace FilesHunter
 			}
 		}
 
-		private void RecursiveUpdatePathsOnModak(XmlNode cutXmlNode, XmlNode destXmlNode)
-		{
-		}
-
         private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
 			TreeNode nazaraNode = null;
@@ -844,6 +842,7 @@ namespace FilesHunter
 				nazaraNode = e.Node.Parent;
 			}
 			currentHierarchyParentPath = GetRelativePathForSelectedTreeNode(nazaraNode.Name);
+			txtSelectedNodePath.Text = currentHierarchyParentPath;
 
 			currentFiltererdNodes.Clear();
 			foreach (CTreeNode child in nazaraNode.Nodes)

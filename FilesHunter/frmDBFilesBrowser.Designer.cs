@@ -35,10 +35,6 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tvwDirTree = new FilesHunter.UserControls.CTreeView();
             this.grpFolderDetails = new System.Windows.Forms.GroupBox();
-            this.thumbViewer = new FilesHunter.ThumbnailViewer();
-            this.btnSearchDuplicates = new System.Windows.Forms.Button();
-            this.btnSearchByRegex = new System.Windows.Forms.Button();
-            this.btnSearchByExtn = new System.Windows.Forms.Button();
             this.btnClearFilter = new System.Windows.Forms.Button();
             this.cboSearchType = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -50,7 +46,6 @@
             this.txtFileLocation = new System.Windows.Forms.TextBox();
             this.lblHierarchyName = new System.Windows.Forms.Label();
             this.pnlBottom = new System.Windows.Forms.Panel();
-            this.splitButton1 = new FilesHunter.SplitButton();
             this.label4 = new System.Windows.Forms.Label();
             this.btnSaveLocation = new System.Windows.Forms.Button();
             this.txtNewItemLocation = new System.Windows.Forms.TextBox();
@@ -62,6 +57,9 @@
             this.tvwMenuCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tvwMenuPaste = new System.Windows.Forms.ToolStripMenuItem();
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
+            this.thumbViewer = new FilesHunter.ThumbnailViewer();
+            this.splitButton1 = new FilesHunter.SplitButton();
+            this.txtSelectedNodePath = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -125,10 +123,8 @@
             // 
             // grpFolderDetails
             // 
+            this.grpFolderDetails.Controls.Add(this.txtSelectedNodePath);
             this.grpFolderDetails.Controls.Add(this.thumbViewer);
-            this.grpFolderDetails.Controls.Add(this.btnSearchDuplicates);
-            this.grpFolderDetails.Controls.Add(this.btnSearchByRegex);
-            this.grpFolderDetails.Controls.Add(this.btnSearchByExtn);
             this.grpFolderDetails.Controls.Add(this.btnClearFilter);
             this.grpFolderDetails.Controls.Add(this.cboSearchType);
             this.grpFolderDetails.Controls.Add(this.label3);
@@ -141,44 +137,6 @@
             this.grpFolderDetails.TabIndex = 16;
             this.grpFolderDetails.TabStop = false;
             this.grpFolderDetails.Text = "Search Folders and Files";
-            // 
-            // thumbViewer
-            // 
-            this.thumbViewer.AutoScroll = true;
-            this.thumbViewer.AutoSize = true;
-            this.thumbViewer.Location = new System.Drawing.Point(19, 92);
-            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-            this.thumbViewer.Name = "thumbViewer";
-            this.thumbViewer.RootFolderPath = null;
-            this.thumbViewer.Size = new System.Drawing.Size(985, 615);
-            this.thumbViewer.TabIndex = 36;
-            // 
-            // btnSearchDuplicates
-            // 
-            this.btnSearchDuplicates.Location = new System.Drawing.Point(399, 53);
-            this.btnSearchDuplicates.Name = "btnSearchDuplicates";
-            this.btnSearchDuplicates.Size = new System.Drawing.Size(119, 31);
-            this.btnSearchDuplicates.TabIndex = 35;
-            this.btnSearchDuplicates.Text = "Search Duplicates";
-            this.btnSearchDuplicates.UseVisualStyleBackColor = true;
-            // 
-            // btnSearchByRegex
-            // 
-            this.btnSearchByRegex.Location = new System.Drawing.Point(274, 53);
-            this.btnSearchByRegex.Name = "btnSearchByRegex";
-            this.btnSearchByRegex.Size = new System.Drawing.Size(119, 31);
-            this.btnSearchByRegex.TabIndex = 34;
-            this.btnSearchByRegex.Text = "Search Using RegEx";
-            this.btnSearchByRegex.UseVisualStyleBackColor = true;
-            // 
-            // btnSearchByExtn
-            // 
-            this.btnSearchByExtn.Location = new System.Drawing.Point(149, 53);
-            this.btnSearchByExtn.Name = "btnSearchByExtn";
-            this.btnSearchByExtn.Size = new System.Drawing.Size(119, 31);
-            this.btnSearchByExtn.TabIndex = 33;
-            this.btnSearchByExtn.Text = "Search Multiple Extensions";
-            this.btnSearchByExtn.UseVisualStyleBackColor = true;
             // 
             // btnClearFilter
             // 
@@ -290,13 +248,6 @@
             this.pnlBottom.Size = new System.Drawing.Size(1036, 50);
             this.pnlBottom.TabIndex = 13;
             // 
-            // splitButton1
-            // 
-            this.splitButton1.Location = new System.Drawing.Point(826, 12);
-            this.splitButton1.Name = "splitButton1";
-            this.splitButton1.Size = new System.Drawing.Size(125, 29);
-            this.splitButton1.TabIndex = 16;
-            // 
             // label4
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -385,6 +336,33 @@
             this.tvwMenuPaste.Tag = "mnuPastModak";
             this.tvwMenuPaste.Text = "Paste";
             // 
+            // thumbViewer
+            // 
+            this.thumbViewer.AutoScroll = true;
+            this.thumbViewer.AutoSize = true;
+            this.thumbViewer.Location = new System.Drawing.Point(19, 92);
+            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+            this.thumbViewer.Name = "thumbViewer";
+            this.thumbViewer.RootFolderPath = null;
+            this.thumbViewer.Size = new System.Drawing.Size(985, 615);
+            this.thumbViewer.TabIndex = 36;
+            // 
+            // splitButton1
+            // 
+            this.splitButton1.Location = new System.Drawing.Point(826, 12);
+            this.splitButton1.Name = "splitButton1";
+            this.splitButton1.Size = new System.Drawing.Size(125, 29);
+            this.splitButton1.TabIndex = 16;
+            // 
+            // txtSelectedNodePath
+            // 
+            this.txtSelectedNodePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtSelectedNodePath.Location = new System.Drawing.Point(19, 59);
+            this.txtSelectedNodePath.Name = "txtSelectedNodePath";
+            this.txtSelectedNodePath.ReadOnly = true;
+            this.txtSelectedNodePath.Size = new System.Drawing.Size(985, 22);
+            this.txtSelectedNodePath.TabIndex = 38;
+            // 
             // frmDBFilesBrowser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -429,9 +407,6 @@
 		private System.Windows.Forms.Label lblHierarchyName;
 		private System.Windows.Forms.GroupBox grpFolderDetails;
 		private ThumbnailViewer thumbViewer;
-		private System.Windows.Forms.Button btnSearchDuplicates;
-		private System.Windows.Forms.Button btnSearchByRegex;
-		private System.Windows.Forms.Button btnSearchByExtn;
 		private System.Windows.Forms.Button btnClearFilter;
 		private System.Windows.Forms.ComboBox cboSearchType;
 		private System.Windows.Forms.Label label3;
@@ -447,5 +422,6 @@
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuCopy;
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuPaste;
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
+        private System.Windows.Forms.TextBox txtSelectedNodePath;
     }
 }
