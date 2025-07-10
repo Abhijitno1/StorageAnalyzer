@@ -23,7 +23,7 @@ namespace FilesHunter
 	public partial class frmDBFilesBrowser : Form
 	{
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
-		int panel1OrigWidth, panel2OrigWidth, formOrigHeight, thumbViewerOrigHeight, grpFolderDetailsOrigHeight;
+		int panel1OrigWidth, panel2OrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
 		string currentHierarchyParentPath, cutNodePath, copyNodePath;
 		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
@@ -41,8 +41,6 @@ namespace FilesHunter
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
-			this.thumbViewerOrigHeight = thumbViewer.Height;
-			this.grpFolderDetailsOrigHeight = grpFolderDetails.Height;
 		}
 
 		private void ThumbViewer_RenameResource(string itemName, string itemPath, string nodeType)
@@ -533,18 +531,13 @@ namespace FilesHunter
 			if (this.formOrigHeight == 0) return;	//Don't do anything on initial form load
 
 			var heightDiff = this.Height - this.formOrigHeight;
-			var heightRatio = this.Height / this.formOrigHeight;
 
 			tvwDirTree.Height += heightDiff;
-
-			thumbViewer.Height += heightDiff;
-            //thumbViewer.Height += thumbViewerOrigHeight * heightRatio;
-            //grpFolderDetails.Height += grpFolderDetailsOrigHeight * heightRatio;
+            grpFolderDetails.Height += heightDiff;
+			thumbViewer.Height += heightDiff - 2;
 
             //Reset the new height of form
             this.formOrigHeight = this.Height;
-			this.thumbViewerOrigHeight = thumbViewer.Height;
-			this.grpFolderDetailsOrigHeight = grpFolderDetails.Height;
         }
 
 		private void btnSaveLocation_Click(object sender, EventArgs e)
@@ -574,7 +567,7 @@ namespace FilesHunter
 			return node.Text.ToLower().Contains(txtSearchName.Text.Trim().ToLower());
 		}
 
-		private void btnClearFilter_Click(object sender, EventArgs e)
+        private void btnClearFilter_Click(object sender, EventArgs e)
 		{
 			var curSelection = tvwDirTree.SelectedNode;
             txtSearchName.Text = string.Empty;
