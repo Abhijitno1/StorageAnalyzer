@@ -43,10 +43,11 @@ namespace FilesHunter
 			this.formOrigHeight = this.Height;
 		}
 
-		private void ThumbViewer_RenameResource(string itemName, string itemPath)
+		private void ThumbViewer_RenameResource(string itemName, string itemPath, string nodeType)
 		{
-			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
-			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
+            var nodeTypeEnum = (NodeType)Enum.Parse(typeof(NodeType), nodeType);
+            var relativeFolderPath = itemPath.TrimEnd('\\') + @"\" + itemName; //Making sure to remove trailing / in Drive letter assignment
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, nodeTypeEnum);
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			if (selectedNode != null)
 			{
@@ -59,20 +60,23 @@ namespace FilesHunter
 					selectedNode.Attributes["name"].Value = newName;
 					dbSaver.UpdateMap(currentFolderNaksha);
 
-					//Strip off root folder name from relative folder path before saving Modak in DB
-					relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
-					//Change the file name portion in the relative path
-					relativeFolderPath = relativeFolderPath.Substring(0, relativeFolderPath.LastIndexOf('\\') +1) + newName;
-					Modak modak = new Modak()
+					if (nodeTypeEnum == NodeType.File)
 					{
-						Id = Convert.ToInt32(selectedNode.Attributes["DbId"].Value),
-						Title = newName,
-						RelativePath = relativeFolderPath
-					};
-					dbSaver.UpdateModak(modak);
+                        //Strip off root folder name from relative folder path before saving Modak in DB
+                        relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
+                        //Change the file name portion in the relative path
+                        relativeFolderPath = relativeFolderPath.Substring(0, relativeFolderPath.LastIndexOf('\\') + 1) + newName;
+                        Modak modak = new Modak()
+                        {
+                            Id = Convert.ToInt32(selectedNode.Attributes["DbId"].Value),
+                            Title = newName,
+                            RelativePath = relativeFolderPath
+                        };
+                        dbSaver.UpdateModak(modak);
+                    }
 
-					//Refresh the treeview and listview
-					TreeViewRefreshState();
+                    //Refresh the treeview and listview
+                    TreeViewRefreshState();
 
                     var foundTreeNode = FindTreeNode(tvwDirTree.Nodes[0], newName);
                     tvwDirTree.SelectedNode = foundTreeNode;
@@ -82,7 +86,7 @@ namespace FilesHunter
 		}
 		private void ThumbViewer_SaveResource(string itemName, string itemPath, string nodeType)
 		{
-			var relativeFolderPath = itemPath.TrimStart('\\');
+			var relativeFolderPath = itemPath.TrimEnd('\\');
 			var rootFolderPath = currentFolderNaksha.DocumentElement.Attributes["fullPath"].Value;
             var nodeTypeEnum = (NodeType)Enum.Parse(typeof(NodeType), nodeType);
 			string relativeFilePath = "", saveAbsolutePath = "", filterClause = "", fileName = "";
@@ -112,8 +116,9 @@ namespace FilesHunter
                     var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
                     DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
                     var fileData = dbReader.GetModakData(resourceDbId);
-                    Debug.WriteLine("Writing file: " + saveAbsolutePath + " to disk");
+                    //Debug.WriteLine("Writing file: " + saveAbsolutePath + " to disk");
                     File.WriteAllBytes(saveAbsolutePath, fileData);
+					txtNewItemLocation.Text = string.Empty;
                 };
                 Action<XmlNode> saveFileToDisk = (XmlNode curNode) =>
                 {
@@ -170,6 +175,7 @@ namespace FilesHunter
                     {
                         rootFolderPath = fbdFolderLocation.SelectedPath; //changing root folder path to user selection 
                         IterateThruXmlHierarchy(selectedNode, relativeFolderPath, saveFileToDisk, createFolderOnDisk);
+                        txtNewItemLocation.Text = string.Empty;
                     }
                 }
             }
@@ -302,7 +308,7 @@ namespace FilesHunter
             {
                 selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
             }
-            var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+            var relativeFolderPath = itemPath.TrimEnd('\\') + @"\" + itemName;
 			var filterClause = string.Empty;
 			if (nodeType == NodeType.File.ToString())
 			{
@@ -350,7 +356,7 @@ namespace FilesHunter
 
 		private void ThumbViewer_GetPreviewData(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData)
 		{
-			var relativeFolderPath = itemPath.TrimStart('\\') + @"\" + itemName;
+			var relativeFolderPath = itemPath.TrimEnd('\\') + @"\" + itemName;
 			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(relativeFolderPath, NodeType.File);
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			if (selectedNode != null)
@@ -372,7 +378,7 @@ namespace FilesHunter
 		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
 		{
 			ExpandSelectedFolderInTreeView(itemName);
-			currentHierarchyParentPath = itemPath + @"\" + itemName;
+			currentHierarchyParentPath = itemPath.TrimEnd('\\') + @"\" + itemName;
 			PopulateFirstLevelChildrenInThumViewer();
 			tvwDirTree.Focus();
 		}
@@ -433,7 +439,9 @@ namespace FilesHunter
 			for (j = 0; j < folderSegments.Length - 1; j++)
 			{
 				var segment = folderSegments[j];
-				filterClause += $"folder[@name='{segment.ToString()}']/";
+                if (Regex.IsMatch(segment, "^[A-Za-z]:$"))
+                    segment += '\\';
+                filterClause += $"folder[@name='{segment.ToString()}']/";
 			}
 			if (folderSegments.Length > 0)
 			{
@@ -588,28 +596,25 @@ namespace FilesHunter
 			if (e.ClickedItem.Text == tvwMenuCut.Text) 
 			{
 				copyNodePath = null;
-				cutNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
-				srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
+				//cutNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+                cutNodePath = tvwDirTree.SelectedNode.Name;
+                srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
 			}
 			else if (e.ClickedItem.Text == tvwMenuCopy.Text)
 			{
 				cutNodePath = null;
-				copyNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
-				srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
+                //copyNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
+                copyNodePath = tvwDirTree.SelectedNode.Name;
+                srcNodeType = tvwDirTree.SelectedNode.Tag.ToString();
 			}
 			else if (e.ClickedItem.Text == tvwMenuPaste.Text)
 			{
                 var selectedTreeNode = tvwDirTree.SelectedNode;
-                //Moving to parent if a File node is selected as destination of paste action
-                string destNodePath = GetRelativePathForSelectedTreeNode(tvwDirTree.SelectedNode.Name);
-				var nodeEndHere = destNodePath.LastIndexOf('\\') > -1 ? destNodePath.Substring(destNodePath.LastIndexOf('\\')) : destNodePath;
-				var destNodeType = nodeEndHere.IndexOf('.') == -1 ? NodeType.Folder : NodeType.File;
-				if (destNodeType == NodeType.File)
-				{
-					//If file node is selected as destination then shift to it's parent folder as new destination
-					destNodePath = destNodePath.Substring(0, destNodePath.LastIndexOf('\\'));
-					//Change destination node type
-					destNodeType = NodeType.Folder;
+                string destNodePath = selectedTreeNode.Name;
+                if (selectedTreeNode.Tag.ToString() == NodeType.File.ToString().ToLower())
+                {
+                    //If file node is selected as destination of paste action then shift to it's parent folder as new destination
+                    destNodePath = destNodePath.Substring(0, destNodePath.LastIndexOf('\\'));
                     selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
                 }
 				string destNodeName = destNodePath.Substring(destNodePath.LastIndexOf('\\') + 1);
@@ -841,7 +846,7 @@ namespace FilesHunter
 				//We show folder details for parent folder of selected file in tree view
 				nazaraNode = e.Node.Parent;
 			}
-			currentHierarchyParentPath = GetRelativePathForSelectedTreeNode(nazaraNode.Name);
+			currentHierarchyParentPath = nazaraNode.Name;
 			txtSelectedNodePath.Text = currentHierarchyParentPath;
 
 			currentFiltererdNodes.Clear();

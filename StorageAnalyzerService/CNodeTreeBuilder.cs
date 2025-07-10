@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FilesHunter.UserControls;
+using static Azure.Core.HttpHeader;
 
 namespace StorageAnalyzerService
 {
@@ -37,7 +38,7 @@ namespace StorageAnalyzerService
 		private void AddNodesToTree(CTreeNode currentNode, XmlNode xmlNode)
         {
             currentNode.Name = xmlNode.ParentNode is XmlDocument ? xmlNode.Attributes["fullPath"].Value
-                : currentNode.Parent.Name + "\\" + xmlNode.Attributes["name"].Value;
+                : currentNode.Parent.Name.TrimEnd('\\') + "\\" + xmlNode.Attributes["name"].Value;
             currentNode.Text = xmlNode.Attributes["name"].Value;
             if (FileImageIndex != -1 && FolderImageIndex != -1)
             {

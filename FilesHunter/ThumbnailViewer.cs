@@ -32,7 +32,7 @@ namespace FilesHunter
 		public delegate void SaveResourceDelegate(string itemName, string itemPath, string nodeType);
 		public event SaveResourceDelegate SaveResource;
 
-		public delegate void RenameResourceDelegate(string itemName, string itemPath);
+		public delegate void RenameResourceDelegate(string itemName, string itemPath, string nodeType);
 		public event RenameResourceDelegate RenameResource;
 
 		public ThumbnailViewer()
@@ -155,7 +155,7 @@ namespace FilesHunter
             object fileData = null;
             if (GetPreviewData != null)
             {
-				GetPreviewData(fileName, $"{RootFolderPath}\\{itemRelativePath}", curMediaType, out fileData);
+				GetPreviewData(fileName, itemRelativePath, curMediaType, out fileData);
 				frmMediaPreview previewForm = new frmMediaPreview();
 				previewForm.ShowMedia(curMediaType, fileName, fileData);
 			}
@@ -209,11 +209,12 @@ namespace FilesHunter
 
 		private void tsMnuItmRenameIt_Click(object sender, EventArgs e)
 		{
-			var fileName = lvwTiles.SelectedItems[0].Text;
-			var itemRelativePath = lvwTiles.SelectedItems[0].Name;
+            var selectedListItem = lvwTiles.SelectedItems[0];
+            var fileName = selectedListItem.Text;
+			var itemRelativePath = selectedListItem.Name;
 			if (RenameResource != null)
 			{
-				RenameResource(fileName, itemRelativePath);
+				RenameResource(fileName, itemRelativePath, selectedListItem.Tag.ToString());
 			}
 		}
 
