@@ -23,7 +23,7 @@ namespace FilesHunter
 	public partial class frmDBFilesBrowser : Form
 	{
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
-		int panel1OrigWidth, panel2OrigWidth, formOrigWidth, formOrigHeight;
+		int panel1OrigWidth, panel2OrigWidth, formOrigHeight, thumbViewerOrigHeight, grpFolderDetailsOrigHeight;
 		XmlDocument currentFolderNaksha;
 		string currentHierarchyParentPath, cutNodePath, copyNodePath;
 		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
@@ -41,6 +41,8 @@ namespace FilesHunter
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
+			this.thumbViewerOrigHeight = thumbViewer.Height;
+			this.grpFolderDetailsOrigHeight = grpFolderDetails.Height;
 		}
 
 		private void ThumbViewer_RenameResource(string itemName, string itemPath, string nodeType)
@@ -528,19 +530,22 @@ namespace FilesHunter
 
 		private void frmDBFilesBrowser_Resize(object sender, EventArgs e)
 		{
-			if (this.formOrigHeight == 0) return;	//Dont do anything on initial form load
+			if (this.formOrigHeight == 0) return;	//Don't do anything on initial form load
 
 			var heightDiff = this.Height - this.formOrigHeight;
-			//var widthDiff = this.Width - this.formOrigWidth;
-			//tvwDirTree.Width += widthDiff / 2;
-			tvwDirTree.Height += heightDiff;
-			//thumbViewer.Width += widthDiff / 2;
-			thumbViewer.Height += heightDiff;
-			grpFolderDetails.Height += heightDiff;
+			var heightRatio = this.Height / this.formOrigHeight;
 
-			this.formOrigHeight = this.Height;
-			//this.formOrigWidth = this.Width;
-		}
+			tvwDirTree.Height += heightDiff;
+
+			thumbViewer.Height += heightDiff;
+            //thumbViewer.Height += thumbViewerOrigHeight * heightRatio;
+            //grpFolderDetails.Height += grpFolderDetailsOrigHeight * heightRatio;
+
+            //Reset the new height of form
+            this.formOrigHeight = this.Height;
+			this.thumbViewerOrigHeight = thumbViewer.Height;
+			this.grpFolderDetailsOrigHeight = grpFolderDetails.Height;
+        }
 
 		private void btnSaveLocation_Click(object sender, EventArgs e)
 		{
@@ -857,25 +862,6 @@ namespace FilesHunter
 			}
 
 			PopulateFirstLevelChildrenInThumViewer();
-		}
-
-		private string GetRelativePathForSelectedTreeNode(string nodeName)
-		{
-			var rootFolder = new DirectoryInfo(txtFileLocation.Text.Trim());
-			var rootParentDirPath = string.Empty;
-			var offset = 0;
-			if (rootFolder.Parent == null)
-			{
-				rootParentDirPath = rootFolder.Name;
-			}
-			else
-			{
-				rootParentDirPath = new DirectoryInfo(txtFileLocation.Text.Trim()).Parent.FullName;
-			}
-			if (nodeName.Length > rootParentDirPath.Length)
-				offset = rootParentDirPath.Length + 1; //We include the // suffix of parent folder hierarchy for calculating string omission offset
-			var relativePath = nodeName.Substring(offset);
-			return relativePath;
 		}
 
 		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
