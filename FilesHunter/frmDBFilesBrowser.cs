@@ -582,13 +582,19 @@ namespace FilesHunter
 		{
 			if (e.Button == MouseButtons.Right)
 			{
-				tvwDirTree.SelectedNode = (CTreeNode)e.Node;
+				var selTreeNode= (CTreeNode)e.Node;
+                tvwDirTree.SelectedNode = selTreeNode;
+				/*if (selTreeNode.Parent != null)
+					tvwMenuUploadFldr.Visible = false;
+				else
+					tvwMenuUploadFldr.Visible = true;
+				*/
 				//Ref: https://stackoverflow.com/questions/32082280/right-click-on-node-in-treeview-and-have-a-menu-pop-up-with-the-option-of-open
 				tvwContextMenu.Show(Cursor.Position);
 			}
 		}
 
-		private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void tvwContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
 		{
 
 			if (e.ClickedItem.Text == tvwMenuCut.Text) 
@@ -830,7 +836,38 @@ namespace FilesHunter
                     }
                 }
 			}
-		}
+			else if (e.ClickedItem.Text == tvwMenuUploadFldr.Text)
+			{
+                DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+                var selectedTreeNode = tvwDirTree.SelectedNode;
+                string destNodePath = selectedTreeNode.Name;
+                if (selectedTreeNode.Tag.ToString() == NodeType.File.ToString().ToLower())
+                {
+                    //If file node is selected as destination of paste action then shift to it's parent folder as new destination
+                    destNodePath = destNodePath.Substring(0, destNodePath.LastIndexOf('\\'));
+                    selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
+                }
+
+                //Step 2: Append xml node at its new position
+                var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
+                var destXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
+                if (destXmlNode != null)
+                {
+					fbdFolderLocation.SelectedPath = destNodePath;
+					var dlgResult =  fbdFolderLocation.ShowDialog();
+					if (dlgResult == DialogResult.OK)
+					{
+                        saver.RootFolderPath = Directory.GetParent(fbdFolderLocation.SelectedPath).FullName;
+                        destNodePath = fbdFolderLocation.SelectedPath;
+						saver.GenerateChildNodeTree(destNodePath, destXmlNode);
+
+                        //Refresh the treeview and listview
+                        TreeViewRefreshState(selectedTreeNode);
+                    }
+                }
+
+            }
+        }
 
         private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{

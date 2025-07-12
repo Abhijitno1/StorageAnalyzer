@@ -59,6 +59,7 @@
             this.tvwMenuCut = new System.Windows.Forms.ToolStripMenuItem();
             this.tvwMenuCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tvwMenuPaste = new System.Windows.Forms.ToolStripMenuItem();
+            this.tvwMenuUploadFldr = new System.Windows.Forms.ToolStripMenuItem();
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -334,16 +335,17 @@
             this.tvwContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tvwMenuCut,
             this.tvwMenuCopy,
-            this.tvwMenuPaste});
+            this.tvwMenuPaste,
+            this.tvwMenuUploadFldr});
             this.tvwContextMenu.Name = "tvwContextMenu";
-            this.tvwContextMenu.Size = new System.Drawing.Size(113, 76);
+            this.tvwContextMenu.Size = new System.Drawing.Size(265, 100);
             this.tvwContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.tvwContextMenu_ItemClicked);
             // 
             // tvwMenuCut
             // 
             this.tvwMenuCut.AutoToolTip = true;
             this.tvwMenuCut.Name = "tvwMenuCut";
-            this.tvwMenuCut.Size = new System.Drawing.Size(112, 24);
+            this.tvwMenuCut.Size = new System.Drawing.Size(264, 24);
             this.tvwMenuCut.Tag = "mnuCutModak";
             this.tvwMenuCut.Text = "Cut";
             // 
@@ -351,7 +353,7 @@
             // 
             this.tvwMenuCopy.AutoToolTip = true;
             this.tvwMenuCopy.Name = "tvwMenuCopy";
-            this.tvwMenuCopy.Size = new System.Drawing.Size(112, 24);
+            this.tvwMenuCopy.Size = new System.Drawing.Size(264, 24);
             this.tvwMenuCopy.Tag = "mnuCopyModak";
             this.tvwMenuCopy.Text = "Copy";
             // 
@@ -359,9 +361,16 @@
             // 
             this.tvwMenuPaste.AutoToolTip = true;
             this.tvwMenuPaste.Name = "tvwMenuPaste";
-            this.tvwMenuPaste.Size = new System.Drawing.Size(112, 24);
+            this.tvwMenuPaste.Size = new System.Drawing.Size(264, 24);
             this.tvwMenuPaste.Tag = "mnuPastModak";
             this.tvwMenuPaste.Text = "Paste";
+            // 
+            // tvwMenuUploadFldr
+            // 
+            this.tvwMenuUploadFldr.Name = "tvwMenuUploadFldr";
+            this.tvwMenuUploadFldr.Size = new System.Drawing.Size(264, 24);
+            this.tvwMenuUploadFldr.Tag = "mnuUploadFolder";
+            this.tvwMenuUploadFldr.Text = "Upload Folder with Children";
             // 
             // frmDBFilesBrowser
             // 
@@ -423,5 +432,6 @@
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuPaste;
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
         private System.Windows.Forms.TextBox txtSelectedNodePath;
+        private System.Windows.Forms.ToolStripMenuItem tvwMenuUploadFldr;
     }
 }

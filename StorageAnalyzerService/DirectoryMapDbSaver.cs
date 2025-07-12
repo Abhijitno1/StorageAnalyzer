@@ -73,7 +73,16 @@ namespace StorageAnalyzerService
             return false;
 		}
 
-		private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
+        public void GenerateChildNodeTree(string childFolderPath, XmlNode destXmlNode)
+        {
+            DirectoryInfo rootFolder = new DirectoryInfo(childFolderPath);
+			xmlDoc = destXmlNode.OwnerDocument;
+            TraverseFolder(rootFolder, destXmlNode);
+			UpdateMap(xmlDoc);
+        }
+
+
+        private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
 		{
 			var folderNode = xmlDoc.CreateElement("folder");
 			folderNode.SetAttribute("name",currentFolder.Name);
