@@ -1,9 +1,12 @@
 ﻿using StorageAnalyzerService.DbModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace StorageAnalyzerService
@@ -25,8 +28,22 @@ namespace StorageAnalyzerService
 
 		public IEnumerable<string> GetAllFolderMapsList()
 		{
-			return dbContext.FolderMaps.Select(k => k.AbsolutePath).ToList();
-		}
+			try
+			{
+                return dbContext.FolderMaps.Select(k => k.AbsolutePath).ToList();
+            }
+            catch (Exception ex)
+			{
+                if (ex.GetType() == typeof(EntityException))
+                {
+                    if (ex.Message.CompareTo("The underlying provider failed on Open.") == 0)
+                    {
+                        MessageBox.Show("Could not connect to database. Please check if the database is running and try again.");
+                    }
+                }
+				return null;
+            }
+        }
 
 		public Byte[] GetModakData(int dbId)
 		{

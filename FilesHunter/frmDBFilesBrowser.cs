@@ -442,12 +442,13 @@ namespace FilesHunter
 				var segment = folderSegments[j];
                 if (Regex.IsMatch(segment, "^[A-Za-z]:$"))
                     segment += '\\';
-                filterClause += $"folder[@name='{segment.ToString()}']/";
+                filterClause += $"folder[@name=\"{segment.ToString()}\"]/";
 			}
 			if (folderSegments.Length > 0)
 			{
-				var fileOrFolder = Enum.GetName(typeof(NodeType), nodeType).ToLower();
-				filterClause += $"{fileOrFolder}[@name='{folderSegments[j].ToString()}']/";
+                var segment = folderSegments[j];
+                var fileOrFolder = Enum.GetName(typeof(NodeType), nodeType).ToLower();
+				filterClause += $"{fileOrFolder}[@name=\"{segment}\"]/";
 			}
 			filterClause = filterClause.TrimEnd('/');
 			return filterClause;
