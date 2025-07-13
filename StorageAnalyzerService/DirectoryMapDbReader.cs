@@ -41,7 +41,7 @@ namespace StorageAnalyzerService
                         MessageBox.Show("Could not connect to database. Please check if the database is running and try again.");
                     }
                 }
-				return null;
+				return new string[0];
             }
         }
 

@@ -28,81 +28,95 @@
         /// </summary>
         private void InitializeComponent()
         {
-			this.components = new System.ComponentModel.Container();
-			this.lvwTiles = new System.Windows.Forms.ListView();
-			this.imlTiles = new System.Windows.Forms.ImageList(this.components);
-			this.listViewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.tsMnuItmSaveToDisk = new System.Windows.Forms.ToolStripMenuItem();
-			this.tsMnuItmDeleteFromDB = new System.Windows.Forms.ToolStripMenuItem();
-			this.tsMnuItmRenameIt = new System.Windows.Forms.ToolStripMenuItem();
-			this.listViewContextMenu.SuspendLayout();
-			this.SuspendLayout();
-			// 
-			// lvwTiles
-			// 
-			this.lvwTiles.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvwTiles.HideSelection = false;
-			this.lvwTiles.LargeImageList = this.imlTiles;
-			this.lvwTiles.Location = new System.Drawing.Point(0, 0);
-			this.lvwTiles.MultiSelect = false;
-			this.lvwTiles.Name = "lvwTiles";
-			this.lvwTiles.Size = new System.Drawing.Size(1061, 593);
-			this.lvwTiles.SmallImageList = this.imlTiles;
-			this.lvwTiles.TabIndex = 0;
-			this.lvwTiles.UseCompatibleStateImageBehavior = false;
-			this.lvwTiles.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseClick);
-			this.lvwTiles.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseDoubleClick);
-			// 
-			// imlTiles
-			// 
-			this.imlTiles.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-			this.imlTiles.ImageSize = new System.Drawing.Size(128, 128);
-			this.imlTiles.TransparentColor = System.Drawing.Color.Transparent;
-			// 
-			// listViewContextMenu
-			// 
-			this.listViewContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.listViewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.components = new System.ComponentModel.Container();
+            this.lvwTiles = new System.Windows.Forms.ListView();
+            this.imlTiles = new System.Windows.Forms.ImageList(this.components);
+            this.listViewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsMnuItmSaveToDisk = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsMnuItmDeleteFromDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsMnuItmRenameIt = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtSelectedNodePath = new System.Windows.Forms.TextBox();
+            this.listViewContextMenu.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // lvwTiles
+            // 
+            this.lvwTiles.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lvwTiles.HideSelection = false;
+            this.lvwTiles.LargeImageList = this.imlTiles;
+            this.lvwTiles.Location = new System.Drawing.Point(0, 28);
+            this.lvwTiles.MultiSelect = false;
+            this.lvwTiles.Name = "lvwTiles";
+            this.lvwTiles.Size = new System.Drawing.Size(1061, 587);
+            this.lvwTiles.SmallImageList = this.imlTiles;
+            this.lvwTiles.TabIndex = 0;
+            this.lvwTiles.UseCompatibleStateImageBehavior = false;
+            this.lvwTiles.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseClick);
+            this.lvwTiles.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseDoubleClick);
+            // 
+            // imlTiles
+            // 
+            this.imlTiles.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.imlTiles.ImageSize = new System.Drawing.Size(128, 128);
+            this.imlTiles.TransparentColor = System.Drawing.Color.Transparent;
+            // 
+            // listViewContextMenu
+            // 
+            this.listViewContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.listViewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMnuItmSaveToDisk,
             this.tsMnuItmDeleteFromDB,
             this.tsMnuItmRenameIt});
-			this.listViewContextMenu.Name = "listViewContextMenu";
-			this.listViewContextMenu.Size = new System.Drawing.Size(211, 104);
-			// 
-			// tsMnuItmSaveToDisk
-			// 
-			this.tsMnuItmSaveToDisk.Name = "tsMnuItmSaveToDisk";
-			this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(210, 24);
-			this.tsMnuItmSaveToDisk.Text = "Save to Disk";
-			this.tsMnuItmSaveToDisk.ToolTipText = "Save this resource to Disk";
-			this.tsMnuItmSaveToDisk.Click += new System.EventHandler(this.tsMnuItmSaveToDisk_Click);
-			// 
-			// tsMnuItmDeleteFromDB
-			// 
-			this.tsMnuItmDeleteFromDB.Name = "tsMnuItmDeleteFromDB";
-			this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(210, 24);
-			this.tsMnuItmDeleteFromDB.Text = "Delete from DB";
-			this.tsMnuItmDeleteFromDB.ToolTipText = "Delete this resource from DB";
-			this.tsMnuItmDeleteFromDB.Click += new System.EventHandler(this.tsMnuItmDeleteFromDB_Click);
-			// 
-			// tsMnuItmRenameIt
-			// 
-			this.tsMnuItmRenameIt.Name = "tsMnuItmRenameIt";
-			this.tsMnuItmRenameIt.Size = new System.Drawing.Size(210, 24);
-			this.tsMnuItmRenameIt.Text = "Rename It";
-			this.tsMnuItmRenameIt.ToolTipText = "Rename this resource";
-			this.tsMnuItmRenameIt.Click += new System.EventHandler(this.tsMnuItmRenameIt_Click);
-			// 
-			// ThumbnailViewer
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.AutoScroll = true;
-			this.Controls.Add(this.lvwTiles);
-			this.Name = "ThumbnailViewer";
-			this.Size = new System.Drawing.Size(1061, 593);
-			this.listViewContextMenu.ResumeLayout(false);
-			this.ResumeLayout(false);
+            this.listViewContextMenu.Name = "listViewContextMenu";
+            this.listViewContextMenu.Size = new System.Drawing.Size(183, 76);
+            // 
+            // tsMnuItmSaveToDisk
+            // 
+            this.tsMnuItmSaveToDisk.Name = "tsMnuItmSaveToDisk";
+            this.tsMnuItmSaveToDisk.Size = new System.Drawing.Size(182, 24);
+            this.tsMnuItmSaveToDisk.Text = "Save to Disk";
+            this.tsMnuItmSaveToDisk.ToolTipText = "Save this resource to Disk";
+            this.tsMnuItmSaveToDisk.Click += new System.EventHandler(this.tsMnuItmSaveToDisk_Click);
+            // 
+            // tsMnuItmDeleteFromDB
+            // 
+            this.tsMnuItmDeleteFromDB.Name = "tsMnuItmDeleteFromDB";
+            this.tsMnuItmDeleteFromDB.Size = new System.Drawing.Size(182, 24);
+            this.tsMnuItmDeleteFromDB.Text = "Delete from DB";
+            this.tsMnuItmDeleteFromDB.ToolTipText = "Delete this resource from DB";
+            this.tsMnuItmDeleteFromDB.Click += new System.EventHandler(this.tsMnuItmDeleteFromDB_Click);
+            // 
+            // tsMnuItmRenameIt
+            // 
+            this.tsMnuItmRenameIt.Name = "tsMnuItmRenameIt";
+            this.tsMnuItmRenameIt.Size = new System.Drawing.Size(182, 24);
+            this.tsMnuItmRenameIt.Text = "Rename It";
+            this.tsMnuItmRenameIt.ToolTipText = "Rename this resource";
+            this.tsMnuItmRenameIt.Click += new System.EventHandler(this.tsMnuItmRenameIt_Click);
+            // 
+            // txtSelectedNodePath
+            // 
+            this.txtSelectedNodePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtSelectedNodePath.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtSelectedNodePath.Location = new System.Drawing.Point(0, 0);
+            this.txtSelectedNodePath.Name = "txtSelectedNodePath";
+            this.txtSelectedNodePath.ReadOnly = true;
+            this.txtSelectedNodePath.Size = new System.Drawing.Size(1061, 22);
+            this.txtSelectedNodePath.TabIndex = 39;
+            // 
+            // ThumbnailViewer
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
+            this.Controls.Add(this.txtSelectedNodePath);
+            this.Controls.Add(this.lvwTiles);
+            this.Name = "ThumbnailViewer";
+            this.Size = new System.Drawing.Size(1061, 615);
+            this.Resize += new System.EventHandler(this.ThumbnailViewer_Resize);
+            this.listViewContextMenu.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -114,5 +128,6 @@
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmSaveToDisk;
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmDeleteFromDB;
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmRenameIt;
-	}
+        private System.Windows.Forms.TextBox txtSelectedNodePath;
+    }
 }

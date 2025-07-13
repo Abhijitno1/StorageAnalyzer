@@ -556,10 +556,17 @@ namespace FilesHunter
 		private void btnSearch_Click(object sender, EventArgs e)
 		{
 			tvwDirTree.Filter(FilterMethod);
-			//Select first node of tree so that Listview gets refreshed
-			tvwDirTree.SelectedNode = null;
-			tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
-		}
+            if (!tvwDirTree.Nodes[0].IsVisible)
+            {
+                thumbViewer.SelectedNodePath = "No data to show. Clear filter if necessary.";
+                thumbViewer.ClearImages();
+            }
+			else 
+			{
+                //Select first node of tree so that Listview gets refreshed
+                tvwDirTree.SelectedNode = tvwDirTree.Nodes[0];
+            }
+        }
 
 		private bool FilterMethod(CTreeNode node)
 		{
@@ -578,7 +585,8 @@ namespace FilesHunter
 			tvwDirTree.CollapseAll();
 			tvwDirTree.Filter((node) => true);
 			//Select first node of tree so that Listview gets refreshed
-			tvwDirTree.SelectedNode = curSelection;
+			if (curSelection==null) curSelection = tvwDirTree.Nodes[0];
+            tvwDirTree.SelectedNode = curSelection;
             tvwDirTree.SelectedNode.Expand();
         }
 
@@ -886,7 +894,7 @@ namespace FilesHunter
 				nazaraNode = e.Node.Parent;
 			}
 			currentHierarchyParentPath = nazaraNode.Name;
-			txtSelectedNodePath.Text = currentHierarchyParentPath;
+			thumbViewer.SelectedNodePath = currentHierarchyParentPath;
 
 			currentFiltererdNodes.Clear();
 			foreach (CTreeNode child in nazaraNode.Nodes)
@@ -894,7 +902,6 @@ namespace FilesHunter
 				if (!child.Hidden)
 					currentFiltererdNodes.Add(child);
 			}
-
 			PopulateFirstLevelChildrenInThumViewer();
 		}
 

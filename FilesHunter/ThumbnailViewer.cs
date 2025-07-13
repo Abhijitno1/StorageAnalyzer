@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -42,6 +43,11 @@ namespace FilesHunter
 			InitializeComponent();
         }
 
+        public string SelectedNodePath
+        {  
+            get => txtSelectedNodePath.Text; 
+            set => txtSelectedNodePath.Text = value;
+        }
         public static Image BinaryToImage(byte[] binaryData)
         {
             if (binaryData == null) return null;
@@ -239,25 +245,31 @@ namespace FilesHunter
 			}
 		}
 
-		//private void OldPreivewForm()
-		//{
-		//	Form previewForm = new Form();
-		//	previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-		//	previewForm.MinimizeBox = false;
-		//	previewForm.Size = new System.Drawing.Size(1000, 860);
-		//	previewForm.StartPosition = FormStartPosition.CenterScreen;
-		//	previewForm.AutoScroll = true;
+        private void ThumbnailViewer_Resize(object sender, EventArgs e)
+        {
+            lvwTiles.Height = this.ClientSize.Height - txtSelectedNodePath.Height - 2;
+            //Debug.WriteLine($"lvwTiles.Height = {lvwTiles.Height}, ClientSize.Height = {this.ClientSize.Height}, txtSelectedNodePath.Height = {txtSelectedNodePath.Height}");
+        }
 
-		//	PictureBox view = new PictureBox();
-		//	view.Dock = DockStyle.Fill;
+        //private void OldPreivewForm()
+        //{
+        //	Form previewForm = new Form();
+        //	previewForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+        //	previewForm.MinimizeBox = false;
+        //	previewForm.Size = new System.Drawing.Size(1000, 860);
+        //	previewForm.StartPosition = FormStartPosition.CenterScreen;
+        //	previewForm.AutoScroll = true;
 
-		//	int index = lvwTiles.SelectedIndices[0];
-		//	view.Image = BinaryToImage(ImageList[index]);
+        //	PictureBox view = new PictureBox();
+        //	view.Dock = DockStyle.Fill;
 
-		//	view.SizeMode = PictureBoxSizeMode.Zoom;
-		//	previewForm.Controls.Add(view);
-		//	previewForm.ShowDialog();
-		//}
+        //	int index = lvwTiles.SelectedIndices[0];
+        //	view.Image = BinaryToImage(ImageList[index]);
 
-	}
+        //	view.SizeMode = PictureBoxSizeMode.Zoom;
+        //	previewForm.Controls.Add(view);
+        //	previewForm.ShowDialog();
+        //}
+
+    }
 }

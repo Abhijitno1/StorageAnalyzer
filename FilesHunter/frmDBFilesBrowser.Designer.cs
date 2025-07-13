@@ -35,7 +35,6 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tvwDirTree = new FilesHunter.UserControls.CTreeView();
             this.grpFolderDetails = new System.Windows.Forms.GroupBox();
-            this.txtSelectedNodePath = new System.Windows.Forms.TextBox();
             this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.btnClearFilter = new System.Windows.Forms.Button();
             this.cboSearchType = new System.Windows.Forms.ComboBox();
@@ -124,7 +123,6 @@
             // 
             // grpFolderDetails
             // 
-            this.grpFolderDetails.Controls.Add(this.txtSelectedNodePath);
             this.grpFolderDetails.Controls.Add(this.thumbViewer);
             this.grpFolderDetails.Controls.Add(this.btnClearFilter);
             this.grpFolderDetails.Controls.Add(this.cboSearchType);
@@ -139,24 +137,17 @@
             this.grpFolderDetails.TabStop = false;
             this.grpFolderDetails.Text = "Search Folders and Files";
             // 
-            // txtSelectedNodePath
-            // 
-            this.txtSelectedNodePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtSelectedNodePath.Location = new System.Drawing.Point(19, 59);
-            this.txtSelectedNodePath.Name = "txtSelectedNodePath";
-            this.txtSelectedNodePath.ReadOnly = true;
-            this.txtSelectedNodePath.Size = new System.Drawing.Size(985, 22);
-            this.txtSelectedNodePath.TabIndex = 38;
-            // 
             // thumbViewer
             // 
             this.thumbViewer.AutoScroll = true;
             this.thumbViewer.AutoSize = true;
-            this.thumbViewer.Location = new System.Drawing.Point(19, 92);
+            this.thumbViewer.DefaultFileImage = null;
+            this.thumbViewer.Location = new System.Drawing.Point(19, 53);
             this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
             this.thumbViewer.Name = "thumbViewer";
             this.thumbViewer.RootFolderPath = null;
-            this.thumbViewer.Size = new System.Drawing.Size(985, 615);
+            this.thumbViewer.SelectedNodePath = "";
+            this.thumbViewer.Size = new System.Drawing.Size(985, 654);
             this.thumbViewer.TabIndex = 36;
             // 
             // btnClearFilter
@@ -431,7 +422,6 @@
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuCopy;
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuPaste;
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
-        private System.Windows.Forms.TextBox txtSelectedNodePath;
         private System.Windows.Forms.ToolStripMenuItem tvwMenuUploadFldr;
     }
 }
