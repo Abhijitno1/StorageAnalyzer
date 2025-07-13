@@ -38,19 +38,32 @@ namespace FilesHunter
 			this.Text = fileName;
 			if (type == MediaType.Image)
 			{
-				axWMP.Visible = false;
-				rtbSlate.Visible = false;
-				picView.Visible = true;
+				var extension = Path.GetExtension(fileName).ToLower();
+				if ( (new [] { ".avif", ".tiff", ".webp" }).Contains(extension))
+				{
+                    axWMP.Visible = false;
+                    rtbSlate.Visible = false;
+                    picView.Visible = false;
 
-				picView.Image = ThumbnailViewer.BinaryToImage((byte[])fileData);
-			}
+                    var tempFilePathName = Path.Combine(Path.GetTempPath(), fileName);
+                    File.WriteAllBytes(tempFilePathName, (byte[])fileData);
+                    ShellExecute("\"" + tempFilePathName + "\"");
+                }
+                else 
+				{
+                    axWMP.Visible = false;
+                    rtbSlate.Visible = false;
+                    picView.Visible = true;
+                    picView.Image = ThumbnailViewer.BinaryToImage((byte[])fileData);
+                }
+            }
 			else if (type == MediaType.Video)
 			{
 				axWMP.Visible = true;
 				rtbSlate.Visible = false;
 				picView.Visible = false;
 
-				var tempFilePathName = Path.Combine(Path.GetTempPath(), fileName);
+                var tempFilePathName = Path.Combine(Path.GetTempPath(), fileName);
 				//Path.GetTempFileName()																					
 				//Change the extension of temp file so that media player is happy to play the file
 				//var extn = Path.GetExtension(fileName);
@@ -66,7 +79,7 @@ namespace FilesHunter
 				rtbSlate.Visible = true;
 				picView.Visible = false;
 
-				rtbSlate.Text = fileData.ToString();
+                rtbSlate.Text = fileData.ToString();
 			}
 			else
 			{

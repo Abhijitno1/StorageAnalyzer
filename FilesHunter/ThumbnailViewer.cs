@@ -19,6 +19,7 @@ namespace FilesHunter
     public partial class ThumbnailViewer : UserControl
     {
         public string RootFolderPath { get; set; }
+        public Image DefaultFileImage { get; set; }
 
         public delegate void GetDataDelegate(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData);
         public event GetDataDelegate GetPreviewData;
@@ -45,7 +46,17 @@ namespace FilesHunter
         {
             if (binaryData == null) return null;
             MemoryStream memStream = new MemoryStream();
-            memStream.Write(binaryData, 0, binaryData.Length);
+            int cursor = 0, chunk = 1024;
+            memStream.Position = cursor;
+            while (cursor < binaryData.Length)
+            {
+                if (cursor + chunk > binaryData.Length)
+                {
+                    chunk = binaryData.Length - cursor;
+                }
+                memStream.Write(binaryData,cursor, chunk);
+                cursor += chunk;
+            }
             return Image.FromStream(memStream);
         }
 
@@ -105,16 +116,26 @@ namespace FilesHunter
         private void MakeThumbnail(NodeType nodeType, byte[] binary, string imgName, string folderPath)
         {
             Image thumbImage;
-            //Set thumbnail image
-            using (MemoryStream ms = new MemoryStream(binary))
+            try
             {
-                var originalImage = System.Drawing.Image.FromStream(ms);
-                thumbImage = originalImage.GetThumbnailImage(imlTiles.ImageSize.Width - 2, imlTiles.ImageSize.Height - 2, null, new IntPtr());
-                //Add to Imagelist and thereafter to listview
-                imlTiles.Images.Add(thumbImage);
-                ms.Close();
+                //Set thumbnail image
+                using (MemoryStream ms = new MemoryStream(binary))
+                {
+                    var originalImage = System.Drawing.Image.FromStream(ms);
+                    thumbImage = originalImage.GetThumbnailImage(imlTiles.ImageSize.Width - 2, imlTiles.ImageSize.Height - 2, null, new IntPtr());
+                    //Add to Imagelist and thereafter to listview
+                    imlTiles.Images.Add(thumbImage);
+                    ms.Close();
+                }
             }
-
+            catch (Exception ex)
+            {
+                //ToDo: Add check for specific exception type (incompatible format) while image reading
+                if (nodeType == NodeType.File)
+                {
+                    imlTiles.Images.Add(this.DefaultFileImage);
+                }
+            }
             var listItem = new ListViewItem();
             listItem.Name = folderPath;
             listItem.Text = imgName;

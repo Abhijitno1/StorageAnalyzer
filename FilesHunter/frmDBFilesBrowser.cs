@@ -41,7 +41,8 @@ namespace FilesHunter
 			this.panel1OrigWidth = splitContainer1.Panel1.Width;
 			this.panel2OrigWidth = splitContainer1.Panel2.Width;
 			this.formOrigHeight = this.Height;
-		}
+			this.thumbViewer.DefaultFileImage = imlShowPad.Images[2];
+        }
 
 		private void ThumbViewer_RenameResource(string itemName, string itemPath, string nodeType)
 		{
@@ -466,6 +467,7 @@ namespace FilesHunter
 				Byte[] imageData = null;
 				if (childNode.Name == "folder")
 				{
+					//Check if given folder XmlNode exists amongst currently filtered nodes then only add it to viewer
 					var folderName = childNode.Attributes["name"].Value;
 					if (currentFiltererdNodes.Any(x => x.Text == folderName && x.Tag.ToString() == childNode.Name))
 					{
@@ -477,7 +479,8 @@ namespace FilesHunter
 				}
 				else if (childNode.Name == "file")
 				{
-					var fileName = childNode.Attributes["name"].Value;
+                    //Check if given file XmlNode exists amongst currently filtered nodes then only add it to viewer
+                    var fileName = childNode.Attributes["name"].Value;
 					if (currentFiltererdNodes.Any(x => x.Text == fileName && x.Tag.ToString() == childNode.Name))
 					{
 						var fileExtn = Path.GetExtension(fileName);
