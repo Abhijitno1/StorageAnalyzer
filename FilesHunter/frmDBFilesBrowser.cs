@@ -532,17 +532,17 @@ namespace FilesHunter
 
 		private void frmDBFilesBrowser_Resize(object sender, EventArgs e)
 		{
-			if (this.formOrigHeight == 0) return;	//Don't do anything on initial form load
+			if (this.formOrigHeight == 0) return;   //Don't do anything on initial form load
 
 			var heightDiff = this.Height - this.formOrigHeight;
 
 			tvwDirTree.Height += heightDiff;
-            grpFolderDetails.Height += heightDiff;
+			grpFolderDetails.Height += heightDiff;
 			thumbViewer.Height += heightDiff - 2;
 
-            //Reset the new height of form
-            this.formOrigHeight = this.Height;
-        }
+			//Reset the new height of form
+			this.formOrigHeight = this.Height;
+		}
 
 		private void btnSaveLocation_Click(object sender, EventArgs e)
 		{

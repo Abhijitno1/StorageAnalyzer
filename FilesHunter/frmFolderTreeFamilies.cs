@@ -21,13 +21,20 @@ namespace FilesHunter
 
 		private void frmFolderTreeFamilies_Load(object sender, EventArgs e)
 		{
-			fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
-
-			DirectoryMapDbReader reader = new DirectoryMapDbReader();
-			var mapNames = reader.GetAllFolderMapsList();
-			foreach (var mapName in mapNames)
+			try
 			{
-				lstFolderHrchies.Items.Add(mapName);
+                fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                DirectoryMapDbReader reader = new DirectoryMapDbReader();
+                var mapNames = reader.GetAllFolderMapsList();
+                foreach (var mapName in mapNames)
+                {
+                    lstFolderHrchies.Items.Add(mapName);
+                }
+            }
+            catch (Exception)
+			{
+				this.Close();
 			}
 		}
 

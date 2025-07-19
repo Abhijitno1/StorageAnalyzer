@@ -248,6 +248,7 @@ namespace FilesHunter
         private void ThumbnailViewer_Resize(object sender, EventArgs e)
         {
             lvwTiles.Height = this.ClientSize.Height - txtSelectedNodePath.Height - 2;
+            lvwTiles.Top = txtSelectedNodePath.Bottom + 1;
             //Debug.WriteLine($"lvwTiles.Height = {lvwTiles.Height}, ClientSize.Height = {this.ClientSize.Height}, txtSelectedNodePath.Height = {txtSelectedNodePath.Height}");
         }
 

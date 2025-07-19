@@ -39,7 +39,8 @@ namespace StorageAnalyzerService
                     if (ex.Message.CompareTo("The underlying provider failed on Open.") == 0)
                     {
                         MessageBox.Show("Could not connect to database. Please check if the database is running and try again.");
-                    }
+						throw;
+					}
                 }
 				return new string[0];
             }
