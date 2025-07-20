@@ -156,7 +156,7 @@
             "Files and Folders",
             "Files Only",
             "Folders Only"});
-            this.cboSearchType.Location = new System.Drawing.Point(733, 19);
+            this.cboSearchType.Location = new System.Drawing.Point(631, 19);
             this.cboSearchType.Name = "cboSearchType";
             this.cboSearchType.Size = new System.Drawing.Size(131, 24);
             this.cboSearchType.TabIndex = 31;
@@ -165,7 +165,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(642, 24);
+            this.label3.Location = new System.Drawing.Point(540, 24);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(85, 16);
             this.label3.TabIndex = 30;
@@ -183,7 +183,7 @@
             // 
             // txtSearchName
             // 
-            this.txtSearchName.Location = new System.Drawing.Point(229, 21);
+            this.txtSearchName.Location = new System.Drawing.Point(127, 21);
             this.txtSearchName.Name = "txtSearchName";
             this.txtSearchName.Size = new System.Drawing.Size(407, 22);
             this.txtSearchName.TabIndex = 28;
@@ -191,7 +191,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(111, 24);
+            this.label2.Location = new System.Drawing.Point(16, 24);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(112, 16);
             this.label2.TabIndex = 27;
@@ -369,10 +369,10 @@
             // chkConsolidate
             // 
             this.chkConsolidate.AutoSize = true;
-            this.chkConsolidate.Location = new System.Drawing.Point(10, 23);
+            this.chkConsolidate.Location = new System.Drawing.Point(775, 21);
             this.chkConsolidate.Name = "chkConsolidate";
             this.chkConsolidate.Size = new System.Drawing.Size(101, 20);
-            this.chkConsolidate.TabIndex = 38;
+            this.chkConsolidate.TabIndex = 39;
             this.chkConsolidate.Text = "Consolidate";
             this.chkConsolidate.UseVisualStyleBackColor = true;
             // 

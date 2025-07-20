@@ -378,7 +378,9 @@ namespace FilesHunter
 
 		private void ThumbViewer_OpenFolderToViewContents(string itemName, string itemPath)
 		{
-			ExpandSelectedFolderInTreeView(itemName);
+			//Return to standard view of Thumbnail Viewer
+			chkConsolidate.Checked = false;
+            ExpandSelectedFolderInTreeView(itemName);
 			currentHierarchyParentPath = itemPath.TrimEnd('\\') + @"\" + itemName;
 			PopulateFirstLevelChildrenInThumViewer();
 			tvwDirTree.Focus();
@@ -580,8 +582,10 @@ namespace FilesHunter
 
         private void btnClearFilter_Click(object sender, EventArgs e)
 		{
-			var curSelection = tvwDirTree.SelectedNode;
+            //MessageBox.Show($"Width = {this.Width}");	//ToDo: Check why width is getting changed incorrectly on load
             txtSearchName.Text = string.Empty;
+            if (tvwDirTree.Nodes.Count == 0) return;
+            var curSelection = tvwDirTree.SelectedNode;
 			tvwDirTree.CollapseAll();
 			tvwDirTree.Filter((node) => true);
 			//Select first node of tree so that Listview gets refreshed
@@ -895,40 +899,52 @@ namespace FilesHunter
 				//We show folder details for parent folder of selected file in tree view
 				nazaraNode = e.Node.Parent;
 			}
-			currentHierarchyParentPath = nazaraNode.Name;
-			thumbViewer.SelectedNodePath = currentHierarchyParentPath;
+			RefreshThumbViewerState(nazaraNode);
+        }
 
-			if (!chkConsolidate.Checked)
-			{
-				thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Normal;
-                currentFiltererdNodes.Clear();
-				foreach (CTreeNode child in nazaraNode.Nodes)
-				{
-					if (!child.Hidden)
-						currentFiltererdNodes.Add(child);
-				}
-				PopulateFirstLevelChildrenInThumViewer();
+        private void chkConsolidate_CheckedChanged(object sender, EventArgs e)
+        {
+			if (tvwDirTree.SelectedNode != null) 
+			{ 
+				RefreshThumbViewerState(tvwDirTree.SelectedNode);
 			}
-			else
-			{
-				thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Consolidated;
+        }
+
+        private void RefreshThumbViewerState(TreeNode nazaraNode)
+		{
+            currentHierarchyParentPath = nazaraNode.Name;
+            thumbViewer.SelectedNodePath = currentHierarchyParentPath;
+
+            if (!chkConsolidate.Checked)
+            {
+                thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Normal;
+                currentFiltererdNodes.Clear();
+                foreach (CTreeNode child in nazaraNode.Nodes)
+                {
+                    if (!child.Hidden)
+                        currentFiltererdNodes.Add(child);
+                }
+                PopulateFirstLevelChildrenInThumViewer();
+            }
+            else
+            {
+                thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Consolidated;
                 Action<CTreeNode> recursiveAddNode = null;
-				recursiveAddNode = (currentNode) =>
-				{
-					foreach (CTreeNode child in currentNode.Nodes)
-					{
-						if (!child.Hidden)
-						{
-							currentFiltererdNodes.Add(child);
-							recursiveAddNode(child);
-						}
-					}
-				};
-				currentFiltererdNodes.Clear();
-				recursiveAddNode(nazaraNode as CTreeNode);
+                recursiveAddNode = (currentNode) =>
+                {
+                    foreach (CTreeNode child in currentNode.Nodes)
+                    {
+                        if (!child.Hidden)
+                        {
+                            currentFiltererdNodes.Add(child);
+                            recursiveAddNode(child);
+                        }
+                    }
+                };
+                currentFiltererdNodes.Clear();
+                recursiveAddNode(nazaraNode as CTreeNode);
                 PopulateAllSearchResultsInThumViewer();
             }
-
         }
 
         private void PopulateAllSearchResultsInThumViewer()
