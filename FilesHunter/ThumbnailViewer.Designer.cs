@@ -36,11 +36,20 @@
             this.tsMnuItmDeleteFromDB = new System.Windows.Forms.ToolStripMenuItem();
             this.tsMnuItmRenameIt = new System.Windows.Forms.ToolStripMenuItem();
             this.txtSelectedNodePath = new System.Windows.Forms.TextBox();
+            this.colItemName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colFileSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colItemPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colItemType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listViewContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvwTiles
             // 
+            this.lvwTiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colItemName,
+            this.colItemType,
+            this.colFileSize,
+            this.colItemPath});
             this.lvwTiles.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lvwTiles.HideSelection = false;
             this.lvwTiles.LargeImageList = this.imlTiles;
@@ -48,7 +57,6 @@
             this.lvwTiles.MultiSelect = false;
             this.lvwTiles.Name = "lvwTiles";
             this.lvwTiles.Size = new System.Drawing.Size(1061, 587);
-            this.lvwTiles.SmallImageList = this.imlTiles;
             this.lvwTiles.TabIndex = 0;
             this.lvwTiles.UseCompatibleStateImageBehavior = false;
             this.lvwTiles.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvwTiles_MouseClick);
@@ -104,6 +112,28 @@
             this.txtSelectedNodePath.Size = new System.Drawing.Size(1061, 22);
             this.txtSelectedNodePath.TabIndex = 39;
             // 
+            // colItemName
+            // 
+            this.colItemName.Text = "Item Name";
+            this.colItemName.Width = 200;
+            // 
+            // colFileSize
+            // 
+            this.colFileSize.Text = "Extn";
+            this.colFileSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.colFileSize.Width = 80;
+            // 
+            // colItemPath
+            // 
+            this.colItemPath.DisplayIndex = 2;
+            this.colItemPath.Text = "Relative Path";
+            this.colItemPath.Width = 500;
+            // 
+            // colItemType
+            // 
+            this.colItemType.Text = "Item Type";
+            this.colItemType.Width = 50;
+            // 
             // ThumbnailViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -129,5 +159,9 @@
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmDeleteFromDB;
 		private System.Windows.Forms.ToolStripMenuItem tsMnuItmRenameIt;
         private System.Windows.Forms.TextBox txtSelectedNodePath;
+        private System.Windows.Forms.ColumnHeader colItemName;
+        private System.Windows.Forms.ColumnHeader colFileSize;
+        private System.Windows.Forms.ColumnHeader colItemPath;
+        private System.Windows.Forms.ColumnHeader colItemType;
     }
 }

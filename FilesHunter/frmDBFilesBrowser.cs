@@ -881,8 +881,10 @@ namespace FilesHunter
             }
         }
 
-        private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
+		private void tvwDirTree_AfterSelect(object sender, TreeViewEventArgs e)
 		{
+			//Debug.WriteLine($"Selected Node = {e.Node.Name}");
+
 			TreeNode nazaraNode = null;
 			if (e.Node.Tag.ToString().ToLower() == NodeType.Folder.ToString().ToLower())
 			{
@@ -896,16 +898,55 @@ namespace FilesHunter
 			currentHierarchyParentPath = nazaraNode.Name;
 			thumbViewer.SelectedNodePath = currentHierarchyParentPath;
 
-			currentFiltererdNodes.Clear();
-			foreach (CTreeNode child in nazaraNode.Nodes)
+			if (!chkConsolidate.Checked)
 			{
-				if (!child.Hidden)
-					currentFiltererdNodes.Add(child);
+				thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Normal;
+                currentFiltererdNodes.Clear();
+				foreach (CTreeNode child in nazaraNode.Nodes)
+				{
+					if (!child.Hidden)
+						currentFiltererdNodes.Add(child);
+				}
+				PopulateFirstLevelChildrenInThumViewer();
 			}
-			PopulateFirstLevelChildrenInThumViewer();
-		}
+			else
+			{
+				thumbViewer.CurrentDisplayMode = ThumbnailViewer.DisplayMode.Consolidated;
+                Action<CTreeNode> recursiveAddNode = null;
+				recursiveAddNode = (currentNode) =>
+				{
+					foreach (CTreeNode child in currentNode.Nodes)
+					{
+						if (!child.Hidden)
+						{
+							currentFiltererdNodes.Add(child);
+							recursiveAddNode(child);
+						}
+					}
+				};
+				currentFiltererdNodes.Clear();
+				recursiveAddNode(nazaraNode as CTreeNode);
+                PopulateAllSearchResultsInThumViewer();
+            }
 
-		private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        }
+
+        private void PopulateAllSearchResultsInThumViewer()
+        {
+            thumbViewer.ClearImages();
+			foreach (CTreeNode node in currentFiltererdNodes)
+            {
+				var extn = "";
+				if (!string.IsNullOrEmpty(node.Text) && node.Text.IndexOf('.') > -1)
+					extn = node.Text.Substring(node.Text.LastIndexOf('.') + 1);
+				var nodeType = (node.Tag.ToString() ?? string.Empty) == "file" ? NodeType.File : NodeType.Folder;
+				//Exclude file name from Node Name to extract relative path to folder
+				var relativePath = node.Name.Substring(0, node.Name.LastIndexOf('\\'));
+				thumbViewer.AddTextItem(nodeType, node.Text, extn, relativePath);
+            }
+        }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
 		{
 			tvwDirTree.Width += splitContainer1.Panel1.Width - panel1OrigWidth;
 			thumbViewer.Width += splitContainer1.Panel2.Width - panel2OrigWidth;

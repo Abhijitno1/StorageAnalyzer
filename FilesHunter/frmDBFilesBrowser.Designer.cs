@@ -35,7 +35,6 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tvwDirTree = new FilesHunter.UserControls.CTreeView();
             this.grpFolderDetails = new System.Windows.Forms.GroupBox();
-            this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.btnClearFilter = new System.Windows.Forms.Button();
             this.cboSearchType = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -47,7 +46,6 @@
             this.txtFileLocation = new System.Windows.Forms.TextBox();
             this.lblHierarchyName = new System.Windows.Forms.Label();
             this.pnlBottom = new System.Windows.Forms.Panel();
-            this.splitButton1 = new FilesHunter.SplitButton();
             this.label4 = new System.Windows.Forms.Label();
             this.btnSaveLocation = new System.Windows.Forms.Button();
             this.txtNewItemLocation = new System.Windows.Forms.TextBox();
@@ -60,6 +58,9 @@
             this.tvwMenuPaste = new System.Windows.Forms.ToolStripMenuItem();
             this.tvwMenuUploadFldr = new System.Windows.Forms.ToolStripMenuItem();
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
+            this.thumbViewer = new FilesHunter.ThumbnailViewer();
+            this.splitButton1 = new FilesHunter.SplitButton();
+            this.chkConsolidate = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -105,8 +106,8 @@
             this.splitContainer1.Panel2.Controls.Add(this.grpFolderDetails);
             this.splitContainer1.Panel2.Controls.Add(this.pnlFolderSelector);
             this.splitContainer1.Panel2.Controls.Add(this.pnlBottom);
-            this.splitContainer1.Size = new System.Drawing.Size(1542, 813);
-            this.splitContainer1.SplitterDistance = 501;
+            this.splitContainer1.Size = new System.Drawing.Size(1566, 813);
+            this.splitContainer1.SplitterDistance = 508;
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 1;
             this.splitContainer1.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainer1_SplitterMoved);
@@ -123,6 +124,7 @@
             // 
             // grpFolderDetails
             // 
+            this.grpFolderDetails.Controls.Add(this.chkConsolidate);
             this.grpFolderDetails.Controls.Add(this.thumbViewer);
             this.grpFolderDetails.Controls.Add(this.btnClearFilter);
             this.grpFolderDetails.Controls.Add(this.cboSearchType);
@@ -132,29 +134,16 @@
             this.grpFolderDetails.Controls.Add(this.label2);
             this.grpFolderDetails.Location = new System.Drawing.Point(0, 58);
             this.grpFolderDetails.Name = "grpFolderDetails";
-            this.grpFolderDetails.Size = new System.Drawing.Size(1036, 711);
+            this.grpFolderDetails.Size = new System.Drawing.Size(1046, 711);
             this.grpFolderDetails.TabIndex = 16;
             this.grpFolderDetails.TabStop = false;
             this.grpFolderDetails.Text = "Search Folders and Files";
             // 
-            // thumbViewer
-            // 
-            this.thumbViewer.AutoScroll = true;
-            this.thumbViewer.AutoSize = true;
-            this.thumbViewer.DefaultFileImage = null;
-            this.thumbViewer.Location = new System.Drawing.Point(19, 53);
-            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
-            this.thumbViewer.Name = "thumbViewer";
-            this.thumbViewer.RootFolderPath = null;
-            this.thumbViewer.SelectedNodePath = "";
-            this.thumbViewer.Size = new System.Drawing.Size(985, 654);
-            this.thumbViewer.TabIndex = 36;
-            // 
             // btnClearFilter
             // 
-            this.btnClearFilter.Location = new System.Drawing.Point(897, 14);
+            this.btnClearFilter.Location = new System.Drawing.Point(954, 14);
             this.btnClearFilter.Name = "btnClearFilter";
-            this.btnClearFilter.Size = new System.Drawing.Size(98, 32);
+            this.btnClearFilter.Size = new System.Drawing.Size(80, 32);
             this.btnClearFilter.TabIndex = 32;
             this.btnClearFilter.Text = "Clear Filter";
             this.btnClearFilter.UseVisualStyleBackColor = true;
@@ -167,16 +156,16 @@
             "Files and Folders",
             "Files Only",
             "Folders Only"});
-            this.cboSearchType.Location = new System.Drawing.Point(633, 19);
+            this.cboSearchType.Location = new System.Drawing.Point(733, 19);
             this.cboSearchType.Name = "cboSearchType";
-            this.cboSearchType.Size = new System.Drawing.Size(146, 24);
+            this.cboSearchType.Size = new System.Drawing.Size(131, 24);
             this.cboSearchType.TabIndex = 31;
             this.cboSearchType.Text = "Files and Folders";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(542, 24);
+            this.label3.Location = new System.Drawing.Point(642, 24);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(85, 16);
             this.label3.TabIndex = 30;
@@ -184,9 +173,9 @@
             // 
             // btnSearch
             // 
-            this.btnSearch.Location = new System.Drawing.Point(788, 15);
+            this.btnSearch.Location = new System.Drawing.Point(872, 15);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(94, 31);
+            this.btnSearch.Size = new System.Drawing.Size(76, 31);
             this.btnSearch.TabIndex = 29;
             this.btnSearch.Text = "Search";
             this.btnSearch.UseVisualStyleBackColor = true;
@@ -194,7 +183,7 @@
             // 
             // txtSearchName
             // 
-            this.txtSearchName.Location = new System.Drawing.Point(125, 21);
+            this.txtSearchName.Location = new System.Drawing.Point(229, 21);
             this.txtSearchName.Name = "txtSearchName";
             this.txtSearchName.Size = new System.Drawing.Size(407, 22);
             this.txtSearchName.TabIndex = 28;
@@ -202,7 +191,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 24);
+            this.label2.Location = new System.Drawing.Point(111, 24);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(112, 16);
             this.label2.TabIndex = 27;
@@ -216,7 +205,7 @@
             this.pnlFolderSelector.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlFolderSelector.Location = new System.Drawing.Point(0, 0);
             this.pnlFolderSelector.Name = "pnlFolderSelector";
-            this.pnlFolderSelector.Size = new System.Drawing.Size(1036, 52);
+            this.pnlFolderSelector.Size = new System.Drawing.Size(1053, 52);
             this.pnlFolderSelector.TabIndex = 15;
             // 
             // btnLoadTreeview
@@ -257,15 +246,8 @@
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBottom.Location = new System.Drawing.Point(0, 763);
             this.pnlBottom.Name = "pnlBottom";
-            this.pnlBottom.Size = new System.Drawing.Size(1036, 50);
+            this.pnlBottom.Size = new System.Drawing.Size(1053, 50);
             this.pnlBottom.TabIndex = 13;
-            // 
-            // splitButton1
-            // 
-            this.splitButton1.Location = new System.Drawing.Point(826, 12);
-            this.splitButton1.Name = "splitButton1";
-            this.splitButton1.Size = new System.Drawing.Size(125, 29);
-            this.splitButton1.TabIndex = 16;
             // 
             // label4
             // 
@@ -312,8 +294,8 @@
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
             this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Size = new System.Drawing.Size(1542, 813);
-            this.splitContainer2.SplitterDistance = 514;
+            this.splitContainer2.Size = new System.Drawing.Size(1566, 813);
+            this.splitContainer2.SplitterDistance = 522;
             this.splitContainer2.TabIndex = 2;
             // 
             // sfdFileSaver
@@ -363,11 +345,42 @@
             this.tvwMenuUploadFldr.Tag = "mnuUploadFolder";
             this.tvwMenuUploadFldr.Text = "Upload Folder with Children";
             // 
+            // thumbViewer
+            // 
+            this.thumbViewer.AutoScroll = true;
+            this.thumbViewer.AutoSize = true;
+            this.thumbViewer.CurrentDisplayMode = FilesHunter.ThumbnailViewer.DisplayMode.Normal;
+            this.thumbViewer.DefaultFileImage = null;
+            this.thumbViewer.Location = new System.Drawing.Point(19, 53);
+            this.thumbViewer.Margin = new System.Windows.Forms.Padding(4);
+            this.thumbViewer.Name = "thumbViewer";
+            this.thumbViewer.RootFolderPath = null;
+            this.thumbViewer.SelectedNodePath = "";
+            this.thumbViewer.Size = new System.Drawing.Size(1017, 654);
+            this.thumbViewer.TabIndex = 36;
+            // 
+            // splitButton1
+            // 
+            this.splitButton1.Location = new System.Drawing.Point(826, 12);
+            this.splitButton1.Name = "splitButton1";
+            this.splitButton1.Size = new System.Drawing.Size(125, 29);
+            this.splitButton1.TabIndex = 16;
+            // 
+            // chkConsolidate
+            // 
+            this.chkConsolidate.AutoSize = true;
+            this.chkConsolidate.Location = new System.Drawing.Point(10, 23);
+            this.chkConsolidate.Name = "chkConsolidate";
+            this.chkConsolidate.Size = new System.Drawing.Size(101, 20);
+            this.chkConsolidate.TabIndex = 38;
+            this.chkConsolidate.Text = "Consolidate";
+            this.chkConsolidate.UseVisualStyleBackColor = true;
+            // 
             // frmDBFilesBrowser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1542, 813);
+            this.ClientSize = new System.Drawing.Size(1566, 813);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.splitContainer2);
             this.Name = "frmDBFilesBrowser";
@@ -423,5 +436,6 @@
 		private System.Windows.Forms.ToolStripMenuItem tvwMenuPaste;
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
         private System.Windows.Forms.ToolStripMenuItem tvwMenuUploadFldr;
+        private System.Windows.Forms.CheckBox chkConsolidate;
     }
 }

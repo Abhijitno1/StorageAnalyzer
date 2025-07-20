@@ -22,6 +22,34 @@ namespace FilesHunter
         public string RootFolderPath { get; set; }
         public Image DefaultFileImage { get; set; }
 
+        public enum DisplayMode
+        {
+            Normal,
+            Consolidated
+        }
+        private DisplayMode curDisplayMode = DisplayMode.Normal;
+        public DisplayMode CurrentDisplayMode 
+        { 
+            get
+            { 
+                return curDisplayMode;  
+            }
+            set
+            {
+                curDisplayMode = value;
+                if (curDisplayMode == DisplayMode.Consolidated)
+                {
+                    lvwTiles.LargeImageList = null;
+                    lvwTiles.View = View.Details;                   
+                }
+                else
+                {
+                    lvwTiles.LargeImageList = imlTiles;
+                    lvwTiles.View = View.LargeIcon;
+                }
+            }
+        }
+
         public delegate void GetDataDelegate(string itemName, string itemPath, frmMediaPreview.MediaType itemType, out object fileData);
         public event GetDataDelegate GetPreviewData;
 
@@ -88,6 +116,13 @@ namespace FilesHunter
             GC.GetTotalMemory(true);
 
             this.Cursor = Cursors.Default;
+        }
+
+        public void AddTextItem(NodeType nodeType, string nodeName, string size, string relativePath)
+        {
+            var rowData = new string[] { nodeName, nodeType.ToString(), size, relativePath };
+            var listViewItem = new ListViewItem(rowData) { Name = relativePath, Tag = nodeType.ToString() };
+            lvwTiles.Items.Add(listViewItem);
         }
 
         public string GetSelectedItemPath()
