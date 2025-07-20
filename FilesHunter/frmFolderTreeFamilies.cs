@@ -32,9 +32,10 @@ namespace FilesHunter
                     lstFolderHrchies.Items.Add(mapName);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
 			{
-				this.Close();
+                if (ex.Message.CompareTo("The underlying provider failed on Open.") == 0)
+                    this.Close();
 			}
 		}
 
