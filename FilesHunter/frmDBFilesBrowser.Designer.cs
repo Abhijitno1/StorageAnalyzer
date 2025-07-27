@@ -35,6 +35,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tvwDirTree = new FilesHunter.UserControls.CTreeView();
             this.grpFolderDetails = new System.Windows.Forms.GroupBox();
+            this.chkConsolidate = new System.Windows.Forms.CheckBox();
             this.btnClearFilter = new System.Windows.Forms.Button();
             this.cboSearchType = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -58,9 +59,9 @@
             this.tvwMenuPaste = new System.Windows.Forms.ToolStripMenuItem();
             this.tvwMenuUploadFldr = new System.Windows.Forms.ToolStripMenuItem();
             this.fbdFolderLocation = new System.Windows.Forms.FolderBrowserDialog();
+            this.btnAdjustThumbViewer = new System.Windows.Forms.Button();
             this.thumbViewer = new FilesHunter.ThumbnailViewer();
             this.splitButton1 = new FilesHunter.SplitButton();
-            this.chkConsolidate = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -139,11 +140,21 @@
             this.grpFolderDetails.TabStop = false;
             this.grpFolderDetails.Text = "Search Folders and Files";
             // 
+            // chkConsolidate
+            // 
+            this.chkConsolidate.AutoSize = true;
+            this.chkConsolidate.Location = new System.Drawing.Point(775, 21);
+            this.chkConsolidate.Name = "chkConsolidate";
+            this.chkConsolidate.Size = new System.Drawing.Size(101, 20);
+            this.chkConsolidate.TabIndex = 39;
+            this.chkConsolidate.Text = "Consolidate";
+            this.chkConsolidate.UseVisualStyleBackColor = true;
+            // 
             // btnClearFilter
             // 
-            this.btnClearFilter.Location = new System.Drawing.Point(954, 14);
+            this.btnClearFilter.Location = new System.Drawing.Point(954, 15);
             this.btnClearFilter.Name = "btnClearFilter";
-            this.btnClearFilter.Size = new System.Drawing.Size(80, 32);
+            this.btnClearFilter.Size = new System.Drawing.Size(76, 31);
             this.btnClearFilter.TabIndex = 32;
             this.btnClearFilter.Text = "Clear Filter";
             this.btnClearFilter.UseVisualStyleBackColor = true;
@@ -199,6 +210,7 @@
             // 
             // pnlFolderSelector
             // 
+            this.pnlFolderSelector.Controls.Add(this.btnAdjustThumbViewer);
             this.pnlFolderSelector.Controls.Add(this.btnLoadTreeview);
             this.pnlFolderSelector.Controls.Add(this.txtFileLocation);
             this.pnlFolderSelector.Controls.Add(this.lblHierarchyName);
@@ -345,6 +357,17 @@
             this.tvwMenuUploadFldr.Tag = "mnuUploadFolder";
             this.tvwMenuUploadFldr.Text = "Upload Folder with Children";
             // 
+            // btnAdjustThumbViewer
+            // 
+            this.btnAdjustThumbViewer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAdjustThumbViewer.Location = new System.Drawing.Point(888, 12);
+            this.btnAdjustThumbViewer.Name = "btnAdjustThumbViewer";
+            this.btnAdjustThumbViewer.Size = new System.Drawing.Size(34, 25);
+            this.btnAdjustThumbViewer.TabIndex = 17;
+            this.btnAdjustThumbViewer.Text = "...";
+            this.btnAdjustThumbViewer.UseVisualStyleBackColor = true;
+            this.btnAdjustThumbViewer.Click += new System.EventHandler(this.btnAdjustThumbViewer_Click);
+            // 
             // thumbViewer
             // 
             this.thumbViewer.AutoScroll = true;
@@ -365,16 +388,6 @@
             this.splitButton1.Name = "splitButton1";
             this.splitButton1.Size = new System.Drawing.Size(125, 29);
             this.splitButton1.TabIndex = 16;
-            // 
-            // chkConsolidate
-            // 
-            this.chkConsolidate.AutoSize = true;
-            this.chkConsolidate.Location = new System.Drawing.Point(775, 21);
-            this.chkConsolidate.Name = "chkConsolidate";
-            this.chkConsolidate.Size = new System.Drawing.Size(101, 20);
-            this.chkConsolidate.TabIndex = 39;
-            this.chkConsolidate.Text = "Consolidate";
-            this.chkConsolidate.UseVisualStyleBackColor = true;
             // 
             // frmDBFilesBrowser
             // 
@@ -437,5 +450,6 @@
         private System.Windows.Forms.FolderBrowserDialog fbdFolderLocation;
         private System.Windows.Forms.ToolStripMenuItem tvwMenuUploadFldr;
         private System.Windows.Forms.CheckBox chkConsolidate;
+        private System.Windows.Forms.Button btnAdjustThumbViewer;
     }
 }

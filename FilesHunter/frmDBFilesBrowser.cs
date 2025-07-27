@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using System.Threading;
 
 namespace FilesHunter
 {
@@ -908,6 +909,13 @@ namespace FilesHunter
 			{ 
 				RefreshThumbViewerState(tvwDirTree.SelectedNode);
 			}
+        }
+
+        private void btnAdjustThumbViewer_Click(object sender, EventArgs e)
+        {
+			grpFolderDetails.Hide();
+			Thread.Sleep(50);
+			grpFolderDetails.Show();
         }
 
         private void RefreshThumbViewerState(TreeNode nazaraNode)
