@@ -26,7 +26,7 @@ namespace FilesHunter
 		private List<string> ImageExtensions = new List<string> { ".JPG", ".JPE", ".BMP", ".GIF", ".PNG" };
 		int panel1OrigWidth, panel2OrigWidth, formOrigHeight;
 		XmlDocument currentFolderNaksha;
-		string currentHierarchyParentPath, cutNodePath, copyNodePath;
+		string currentHierarchyParentRootPath, currentHierarchyParentRelPath, cutNodePath, copyNodePath;
 		List<CTreeNode> currentFiltererdNodes= new List<CTreeNode>();
 		string srcNodeType = NodeType.File.ToString().ToLower();
 
@@ -213,8 +213,8 @@ namespace FilesHunter
 			XmlElement newElm = null;
 			//Omit the topmost folder of hierarchy for storing relativ path in DB.
 			var modakRelPath = string.Empty;
-			if (currentHierarchyParentPath.IndexOf('\\', 1) > -1)
-				modakRelPath = currentHierarchyParentPath.Substring(currentHierarchyParentPath.IndexOf('\\', 1));
+			if (currentHierarchyParentRelPath.IndexOf('\\', 1) > -1)
+				modakRelPath = currentHierarchyParentRelPath.Substring(currentHierarchyParentRelPath.IndexOf('\\', 1));
 
 			Func<string, bool> isFileOperation = (string selectCommand) => selectedCommand != "folderaddatend";
 			if (isFileOperation(selectedCommand))
@@ -244,7 +244,7 @@ namespace FilesHunter
 				switch (selectedCommand)
 				{
 					case "fileaddatend":
-						var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
+						var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentRelPath, NodeType.Folder);
 						var selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
 						if (selectedXmlNode != null)
 							selectedXmlNode.AppendChild(newElm);
@@ -290,7 +290,7 @@ namespace FilesHunter
 				//File: name, extension, creationdate, size | folder: name, creationdate
 				newElm.SetAttribute("name", folderName);
 				newElm.SetAttribute("creationDate", DateTime.Today.ToString("dd-MMM-yyyy"));
-				var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
+				var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentRelPath, NodeType.Folder);
 				var selectedXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
 				if (selectedXmlNode != null)
 					selectedXmlNode.AppendChild(newElm);
@@ -382,7 +382,7 @@ namespace FilesHunter
 			//Return to standard view of Thumbnail Viewer
 			chkConsolidate.Checked = false;
             ExpandSelectedFolderInTreeView(itemName);
-			currentHierarchyParentPath = itemPath.TrimEnd('\\') + @"\" + itemName;
+			currentHierarchyParentRelPath = itemPath.TrimEnd('\\') + @"\" + itemName;
 			PopulateFirstLevelChildrenInThumViewer();
 			tvwDirTree.Focus();
 		}
@@ -396,8 +396,9 @@ namespace FilesHunter
 				{
 					txtFileLocation.Text = form.SelectedFolderTree;
 					DirectoryMapDbReader reader = new DirectoryMapDbReader();
-					reader.RootFolderPath = form.SelectedFolderTree;
-					currentFolderNaksha = reader.GetMap();
+					currentHierarchyParentRootPath = form.SelectedFolderTree;
+					reader.RootFolderPath = currentHierarchyParentRootPath;
+                    currentFolderNaksha = reader.GetMap();
 					TreeViewRefreshState();
 				}
 			}
@@ -428,40 +429,66 @@ namespace FilesHunter
 
         private string GenerateXPathFilterClauseFromRelativeFolderPath(string relativeFolderPath, NodeType nodeType)
 		{
-            var folderSegments = new String[1];
-            //Regex.IsMatch(relativeFolderPath, "^[A-Za-z]:\\$") //This did not work
-            if (!string.IsNullOrEmpty(relativeFolderPath) && relativeFolderPath.Length==3 && relativeFolderPath.EndsWith(@":\"))
+			if (relativeFolderPath.StartsWith(currentHierarchyParentRootPath))
 			{
-				folderSegments[0] = relativeFolderPath;
-			}
-			else 
-			{
-                folderSegments = relativeFolderPath.Split('\\');
+				StringBuilder xPathClauses = new StringBuilder();
+                var folderSegmentsEndAry = relativeFolderPath.Substring(currentHierarchyParentRootPath.Length).TrimStart('\\').Split('\\');
+                xPathClauses.Append($"//folder[@fullPath=\"{currentHierarchyParentRootPath}\"]/");
+				int i = 0;
+				for (i = 0; i < folderSegmentsEndAry.Length -1; i++)
+				{
+					xPathClauses.Append($"folder[@name=\"{folderSegmentsEndAry[i]}\"]/");
+				}
+				if (folderSegmentsEndAry.Length > 0 && folderSegmentsEndAry[i].Length > 0)
+				{
+					var segment = folderSegmentsEndAry[i];
+					var fileOrFolder = Enum.GetName(typeof(NodeType), nodeType).ToLower();
+					xPathClauses.Append($"{fileOrFolder}[@name=\"{segment}\"]/");
+				}
+				var filterClause = xPathClauses.ToString();
+                filterClause = filterClause.TrimEnd('/');
+                return filterClause;
+
             }
-            var filterClause = "//";
-			int j = 0;
-			for (j = 0; j < folderSegments.Length - 1; j++)
+            else
 			{
-				var segment = folderSegments[j];
-                if (Regex.IsMatch(segment, "^[A-Za-z]:$"))
-                    segment += '\\';
-                filterClause += $"folder[@name=\"{segment.ToString()}\"]/";
-			}
-			if (folderSegments.Length > 0)
-			{
-                var segment = folderSegments[j];
-                var fileOrFolder = Enum.GetName(typeof(NodeType), nodeType).ToLower();
-				filterClause += $"{fileOrFolder}[@name=\"{segment}\"]/";
-			}
-			filterClause = filterClause.TrimEnd('/');
-			return filterClause;
-		}
+                var folderSegments = new String[1];
+                //Regex.IsMatch(relativeFolderPath, "^[A-Za-z]:\\$") //This did not work
+                if (!string.IsNullOrEmpty(relativeFolderPath) && relativeFolderPath.Length == 3 && relativeFolderPath.EndsWith(@":\"))
+                {
+                    folderSegments[0] = relativeFolderPath;
+                }
+                else
+                {
+                    folderSegments = relativeFolderPath.Split('\\');
+                }
+                var filterClause = "//";
+                int j = 0;
+                for (j = 0; j < folderSegments.Length - 1; j++)
+                {
+                    var segment = folderSegments[j];
+                    if (Regex.IsMatch(segment, "^[A-Za-z]:$"))
+                    {
+                        segment += '\\';
+                    }
+                    filterClause += $"folder[@name=\"{segment.ToString()}\"]/";
+                }
+                if (folderSegments.Length > 0)
+                {
+                    var segment = folderSegments[j];
+                    var fileOrFolder = Enum.GetName(typeof(NodeType), nodeType).ToLower();
+                    filterClause += $"{fileOrFolder}[@name=\"{segment}\"]/";
+                }
+                filterClause = filterClause.TrimEnd('/');
+                return filterClause;
+            }
+        }
 
 
 		private void PopulateFirstLevelChildrenInThumViewer()
 		{
 			thumbViewer.ClearImages();
-			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentPath, NodeType.Folder);
+			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentRelPath, NodeType.Folder);
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			DirectoryMapDbReader reader = new DirectoryMapDbReader();
 
@@ -478,7 +505,7 @@ namespace FilesHunter
 						//Ref: https://www.edgeventures.com/kb/post/2017/05/01/resize-images-in-c-extreme-compression
 						SD.Image folderImage = imlShowPad.Images[0];
 						imageData = ThumbnailViewer.ImageToBinary(folderImage);
-						thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentPath);
+						thumbViewer.AddImageItem(NodeType.Folder, imageData, folderName, currentHierarchyParentRelPath);
 					}
 				}
 				else if (childNode.Name == "file")
@@ -517,7 +544,7 @@ namespace FilesHunter
 						{
 							imageData = ThumbnailViewer.ImageToBinary(imlShowPad.Images[1]);
 						}
-						thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, currentHierarchyParentPath);
+						thumbViewer.AddImageItem(NodeType.File, imageData, childNode.Attributes["name"].Value, currentHierarchyParentRelPath);
 					}
 				}
 			}
@@ -913,15 +940,16 @@ namespace FilesHunter
 
         private void btnAdjustThumbViewer_Click(object sender, EventArgs e)
         {
-			grpFolderDetails.Hide();
-			Thread.Sleep(50);
-			grpFolderDetails.Show();
+			if (grpFolderDetails.Visible)
+				grpFolderDetails.Hide();
+			else
+				grpFolderDetails.Show();
         }
 
         private void RefreshThumbViewerState(TreeNode nazaraNode)
 		{
-            currentHierarchyParentPath = nazaraNode.Name;
-            thumbViewer.SelectedNodePath = currentHierarchyParentPath;
+            currentHierarchyParentRelPath = nazaraNode.Name;
+            thumbViewer.SelectedNodePath = currentHierarchyParentRelPath;
 
             if (!chkConsolidate.Checked)
             {
