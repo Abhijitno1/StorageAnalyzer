@@ -1,4 +1,5 @@
 ﻿using StorageAnalyzerService;
+using StorageAnalyzerService.DbModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,14 +23,15 @@ namespace FilesHunter
 			InitializeComponent();
 		}
 
-		private void frmFolderTreeFamilies_Load(object sender, EventArgs e)
+		private async void frmFolderTreeFamilies_Load(object sender, EventArgs e)
 		{
 			try
 			{
                 fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
 
-                DirectoryMapDbReader reader = new DirectoryMapDbReader();
-                var mapNames = reader.GetAllFolderMapsList();
+                MongoDbRepository reader = new MongoDbRepository();
+                var allMaps = await reader.GetAllFolderMapsAsync();
+                var mapNames = allMaps.Select(map => map.AbsolutePath).ToList();
                 foreach (var mapName in mapNames)
                 {
                     lstFolderHrchies.Items.Add(mapName);
@@ -42,7 +44,28 @@ namespace FilesHunter
 			}
 		}
 
-		private void btnOpenSelected_Click(object sender, EventArgs e)
+        private void frmFolderTreeFamilies_Load_Old(object sender, EventArgs e)
+        {
+            try
+            {
+                fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                DirectoryMapDbReader reader = new DirectoryMapDbReader();
+                var mapNames = reader.GetAllFolderMapsList();
+                foreach (var mapName in mapNames)
+                {
+                    lstFolderHrchies.Items.Add(mapName);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.CompareTo("The underlying provider failed on Open.") == 0)
+                    this.Close();
+            }
+        }
+
+
+        private void btnOpenSelected_Click(object sender, EventArgs e)
 		{
 			if (lstFolderHrchies.Items.Count == 0 || lstFolderHrchies.SelectedItems.Count == 0)
 				return;
@@ -60,7 +83,16 @@ namespace FilesHunter
 			}
 		}
 
-		private void btnSaveFolderData_Click(object sender, EventArgs e)
+        private async void btnSaveFolderData_Click(object sender, EventArgs e)
+        {
+            MongoDbRepository saver = new MongoDbRepository();
+            saver.RootFolderPath = txtFileLocation.Text.Trim();
+            await saver.SaveMap();
+            //Also add item to the list
+            lstFolderHrchies.Items.Add(saver.RootFolderPath);
+        }
+
+        private void btnSaveFolderData_Click_Old(object sender, EventArgs e)
 		{
 			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
 			saver.RootFolderPath = txtFileLocation.Text.Trim();

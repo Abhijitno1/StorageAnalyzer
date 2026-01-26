@@ -387,7 +387,7 @@ namespace FilesHunter
 			tvwDirTree.Focus();
 		}
 
-		private void btnLoadTreeview_Click(object sender, EventArgs e)
+		private async void btnLoadTreeview_Click(object sender, EventArgs e)
 		{
 			using (var form = new frmFolderTreeFamilies())
 			{
@@ -395,16 +395,34 @@ namespace FilesHunter
 				if (result == DialogResult.OK)
 				{
 					txtFileLocation.Text = form.SelectedFolderTree;
-					DirectoryMapDbReader reader = new DirectoryMapDbReader();
+					MongoDbRepository reader = new MongoDbRepository();
 					currentHierarchyParentRootPath = form.SelectedFolderTree;
 					reader.RootFolderPath = currentHierarchyParentRootPath;
-                    currentFolderNaksha = reader.GetMap();
-					TreeViewRefreshState();
+                    currentFolderNaksha = await reader.GetMap();
+
+                    TreeViewRefreshState();
 				}
 			}
 		}
+        private void btnLoadTreeview_Click_Old(object sender, EventArgs e)
+        {
+            using (var form = new frmFolderTreeFamilies())
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    txtFileLocation.Text = form.SelectedFolderTree;
+                    DirectoryMapDbReader reader = new DirectoryMapDbReader();
+                    currentHierarchyParentRootPath = form.SelectedFolderTree;
+                    reader.RootFolderPath = currentHierarchyParentRootPath;
+                    currentFolderNaksha = reader.GetMap();
+                    TreeViewRefreshState();
+                }
+            }
+        }
 
-		private void TreeViewRefreshState()
+
+        private void TreeViewRefreshState()
 		{
 			CNodeTreeBuilder browser = new CNodeTreeBuilder();
 			browser.FolderImageIndex = 0;
@@ -960,7 +978,8 @@ namespace FilesHunter
                     if (!child.Hidden)
                         currentFiltererdNodes.Add(child);
                 }
-                PopulateFirstLevelChildrenInThumViewer();
+				//ToDo: disabling temporarily due to partial conversion to MongoDB
+                //PopulateFirstLevelChildrenInThumViewer();
             }
             else
             {
