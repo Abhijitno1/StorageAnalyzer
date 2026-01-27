@@ -23,14 +23,14 @@ namespace FilesHunter
 			InitializeComponent();
 		}
 
-		private async void frmFolderTreeFamilies_Load(object sender, EventArgs e)
+		private void frmFolderTreeFamilies_Load(object sender, EventArgs e)
 		{
 			try
 			{
                 fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
 
                 MongoDbRepository reader = new MongoDbRepository();
-                var allMaps = await reader.GetAllFolderMapsAsync();
+                var allMaps = reader.GetAllFolderMapsAsync();
                 var mapNames = allMaps.Select(map => map.AbsolutePath).ToList();
                 foreach (var mapName in mapNames)
                 {
@@ -83,11 +83,11 @@ namespace FilesHunter
 			}
 		}
 
-        private async void btnSaveFolderData_Click(object sender, EventArgs e)
+        private void btnSaveFolderData_Click(object sender, EventArgs e)
         {
             MongoDbRepository saver = new MongoDbRepository();
             saver.RootFolderPath = txtFileLocation.Text.Trim();
-            await saver.SaveMap();
+            saver.SaveMap();
             //Also add item to the list
             lstFolderHrchies.Items.Add(saver.RootFolderPath);
         }

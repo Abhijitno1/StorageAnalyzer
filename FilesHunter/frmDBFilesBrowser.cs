@@ -363,17 +363,18 @@ namespace FilesHunter
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 			if (selectedNode != null)
 			{
-				DirectoryMapDbReader reader = new DirectoryMapDbReader();
-				int fileId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
-				fileData = reader.GetModakData(fileId);
+				MongoDbRepository reader = new MongoDbRepository();
+                //DirectoryMapDbReader reader = new DirectoryMapDbReader();
+				var fileId = selectedNode.Attributes["DbId"].Value;
+                fileData = reader.GetModakData(fileId);
 				if (itemType == frmMediaPreview.MediaType.Text)
 				{
 					fileData = Encoding.UTF8.GetString((byte[])fileData);
-				}
+                }
 			}
 			else 
-			{ 
-				fileData = null; 
+			{
+                fileData = null; 
 			}
 		}
 
@@ -387,7 +388,7 @@ namespace FilesHunter
 			tvwDirTree.Focus();
 		}
 
-		private async void btnLoadTreeview_Click(object sender, EventArgs e)
+		private void btnLoadTreeview_Click(object sender, EventArgs e)
 		{
 			using (var form = new frmFolderTreeFamilies())
 			{
@@ -398,7 +399,7 @@ namespace FilesHunter
 					MongoDbRepository reader = new MongoDbRepository();
 					currentHierarchyParentRootPath = form.SelectedFolderTree;
 					reader.RootFolderPath = currentHierarchyParentRootPath;
-                    currentFolderNaksha = await reader.GetMap();
+                    currentFolderNaksha = reader.GetMap();
 
                     TreeViewRefreshState();
 				}
@@ -508,7 +509,7 @@ namespace FilesHunter
 			thumbViewer.ClearImages();
 			var filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(currentHierarchyParentRelPath, NodeType.Folder);
 			var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
-			DirectoryMapDbReader reader = new DirectoryMapDbReader();
+			MongoDbRepository reader = new MongoDbRepository();
 
 			for (int i = 0; i < selectedNode.ChildNodes.Count; i++)
 			{
@@ -555,7 +556,7 @@ namespace FilesHunter
 						}
 						else if ((new string[] { ".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp" }).Contains(fileExtn))
 						{
-							var fileId = Convert.ToInt32(childNode.Attributes["DbId"].Value);
+							var fileId = childNode.Attributes["DbId"].Value;
 							imageData = reader.GetModakData(fileId);
 						}
 						else
@@ -979,7 +980,7 @@ namespace FilesHunter
                         currentFiltererdNodes.Add(child);
                 }
 				//ToDo: disabling temporarily due to partial conversion to MongoDB
-                //PopulateFirstLevelChildrenInThumViewer();
+                PopulateFirstLevelChildrenInThumViewer();
             }
             else
             {
