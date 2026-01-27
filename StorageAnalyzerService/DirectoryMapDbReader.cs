@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace StorageAnalyzerService
 {
-	public class DirectoryMapDbReader
+	public class DirectoryMapDbReader11
 	{
 		public string RootFolderPath { get; set; }
 		ApplicationDbContext dbContext = new ApplicationDbContext();

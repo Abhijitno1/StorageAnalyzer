@@ -30,7 +30,7 @@ namespace FilesHunter
                 fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
 
                 MongoDbRepository reader = new MongoDbRepository();
-                var allMaps = reader.GetAllFolderMapsAsync();
+                var allMaps = reader.GetAllFolderMaps();
                 var mapNames = allMaps.Select(map => map.AbsolutePath).ToList();
                 foreach (var mapName in mapNames)
                 {
@@ -43,27 +43,6 @@ namespace FilesHunter
                     this.Close();
 			}
 		}
-
-        private void frmFolderTreeFamilies_Load_Old(object sender, EventArgs e)
-        {
-            try
-            {
-                fbdFolderLocation.RootFolder = Environment.SpecialFolder.MyComputer;
-
-                DirectoryMapDbReader reader = new DirectoryMapDbReader();
-                var mapNames = reader.GetAllFolderMapsList();
-                foreach (var mapName in mapNames)
-                {
-                    lstFolderHrchies.Items.Add(mapName);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.CompareTo("The underlying provider failed on Open.") == 0)
-                    this.Close();
-            }
-        }
-
 
         private void btnOpenSelected_Click(object sender, EventArgs e)
 		{
@@ -94,7 +73,7 @@ namespace FilesHunter
 
         private void btnSaveFolderData_Click_Old(object sender, EventArgs e)
 		{
-			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+			MongoDbRepository saver = new MongoDbRepository();
 			saver.RootFolderPath = txtFileLocation.Text.Trim();
 			saver.SaveMap();
 			//Also add item to the list
@@ -105,7 +84,7 @@ namespace FilesHunter
 		{
 			if (lstFolderHrchies.Items.Count == 0 || lstFolderHrchies.SelectedItems.Count == 0)
 				return;
-			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+			var saver = new MongoDbRepository();
 			saver.DeleteFolderMap(lstFolderHrchies.SelectedItem.ToString());
 			//Also remove item from the list
 			lstFolderHrchies.Items.RemoveAt(lstFolderHrchies.SelectedIndex);
@@ -122,16 +101,15 @@ namespace FilesHunter
         private void btnSave2Disk_Click(object sender, EventArgs e)
         {
 			//MessageBox.Show($"Saving {lstFolderHrchies.SelectedItem.ToString()} to disk");
-            DirectoryMapDbReader reader = new DirectoryMapDbReader();
+            var reader = new MongoDbRepository();
 			var rootFolderPath = lstFolderHrchies.SelectedItem.ToString();
 			reader.RootFolderPath = rootFolderPath;
 			var folderMap = reader.GetMap();
             var rootNode = folderMap.DocumentElement as XmlNode;
             Action<XmlNode> saveFileToDisk = (XmlNode curNode) =>
             {
-                var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
-                var fileData = dbReader.GetModakData(resourceDbId);
+                var resourceDbId = curNode.Attributes["DbId"].Value;
+                var fileData = reader.GetModakData(resourceDbId);
                 var childFilePathName = curNode.Attributes["name"].Value;
                 var iNode = curNode;
                 while (iNode.ParentNode != null && iNode.ParentNode.Name != "#document")

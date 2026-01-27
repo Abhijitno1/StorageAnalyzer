@@ -56,7 +56,7 @@ namespace FilesHunter
 				var newName = WinFormsPrompt.ShowDialog("Please enter new name for selected resource", "Rename Resource in DB", itemName);
 				if (newName != null)
 				{
-					DirectoryMapDbSaver dbSaver = new DirectoryMapDbSaver();
+					MongoDbRepository dbSaver = new MongoDbRepository();
 
 					//change resource name in xml node
 					selectedNode.Attributes["name"].Value = newName;
@@ -68,13 +68,13 @@ namespace FilesHunter
                         relativeFolderPath = relativeFolderPath.Substring(relativeFolderPath.IndexOf('\\'));
                         //Change the file name portion in the relative path
                         relativeFolderPath = relativeFolderPath.Substring(0, relativeFolderPath.LastIndexOf('\\') + 1) + newName;
-                        Modak modak = new Modak()
+                        ModakV2 modak = new ModakV2()
                         {
-                            Id = Convert.ToInt32(selectedNode.Attributes["DbId"].Value),
+                            Id = selectedNode.Attributes["DbId"].Value,
                             Title = newName,
                             RelativePath = relativeFolderPath
                         };
-                        dbSaver.UpdateModak(modak);
+                        dbSaver.UpsertModak(modak);
                     }
 
                     //Refresh the treeview and listview
@@ -115,8 +115,8 @@ namespace FilesHunter
 			{
                 Action<XmlNode> saveSingleFileToDisk = (XmlNode curNode) =>
                 {
-                    var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                    DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
+                    var resourceDbId = curNode.Attributes["DbId"].Value;
+                    var dbReader = new MongoDbRepository();
                     var fileData = dbReader.GetModakData(resourceDbId);
                     //Debug.WriteLine("Writing file: " + saveAbsolutePath + " to disk");
                     File.WriteAllBytes(saveAbsolutePath, fileData);
@@ -124,8 +124,8 @@ namespace FilesHunter
                 };
                 Action<XmlNode> saveFileToDisk = (XmlNode curNode) =>
                 {
-                    var resourceDbId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                    DirectoryMapDbReader dbReader = new DirectoryMapDbReader();
+                    var resourceDbId = curNode.Attributes["DbId"].Value;
+                    var dbReader = new MongoDbRepository();
                     var fileData = dbReader.GetModakData(resourceDbId);
                     var childFilePathName = curNode.Attributes["name"].Value;
 					var iNode = curNode;
@@ -207,7 +207,7 @@ namespace FilesHunter
 			{
 				selectedTreeNode = selectedTreeNode.Parent as CTreeNode;
             }
-			DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+			var saver = new MongoDbRepository();
 			var selectedItemPath = thumbViewer.GetSelectedItemPath();
 			var selectedCommand = (sender as ToolStripMenuItem).Tag.ToString();
 			XmlElement newElm = null;
@@ -229,7 +229,7 @@ namespace FilesHunter
 				//ToDo: Optiomize this file read in future
 				stream.Read(fileData, 0, (int)fileSize);
 				stream.Dispose();
-				Modak modak = new Modak()
+				var modak = new ModakV2()
 				{
 					Title = fileName,
 					PicData = fileData,
@@ -275,7 +275,7 @@ namespace FilesHunter
 						break;
 				}
 
-				saver.InsertModakIntoDb(modak);
+				saver.UpsertModak(modak); //inserting
 				newElm.SetAttribute("DbId", modak.Id.ToString());
 			}
 			else //Add folder at end of currently selected folder view
@@ -318,12 +318,12 @@ namespace FilesHunter
 				var selectedNode = currentFolderNaksha.SelectSingleNode(filterClause);
 				if (selectedNode != null)
 				{
-					var resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
+					var resourceDbId = selectedNode.Attributes["DbId"].Value;
 					var parentNode = selectedNode.ParentNode;
 					if (parentNode != null)
 					{
 						parentNode.RemoveChild(selectedNode);
-						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						var saver = new MongoDbRepository();
 						saver.DeleteModak(resourceDbId);
 						saver.UpdateMap(currentFolderNaksha);
 
@@ -341,7 +341,7 @@ namespace FilesHunter
 					var parentNode = selectedNode.ParentNode;
 					if (parentNode != null)
 					{
-						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+						var saver = new MongoDbRepository();
 						
 						//Delete child files stored under this folder before deleting it. 
 						saver.DeleteFiles4Node(selectedNode);
@@ -405,23 +405,6 @@ namespace FilesHunter
 				}
 			}
 		}
-        private void btnLoadTreeview_Click_Old(object sender, EventArgs e)
-        {
-            using (var form = new frmFolderTreeFamilies())
-            {
-                var result = form.ShowDialog();
-                if (result == DialogResult.OK)
-                {
-                    txtFileLocation.Text = form.SelectedFolderTree;
-                    DirectoryMapDbReader reader = new DirectoryMapDbReader();
-                    currentHierarchyParentRootPath = form.SelectedFolderTree;
-                    reader.RootFolderPath = currentHierarchyParentRootPath;
-                    currentFolderNaksha = reader.GetMap();
-                    TreeViewRefreshState();
-                }
-            }
-        }
-
 
         private void TreeViewRefreshState()
 		{
@@ -692,11 +675,10 @@ namespace FilesHunter
 					//This is Cut and Paste operation
 					srcNodeName = cutNodePath.Substring(cutNodePath.LastIndexOf('\\') + 1);
 					var result = WinFormsConfirm.ShowDialog($"Are you sure you want to paste Cut Node \"{srcNodeName}\" at \"{destNodeName}\"?", "File/Folder Move");
-					int resourceDbId = 0;
+					string resourceDbId = null;
 					if (result == DialogResult.Yes)
 					{
-						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-						DirectoryMapDbReader reader = new DirectoryMapDbReader();
+						MongoDbRepository repository = new MongoDbRepository();
 
 						if (srcNodeType == NodeType.File.ToString().ToLower())
 						{
@@ -705,7 +687,7 @@ namespace FilesHunter
 							var cutXmlNode = currentFolderNaksha.SelectSingleNode(filterClause);
 							if (cutXmlNode != null)
 							{
-								resourceDbId = Convert.ToInt32(cutXmlNode.Attributes["DbId"].Value);
+								resourceDbId = cutXmlNode.Attributes["DbId"].Value;
 								var parentNode = cutXmlNode.ParentNode;
 								if (parentNode != null)
 								{
@@ -719,13 +701,13 @@ namespace FilesHunter
 							if (destXmlNode != null )
 							{
                                 destXmlNode.AppendChild(cutXmlNode);    // We are already making sure destination node is set as a folder
-                                saver.UpdateMap(currentFolderNaksha);
+                                repository.UpdateMap(currentFolderNaksha);
                             }
 
                             //Step 3: Update the relative path in Modak DB object
-                            Modak updModak = reader.GetModak(resourceDbId);
+                            ModakV2 updModak = repository.GetModak(resourceDbId);
 							updModak.RelativePath = destNodePath.Substring(destNodePath.IndexOf('\\', 1)) + "\\" + srcNodeName;
-							saver.UpdateModak(updModak);
+                            repository.UpsertModak(updModak);
 						}
 						else
 						{
@@ -747,7 +729,7 @@ namespace FilesHunter
                             if (destXmlNode != null)
                             {
                                 destXmlNode.AppendChild(cutXmlNode);    // We are already making sure destination node is set as a folder
-                                saver.UpdateMap(currentFolderNaksha);
+                                repository.UpdateMap(currentFolderNaksha);
                             }
 
                             //Step 3: Recursively Update the relative path in Modak DB objects associated with all descendants of source cut node
@@ -766,10 +748,10 @@ namespace FilesHunter
                                             iNode = iNode.ParentNode;
                                         }
                                         relPath = relPath.Substring(relPath.IndexOf(@"\") + 1);
-                                        var modakId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                                        var modak = reader.GetModak(modakId);
+                                        var modakId = curNode.Attributes["DbId"].Value;
+                                        var modak = repository.GetModak(modakId);
                                         modak.RelativePath = destXmlNode.Attributes["name"].Value + "\\" + relPath;
-                                        saver.UpdateModak(modak);
+                                        repository.UpsertModak(modak);
                                     }
                                     else
                                     {
@@ -793,8 +775,7 @@ namespace FilesHunter
 					if (result == DialogResult.Yes)
 					{
 						XmlElement newElm;
-						DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
-						DirectoryMapDbReader reader = new DirectoryMapDbReader();
+						MongoDbRepository repository = new MongoDbRepository();
 
 						if (srcNodeType == NodeType.File.ToString().ToLower())
 						{
@@ -810,8 +791,8 @@ namespace FilesHunter
 							newElm.SetAttribute("size", selectedNode.Attributes["size"].Value);
 
 							//Step 3: Create a copy of existing modak (filedata) object for storing in DB
-							var	resourceDbId = Convert.ToInt32(selectedNode.Attributes["DbId"].Value);
-							var copyModak = reader.GetModak(resourceDbId);
+							var	resourceDbId = selectedNode.Attributes["DbId"].Value;
+							var copyModak = repository.GetModak(resourceDbId);
 
 							filterClause = GenerateXPathFilterClauseFromRelativeFolderPath(destNodePath, NodeType.Folder);
 							//Strip off top folder in hierarchy for storing relative path in DB and append the new file name to relative dest folder path
@@ -819,16 +800,16 @@ namespace FilesHunter
 							//var fileName = selectedNode.Name;
 							var destParentNode = currentFolderNaksha.SelectSingleNode(filterClause);
 
-							Modak modak = new Modak()
+							var modak = new ModakV2()
 							{
 								Title = copyModak.Title,
 								PicData = copyModak.PicData,
 								RelativePath = modakRelPath
 							};
-							saver.InsertModakIntoDb(modak);
+                            repository.UpsertModak(modak);
 							newElm.SetAttribute("DbId", modak.Id.ToString());
 							destParentNode.AppendChild(newElm);
-							saver.UpdateMap(currentFolderNaksha);
+                            repository.UpdateMap(currentFolderNaksha);
 						}
 						else
 						{
@@ -844,9 +825,9 @@ namespace FilesHunter
                             //var fileName = selectedNode.Name;
                             var destParentNode = currentFolderNaksha.SelectSingleNode(filterClause);
 
-                            Func<Modak, Modak> copyModak = (srcModak) =>
+                            Func<ModakV2, ModakV2> copyModak = (srcModak) =>
                             { 
-                                return new Modak()
+                                return new ModakV2()
                                 {
                                     Title = srcModak.Title,
                                     PicData = srcModak.PicData,
@@ -873,12 +854,12 @@ namespace FilesHunter
                                             iNode = iNode.ParentNode;
                                         }
                                         relPath = relPath.Substring(relPath.IndexOf(@"\") + 1);
-                                        var modakId = Convert.ToInt32(curNode.Attributes["DbId"].Value);
-                                        var modak = reader.GetModak(modakId);				
+                                        var modakId = curNode.Attributes["DbId"].Value;
+                                        var modak = repository.GetModak(modakId);				
 										var copyOfModak = copyModak(modak);
                                         copyOfModak.RelativePath = destParentNode.Attributes["name"].Value + "\\" + relPath;
 										//Debug.WriteLine($"Inserting Modak with  Title = {copyOfModak.Title}, Relative Path = {copyOfModak.RelativePath}");
-										saver.InsertModakIntoDb(copyOfModak);
+										repository.UpsertModak(copyOfModak);
                                         (correspondingDestNode as XmlElement).SetAttribute("DbId", copyOfModak.Id.ToString());
                                     }
                                     else
@@ -891,7 +872,7 @@ namespace FilesHunter
                             //Debug.WriteLine($"Adding Xml node = {copiedRoot.Attributes["name"].Value}, Node Type = {copiedRoot.Name}, Parent Node = {destParentNode.Attributes["name"].Value}");
                             destParentNode.AppendChild(copiedRoot);
                             insertModaks4ClinedNodes(selectedNode, copiedRoot);
-                            saver.UpdateMap(currentFolderNaksha);
+                            repository.UpdateMap(currentFolderNaksha);
                         }
 
                         //Refresh the treeview and listview
@@ -901,7 +882,7 @@ namespace FilesHunter
 			}
 			else if (e.ClickedItem.Text == tvwMenuUploadFldr.Text)
 			{
-                DirectoryMapDbSaver saver = new DirectoryMapDbSaver();
+                var saver = new MongoDbRepository();
                 var selectedTreeNode = tvwDirTree.SelectedNode;
                 string destNodePath = selectedTreeNode.Name;
                 if (selectedTreeNode.Tag.ToString() == NodeType.File.ToString().ToLower())

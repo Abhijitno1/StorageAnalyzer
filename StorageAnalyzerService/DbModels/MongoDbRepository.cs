@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -29,14 +30,14 @@ namespace StorageAnalyzerService.DbModels
             _collectFolderMaps = database.GetCollection<FolderMapV2>("FolderMaps");
         }
 
-        public List<FolderMapV2> GetAllFolderMapsAsync() =>
+        public List<FolderMapV2> GetAllFolderMaps() =>
             _collectFolderMaps.Find(_ => true).ToList();
 
         public XmlDocument GetMap()
         {
             string folderMapText = null;
             var folderMap = _collectFolderMaps.Find(naksha => naksha.AbsolutePath == RootFolderPath).FirstOrDefault();
-            if (folderMap !=null) folderMapText = folderMap.DirectoryXml;
+            if (folderMap != null) folderMapText = folderMap.DirectoryXml;
             var retDoc = new XmlDocument();
             retDoc.LoadXml(folderMapText);
             return retDoc;
@@ -54,26 +55,75 @@ namespace StorageAnalyzerService.DbModels
                 AbsolutePath = RootFolderPath,
                 DirectoryXml = xml2save
             };
-            _collectFolderMaps.InsertOneAsync(folderMap);
+            _collectFolderMaps.InsertOne(folderMap);
         }
 
-        public async Task UpdateMap(XmlDocument editedDoc)
+        public void GenerateChildNodeTree(string childFolderPath, XmlNode destXmlNode)
         {
-            using (ApplicationDbContext dbContext = new ApplicationDbContext())
+            DirectoryInfo rootFolder = new DirectoryInfo(childFolderPath);
+            xmlDoc = destXmlNode.OwnerDocument;
+            TraverseFolder(rootFolder, destXmlNode);
+            UpdateMap(xmlDoc);
+        }
+
+
+        public void UpdateMap(XmlDocument editedDoc)
+        {
+            var identifier = editedDoc.DocumentElement.Attributes["fullPath"].Value;
+            if (identifier != null)
             {
-                var identifier = editedDoc.DocumentElement.Attributes["fullPath"].Value;
-                if (identifier != null)
+                var foundRec = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == identifier).FirstOrDefault();
+                if (foundRec != null)
                 {
-                    var foundRec = await _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == identifier).FirstOrDefaultAsync();
-                    if (foundRec != null)
-                    {
-                        foundRec.DirectoryXml = editedDoc.DocumentElement.OuterXml;
-                        await _collectFolderMaps.ReplaceOneAsync(x => x.Id == foundRec.Id, foundRec);
-                    }
+                    foundRec.DirectoryXml = editedDoc.DocumentElement.OuterXml;
+                    _collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
                 }
             }
         }
 
+        public bool DeleteFolderMap(string absolutePath)
+        {
+            var foundFolderMap = _collectFolderMaps.Find(k => k.AbsolutePath == absolutePath).FirstOrDefault();
+            if (foundFolderMap != null)
+            {
+                //First remove any stored file dependencies in database
+                DeleteModaksForNaksha(absolutePath);
+                //Then remove folder map from Xml maps
+                var deleteResult = _collectFolderMaps.DeleteOne(k => k.Id == foundFolderMap.Id);
+                return deleteResult.DeletedCount > 0;
+            }
+            return false;
+        }
+
+        public bool DeleteModaksForNaksha(string absolutePath)
+        {
+            var foundFolderMap = _collectFolderMaps.Find(k => k.AbsolutePath == absolutePath).FirstOrDefault();
+            if (foundFolderMap != null)
+            {
+                var xml = foundFolderMap.DirectoryXml;
+                var xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(xml);
+                DeleteFiles4Node(xmlDoc.DocumentElement);
+            }
+            return true;
+        }
+
+        public bool DeleteFiles4Node(XmlNode node)
+        {
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.Name == "file")
+                {
+                    var modakId = child.Attributes["DbId"].Value;
+                    DeleteModak(modakId);
+                }
+                else
+                {
+                    DeleteFiles4Node(child);
+                }
+            }
+            return true;
+        }
 
         private void TraverseFolder(DirectoryInfo currentFolder, XmlNode parentNode)
         {
@@ -134,7 +184,7 @@ namespace StorageAnalyzerService.DbModels
                 fs.Read(fileData, 0, (int)fs.Length);
                 fs.Dispose();
                 modak.PicData = fileData;
-                UpsertModakAsync(modak);
+                UpsertModak(modak);
                 //Ref: https://stackoverflow.com/questions/5212751/how-can-i-retrieve-id-of-inserted-entity-using-entity-framework
                 fileElm.SetAttribute("DbId", modak.Id.ToString());
             }
@@ -142,7 +192,7 @@ namespace StorageAnalyzerService.DbModels
 
 
 
-        public String UpsertModakAsync(ModakV2 modak)
+        public String UpsertModak(ModakV2 modak)
         {
             try
             {
@@ -152,7 +202,7 @@ namespace StorageAnalyzerService.DbModels
                     // Manually generate a new ObjectId string if you want to be safe
                     modak.Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
                 }
-                
+
                 // Filter to find the existing document by its ID
                 var filter = Builders<ModakV2>.Filter.Eq(m => m.Id, modak.Id);
 
@@ -163,7 +213,7 @@ namespace StorageAnalyzerService.DbModels
                 // 1. If we inserted a new doc, return the new ID generated by Mongo
                 if (result.UpsertedId != null)
                 {
-                    return result.UpsertedId.ToString();
+                    modak.Id = result.UpsertedId.ToString();
                 }
                 return modak.Id;
             }

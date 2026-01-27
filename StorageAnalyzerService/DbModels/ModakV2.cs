@@ -12,7 +12,7 @@ namespace StorageAnalyzerService.DbModels
 {
 	public class ModakV2
 	{
-        [BsonId(IdGenerator =typeof(StringObjectIdGenerator))]	// Maps this property to the MongoDB "_id" field
+        [BsonId]	// Maps this property to the MongoDB "_id" field
         [BsonRepresentation(BsonType.ObjectId)]
         [BsonIgnoreIfDefault] // This allows auto-generation when Id is null
         public string Id { get; set; }
