@@ -74,7 +74,7 @@ namespace FilesHunter
                             Title = newName,
                             RelativePath = relativeFolderPath
                         };
-                        dbSaver.UpsertModak(modak);
+                        dbSaver.UpdateModak(modak);
                     }
 
                     //Refresh the treeview and listview
@@ -275,7 +275,7 @@ namespace FilesHunter
 						break;
 				}
 
-				saver.UpsertModak(modak); //inserting
+				saver.InsertModak(modak); //inserting
 				newElm.SetAttribute("DbId", modak.Id.ToString());
 			}
 			else //Add folder at end of currently selected folder view
@@ -707,7 +707,7 @@ namespace FilesHunter
                             //Step 3: Update the relative path in Modak DB object
                             ModakV2 updModak = repository.GetModak(resourceDbId);
 							updModak.RelativePath = destNodePath.Substring(destNodePath.IndexOf('\\', 1)) + "\\" + srcNodeName;
-                            repository.UpsertModak(updModak);
+                            repository.UpdateModak(updModak);
 						}
 						else
 						{
@@ -751,7 +751,7 @@ namespace FilesHunter
                                         var modakId = curNode.Attributes["DbId"].Value;
                                         var modak = repository.GetModak(modakId);
                                         modak.RelativePath = destXmlNode.Attributes["name"].Value + "\\" + relPath;
-                                        repository.UpsertModak(modak);
+                                        repository.UpdateModak(modak);
                                     }
                                     else
                                     {
@@ -806,7 +806,7 @@ namespace FilesHunter
 								PicData = copyModak.PicData,
 								RelativePath = modakRelPath
 							};
-                            repository.UpsertModak(modak);
+                            repository.InsertModak(modak);
 							newElm.SetAttribute("DbId", modak.Id.ToString());
 							destParentNode.AppendChild(newElm);
                             repository.UpdateMap(currentFolderNaksha);
@@ -859,7 +859,7 @@ namespace FilesHunter
 										var copyOfModak = copyModak(modak);
                                         copyOfModak.RelativePath = destParentNode.Attributes["name"].Value + "\\" + relPath;
 										//Debug.WriteLine($"Inserting Modak with  Title = {copyOfModak.Title}, Relative Path = {copyOfModak.RelativePath}");
-										repository.UpsertModak(copyOfModak);
+										repository.InsertModak(copyOfModak);
                                         (correspondingDestNode as XmlElement).SetAttribute("DbId", copyOfModak.Id.ToString());
                                     }
                                     else

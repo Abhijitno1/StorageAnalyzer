@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -17,6 +19,7 @@ namespace StorageAnalyzerService.DbModels
     {
         private readonly IMongoCollection<FolderMapV2> _collectFolderMaps;
         private readonly IMongoCollection<ModakV2> _collectModaks;
+        private readonly GridFSBucket _bucket;
         XmlDocument xmlDoc = new XmlDocument();
 
         public string RootFolderPath { get; set; }
@@ -28,6 +31,7 @@ namespace StorageAnalyzerService.DbModels
             var database = client.GetDatabase("DirectoryMap");
             _collectModaks = database.GetCollection<ModakV2>("Modaks");
             _collectFolderMaps = database.GetCollection<FolderMapV2>("FolderMaps");
+            _bucket = new GridFSBucket(database);
         }
 
         public List<FolderMapV2> GetAllFolderMaps() =>
@@ -158,39 +162,46 @@ namespace StorageAnalyzerService.DbModels
 
             foreach (var childFile in currentfolder.EnumerateFiles())
             {
-                fileNode = xmlDoc.CreateElement("file");
-                var fileElm = fileNode as XmlElement; ;
-                fileElm.SetAttribute("name", childFile.Name);
-                fileElm.SetAttribute("extension", childFile.Extension);
-                fileElm.SetAttribute("creationDate", childFile.CreationTime.ToString("dd-MMM-yyyy"));
-                fileElm.SetAttribute("size", childFile.Length.ToString());
-
-                //Console.WriteLine(childFile.Name);
-                //Console.WriteLine(childFile.Extension);
-                //Console.WriteLine(childFile.CreationTime.ToShortDateString());
-                parentNode.AppendChild(fileNode);
-
-                var cutPoint = childFile.FullName.IndexOf(this.RootFolderPath) > -1 ? this.RootFolderPath.Length : 0;
-                var relativePath = childFile.FullName.Substring(cutPoint);
-                //Also Add to DB
-                ModakV2 modak = new ModakV2()
+                try
                 {
-                    Title = childFile.Name,
-                    RelativePath = relativePath
-                };
-                var fs = childFile.OpenRead();
-                var fileData = new byte[fs.Length];
-                //ToDo: Optiomize this file read in future
-                fs.Read(fileData, 0, (int)fs.Length);
-                fs.Dispose();
-                modak.PicData = fileData;
-                UpsertModak(modak);
-                //Ref: https://stackoverflow.com/questions/5212751/how-can-i-retrieve-id-of-inserted-entity-using-entity-framework
-                fileElm.SetAttribute("DbId", modak.Id.ToString());
+                    fileNode = xmlDoc.CreateElement("file");
+                    var fileElm = fileNode as XmlElement; ;
+                    fileElm.SetAttribute("name", childFile.Name);
+                    fileElm.SetAttribute("extension", childFile.Extension);
+                    fileElm.SetAttribute("creationDate", childFile.CreationTime.ToString("dd-MMM-yyyy"));
+                    fileElm.SetAttribute("size", childFile.Length.ToString());
+
+                    //Console.WriteLine(childFile.Name);
+                    //Console.WriteLine(childFile.Extension);
+                    //Console.WriteLine(childFile.CreationTime.ToShortDateString());
+                    parentNode.AppendChild(fileNode);
+
+                    var cutPoint = childFile.FullName.IndexOf(this.RootFolderPath) > -1 ? this.RootFolderPath.Length : 0;
+                    var relativePath = childFile.FullName.Substring(cutPoint);
+                    //Also Add to DB
+                    ModakV2 modak = new ModakV2()
+                    {
+                        Title = childFile.Name,
+                        RelativePath = relativePath
+                    };
+                    var fs = childFile.OpenRead();
+                    var fileData = new byte[fs.Length];
+                    //ToDo: Optiomize this file read in future
+                    fs.Read(fileData, 0, (int)fs.Length);
+                    fs.Dispose();
+                    modak.PicData = fileData;
+                    InsertModak(modak);
+                    //Ref: https://stackoverflow.com/questions/5212751/how-can-i-retrieve-id-of-inserted-entity-using-entity-framework
+                    fileElm.SetAttribute("DbId", modak.Id.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("File db insert error: " + ex.Message);
+                }
             }
         }
 
-        public String UpsertModak(ModakV2 modak)
+        public String UpsertModak11(ModakV2 modak)
         {
             try
             {
@@ -226,7 +237,68 @@ namespace StorageAnalyzerService.DbModels
             }
         }
 
+        // INSERT with logicalFilePath in Metadata
+        public ObjectId InsertModak(ModakV2 modak)
+        {
+            var options = new GridFSUploadOptions
+            {
+                // Store extra fields here
+                Metadata = new BsonDocument { { "RelativePath", modak.RelativePath } }
+            };
+
+            using (var stream = new MemoryStream(modak.PicData))
+            {
+                var insertedId = _bucket.UploadFromStream(modak.Title, stream, options);
+                modak.Id = insertedId.ToString();
+                return insertedId;
+            }
+        }
+
+        public void UpdateModak(ModakV2 modak)
+        {
+            var fileId = new ObjectId(modak.Id);
+
+            // 1. Rename the file in fs.files
+            _bucket.Rename(fileId, modak.Title);
+
+            // 2. Update the Metadata field specifically
+            var filter = Builders<GridFSFileInfo>.Filter.Eq("_id", fileId);
+            var update = Builders<GridFSFileInfo>.Update.Set("metadata.RelativePath", modak.RelativePath);
+
+            // Use the files collection directly for metadata updates
+            var filesCollection = _bucket.Database.GetCollection<GridFSFileInfo>("fs.files");
+            filesCollection.UpdateOne(filter, update);
+        }
+
         public ModakV2 GetModak(string id)
+        {
+            var fileId = new ObjectId(id);
+
+            // 1. Find the file metadata using a filter
+            var filter = Builders<GridFSFileInfo>.Filter.Eq("_id", fileId);
+            var fileInfo = _bucket.Find(filter).FirstOrDefault();
+
+            if (fileInfo == null)
+            {
+                return null;
+            }
+
+            // 2. Extract metadata and filename
+            // Accessing the custom "LogicalFilePath" field we stored earlier
+            var modak = new ModakV2
+            {
+                Id = fileInfo.Id.ToString(),
+                Title = fileInfo.Filename,
+                RelativePath = fileInfo.Metadata.Contains("RelativePath")
+                               ? fileInfo.Metadata["RelativePath"].AsString
+                               : string.Empty,
+                PicData = _bucket.DownloadAsBytes(fileId)
+            };
+
+            return modak;
+        }
+
+        public ModakV2 GetModakOld(string id)
         {
             try
             {
@@ -246,6 +318,12 @@ namespace StorageAnalyzerService.DbModels
         }
 
         public void DeleteModak(string id)
+        {
+            var fileId = new ObjectId(id);
+            _bucket.Delete(fileId);
+        }
+
+        public void DeleteModakOld(string id)
         {
             //if (!ObjectId.TryParse(id, out var objectId))
             try
