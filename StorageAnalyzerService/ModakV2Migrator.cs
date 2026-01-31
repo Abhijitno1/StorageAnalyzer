@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
 using MongoDB.Driver.GridFS;
 using StorageAnalyzerService.DbModels;
 using System;
@@ -13,12 +14,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace StorageAnalyzerService
 {
     public class ModakV2Migrator
     {
-        public async Task MigrateExistingDataAsync()
+        public async Task HashExistingDataAsync()
         {
             var client = new MongoClient("mongodb://localhost:27017");
             var database = client.GetDatabase("DirectoryMap");
@@ -95,7 +97,7 @@ namespace StorageAnalyzerService
             }
         }
 
-        public void SaveDbFilesList(string connectionString, string outputFilePathName)
+        public void SaveSqlDbFilesList(string connectionString, string outputFilePathName)
         {
             var sqlConn = new SqlConnection(connectionString);
             sqlConn.Open();
@@ -129,6 +131,35 @@ namespace StorageAnalyzerService
             }
 
             sqlConn.Close();
+
+        }
+
+        public void CheckMissingSqlDatabaseFiles(string connectionString)
+        {
+            using (var sqlConn = new SqlConnection(connectionString))
+            {
+                sqlConn.Open();
+                var cmd = sqlConn.CreateCommand();
+                cmd.CommandText = "Select DirectoryXml from FolderMap where Id=1";
+                var dirXml = cmd.ExecuteScalar() as string;
+                var dirDoc = XDocument.Parse(dirXml);
+                var fileNodes = dirDoc.Root.Descendants("file");
+                foreach (var fileNode in fileNodes)
+                {
+                    var fileId = fileNode.Attribute("DbId").Value;
+                    var checkCmd = sqlConn.CreateCommand();
+                    checkCmd.CommandText = "Select Id from Modak where Id=@Id";
+                    checkCmd.Parameters.AddWithValue("@Id", fileId);
+                    var id = checkCmd.ExecuteScalar();
+                    if (id == null)
+                    {
+                        Console.WriteLine($"Missing file with Id: {fileId}, Title: {fileNode.Attribute("name").Value}, Extn: {fileNode.Attribute("extension").Value}, Creation Date: {fileNode.Attribute("creationDate").Value}");
+                    }
+                }
+
+
+                sqlConn.Close();
+            }
 
         }
 

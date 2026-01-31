@@ -74,6 +74,7 @@ namespace StorageAnalyzerService
             {
                 return obj.GetHashCode();
             }
-        }   
+        } 
+        
     }
 }

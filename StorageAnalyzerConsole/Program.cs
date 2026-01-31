@@ -14,10 +14,8 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            DBFilesComparer mercator = new DBFilesComparer();
-            mercator.FirstInputFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
-            mercator.SecondInputFilePathName = ConfigurationManager.AppSettings["compareFilePathAndName"];
-            mercator.WriteComparisonResults2File(ConfigurationManager.AppSettings["compareResultsFilePathAndName"]);
+            ModakV2Migrator mercator = new ModakV2Migrator();
+            mercator.CheckMissingSqlDatabaseFiles(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
         }
 
         static void WriteExcelFile()
