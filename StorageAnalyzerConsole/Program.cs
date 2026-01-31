@@ -14,8 +14,9 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            ModakV2Migrator migrator = new ModakV2Migrator();
-            migrator.SaveDBFilesList(ConfigurationManager.AppSettings["outputFilePathAndName"]);
+            ModakV2Migrator mercator = new ModakV2Migrator();
+            mercator.SaveDbFilesList(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString, 
+                ConfigurationManager.AppSettings["outputFilePathAndName"]);
         }
 
         static void WriteExcelFile()

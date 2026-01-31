@@ -243,10 +243,16 @@ namespace StorageAnalyzerService.DbModels
         // INSERT with logicalFilePath in Metadata
         public ObjectId InsertModak(ModakV2 modak)
         {
+            //First compute DataHash
+            modak.DataHash = CommonMethods.CalculateSha256(modak.PicData);
+
             var options = new GridFSUploadOptions
             {
                 // Store extra fields here
-                Metadata = new BsonDocument { { "RelativePath", modak.RelativePath } }
+                Metadata = new BsonDocument { 
+                    { "RelativePath", modak.RelativePath },
+                    { "DataHash", modak.DataHash }
+                }
             };
 
             using (var stream = new MemoryStream(modak.PicData))

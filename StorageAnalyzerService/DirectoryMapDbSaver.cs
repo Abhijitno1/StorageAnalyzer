@@ -14,7 +14,7 @@ using StorageAnalyzerService.DbModels;
 
 namespace StorageAnalyzerService
 {
-	public class DirectoryMapDbSaver11
+	public class DirectoryMapDbSaver
 	{
 		public string RootFolderPath { get; set; }
 		//ApplicationDbContext dbContext = new ApplicationDbContext();

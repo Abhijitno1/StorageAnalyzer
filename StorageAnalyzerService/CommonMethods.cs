@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -26,6 +28,32 @@ namespace StorageAnalyzerService
             }
             return elmPath;
         }
+        public static string CalculateSha256(Byte[] buffer)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(buffer);
+                return ToHexString(hashBytes).ToLowerInvariant();
+            }
+        }
 
+        public static string CalculateSha256(Stream stream)
+        {
+            //Late wisdom: return Convert.ToBase64String(System.Security.Cryptography.MD5.Create().ComputeHash(stream))
+
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(stream);
+                return ToHexString(hashBytes).ToLowerInvariant();
+            }
+        }
+
+        private static string ToHexString(byte[] bytes)
+        {
+            // BitConverter.ToString creates "XX-XX-XX"
+            // Replace("-", "") removes the hyphens
+            // ToLower() ensures it matches your ModakV2 style
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
     }
 }

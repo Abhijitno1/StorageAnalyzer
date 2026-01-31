@@ -4,8 +4,11 @@ using MongoDB.Driver.GridFS;
 using StorageAnalyzerService.DbModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +36,7 @@ namespace StorageAnalyzerService
                         // Stream the file instead of downloading all bytes at once to save RAM
                         using (var stream = await bucket.OpenDownloadStreamAsync(file.Id))
                         {
-                            string calculatedHash = CalculateSha256Async(stream);
+                            string calculatedHash = CommonMethods.CalculateSha256(stream);
 
                             // FIX: Use the specific file's ID in the filter
                             var updFilter = Builders<BsonDocument>.Filter.Eq("_id", file.Id);
@@ -46,24 +49,7 @@ namespace StorageAnalyzerService
             }
         }
 
-        private string CalculateSha256Async(Stream stream)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hashBytes = sha256.ComputeHash(stream);
-                return ToHexString(hashBytes).ToLowerInvariant();
-            }
-        }
-
-        private string ToHexString(byte[] bytes)
-        {
-            // BitConverter.ToString creates "XX-XX-XX"
-            // Replace("-", "") removes the hyphens
-            // ToLower() ensures it matches your ModakV2 style
-            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-        }
-
-        public void SaveDBFilesList(string outputFilePathName)
+        public void SaveMongoDBFilesList(string outputFilePathName)
         {
             var client = new MongoClient("mongodb://localhost:27017");
             var database = client.GetDatabase("DirectoryMap");
@@ -107,6 +93,43 @@ namespace StorageAnalyzerService
                 outWriter.WriteEndDocument();
                 outWriter.Close();
             }
+        }
+
+        public void SaveDbFilesList(string connectionString, string outputFilePathName)
+        {
+            var sqlConn = new SqlConnection(connectionString);
+            sqlConn.Open();
+            var cmd = sqlConn.CreateCommand();
+            cmd.CommandText = "Select Id, Title, RelativePath from Modak";
+            using (var reader = cmd.ExecuteReader())
+            {
+                var writerSettings = new XmlWriterSettings()
+                {
+                    Indent = true,
+                    IndentChars = "\t",
+                    NewLineHandling = NewLineHandling.Replace,
+                    NewLineChars = "\r\n"
+                };
+                using (var outWriter = XmlWriter.Create(outputFilePathName, writerSettings))
+                {
+                    outWriter.WriteStartDocument();
+                    outWriter.WriteStartElement("DBFiles");
+
+                    while (reader.Read())
+                    {
+                        outWriter.WriteStartElement("file");
+                        outWriter.WriteAttributeString("Id", reader["Id"].ToString());
+                        outWriter.WriteAttributeString("Title", reader["Title"].ToString());
+                        outWriter.WriteAttributeString("RelativePath", reader["RelativePath"].ToString());
+                        outWriter.WriteEndElement(); // file
+                    }
+                    outWriter.WriteEndElement(); // FolderMap
+                    outWriter.WriteEndDocument();
+                }
+            }
+
+            sqlConn.Close();
+
         }
 
     }
