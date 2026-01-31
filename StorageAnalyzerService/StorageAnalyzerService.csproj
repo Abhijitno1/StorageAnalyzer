@@ -221,6 +221,7 @@
   <ItemGroup>
     <Compile Include="CNodeTreeBuilder.cs" />
     <Compile Include="CommonMethods.cs" />
+    <Compile Include="DBFilesComparer.cs" />
     <Compile Include="DbModels\FolderMapV2.cs" />
     <Compile Include="DbModels\FolderMap.cs" />
     <Compile Include="DbModels\ModakV2.cs" />
