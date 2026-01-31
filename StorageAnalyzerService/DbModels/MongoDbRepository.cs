@@ -9,9 +9,12 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
+using static System.Net.WebRequestMethods;
 
 namespace StorageAnalyzerService.DbModels
 {
@@ -292,6 +295,9 @@ namespace StorageAnalyzerService.DbModels
                 RelativePath = fileInfo.Metadata.Contains("RelativePath")
                                ? fileInfo.Metadata["RelativePath"].AsString
                                : string.Empty,
+                DataHash = fileInfo.Metadata.Contains("DataHash")
+                               ? fileInfo.Metadata["DataHash"].AsString
+                               : string.Empty,
                 PicData = _bucket.DownloadAsBytes(fileId)
             };
 
@@ -336,5 +342,49 @@ namespace StorageAnalyzerService.DbModels
                 throw;
             }
         }
+
+
+        public List<ModakV2> GetAllModaks(bool includeFileData = false)
+        {
+            // 1. Find all files in the bucket
+            var filter = Builders<GridFSFileInfo>.Filter.Empty;
+            var files = _bucket.Find(filter).ToList();
+            var modakList = new List<ModakV2>();
+
+            foreach (var file in files)
+            {
+                // 2. Retrieve metadata and basic info
+                var relativePath = file.Metadata != null && file.Metadata.Contains("RelativePath")
+                                   ? file.Metadata["RelativePath"].AsString
+                                   : "N/A";
+                // 2. Retrieve metadata and basic info
+                var dataHash = file.Metadata != null && file.Metadata.Contains("DataHash")
+                                   ? file.Metadata["DataHash"].AsString
+                                   : null;
+
+                // Handle the Hash (MD5)
+                // Older servers stored this in the 'md5' property.Not useful for newer servers.
+                //string hash = file.BackingDocument.Contains("md5")
+                //              ? file.BackingDocument["md5"].ToString()
+                //              : "Hash_Not_Stored";
+
+                var chocolate = new ModakV2
+                {
+                    Id = file.Id.ToString(),
+                    Title = file.Filename,
+                    RelativePath = relativePath,
+                    DataHash = dataHash
+                };
+                if (includeFileData)
+                {
+                    chocolate.PicData = _bucket.DownloadAsBytes(file.Id); // Exclude file data if not requested
+                }
+
+                modakList.Add(chocolate);
+            }
+
+            return modakList;
+        }
+
     }
 }

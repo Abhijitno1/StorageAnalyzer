@@ -1,11 +1,12 @@
-﻿using System;
-using System.Configuration;
+﻿using StorageAnalyzerService;
+using StorageAnalyzerService.DbModels;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using StorageAnalyzerService;
-using System.IO;
 
 namespace StorageAnalyzerConsole
 {
@@ -13,7 +14,22 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-          WriteDataFile();
+            ModakV2Migrator migrator = new ModakV2Migrator();
+            migrator.SaveDBFilesList(ConfigurationManager.AppSettings["outputFilePathAndName"]);
+        }
+
+        static void WriteExcelFile()
+        {
+            var columns = new Tuple<string, ExcelGenerator.ExcelDataTypes>[]
+            {
+                new Tuple<string, ExcelGenerator.ExcelDataTypes>("FilePath", ExcelGenerator.ExcelDataTypes.TEXT),
+                new Tuple<string, ExcelGenerator.ExcelDataTypes>("FileSizeInBytes", ExcelGenerator.ExcelDataTypes.INT),
+                new Tuple<string, ExcelGenerator.ExcelDataTypes>("LastModified", ExcelGenerator.ExcelDataTypes.DATETIME)
+            };
+            ExcelGenerator excelGen = new ExcelGenerator();
+            var inputFilePathName = ConfigurationManager.AppSettings["excelFilePathAndName"];
+            excelGen.CreateExcelFileWithSchema(inputFilePathName, "Output", columns);
+
         }
 
         static void WriteDataFile()

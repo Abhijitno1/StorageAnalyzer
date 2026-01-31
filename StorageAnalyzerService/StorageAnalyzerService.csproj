@@ -231,6 +231,8 @@
     <Compile Include="DirectoryMapDbSaver.cs" />
     <Compile Include="DbModels\ApplicationDbContext.cs" />
     <Compile Include="DbModels\Modak.cs" />
+    <Compile Include="ExcelGenerator.cs" />
+    <Compile Include="ModakV2Migrator.cs" />
     <Compile Include="NodeTreeBuilder.cs" />
     <Compile Include="DirectoryMapReader.cs" />
     <Compile Include="DirectoryMapSaver.cs" />

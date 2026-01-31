@@ -14,10 +14,12 @@ namespace StorageAnalyzerService.DbModels
 	{
         [BsonId]	// Maps this property to the MongoDB "_id" field
         [BsonRepresentation(BsonType.ObjectId)]
-        [BsonIgnoreIfDefault] // This allows auto-generation when Id is null
+        [BsonIgnoreIfDefault] // This allows auto-generation when Id is null (check if needed now)
         public string Id { get; set; }
 		public string Title { get; set; }
 		public string RelativePath { get; set; }
-		public byte[] PicData { get; set; } // Binary data < 16MB
+		public byte[] PicData { get; set; }
+        // New column for the hash
+        public string DataHash { get; set; }
     }
 }
