@@ -267,12 +267,11 @@ namespace StorageAnalyzerService.DbModels
         {
             var fileId = new ObjectId(modak.Id);
 
-            // 1. Rename the file in fs.files
-            _bucket.Rename(fileId, modak.Title);
-
-            // 2. Update the Metadata field specifically
+            // Update the Metadata field specifically
             var filter = Builders<GridFSFileInfo>.Filter.Eq("_id", fileId);
-            var update = Builders<GridFSFileInfo>.Update.Set("metadata.RelativePath", modak.RelativePath);
+            var update = Builders<GridFSFileInfo>.Update
+                .Set("metadata.RelativePath", modak.RelativePath)
+                .Set("filename", modak.Title); // This is what _bucket.Rename does
 
             // Use the files collection directly for metadata updates
             var filesCollection = _bucket.Database.GetCollection<GridFSFileInfo>("fs.files");
