@@ -14,11 +14,16 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
+            WriteDataFile();
+		}
+
+        static void MigrationTask()
+        {
             ModakV2Migrator mercator = new ModakV2Migrator();
             mercator.CheckMissingSqlDatabaseFiles(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
-        }
+		}
 
-        static void WriteExcelFile()
+		static void WriteExcelFile()
         {
             var columns = new Tuple<string, ExcelGenerator.ExcelDataTypes>[]
             {
