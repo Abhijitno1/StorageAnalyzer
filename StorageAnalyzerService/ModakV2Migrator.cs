@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Microsoft.SqlServer.Server;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 using MongoDB.Driver.GridFS;
@@ -97,7 +98,62 @@ namespace StorageAnalyzerService
             }
         }
 
-        public void SaveSqlDbFilesList(string connectionString, string outputFilePathName)
+		public void ProcessDuplicatesFromCsv(string dataFilePathName, string mapInputPath, string mapOutputPath)
+		{
+            MongoDbRepository mongoRepo = new MongoDbRepository();  //Future params: "mongodb://localhost:27017", "DirectoryMap"
+            //mongoRepo.RootFolderPath = mapInputPath;
+            //var xmlDoc = mongoRepo.GetMap();
+            //var xDoc = XDocument.Parse(xmlDoc.OuterXml);
+			var xDoc = XDocument.Load(mapInputPath);
+
+			ExcelGenerator excelGen = new ExcelGenerator();
+			var duplicates = excelGen.ReadCsvFileToList(dataFilePathName);
+			string prevFileHash = null;
+			int inner = -1;
+			for (int outer = 0; outer < duplicates.Count(); outer++)
+			{
+				var outerDup = duplicates[outer];
+				if (prevFileHash != outerDup.DataHash)
+				{
+					prevFileHash = outerDup.DataHash;
+					inner = outer;
+					Console.WriteLine("*** Processing files with hash {0}", outerDup.DataHash);
+				}
+				else
+				{
+                    if (inner != outer)
+                    {
+                        var innerDup = duplicates[inner];
+                        // do some processing here
+                        //Console.WriteLine("file '{0}' with id {1} -", innerDup.RelativePath, innerDup.Id);
+                        //Console.WriteLine("- will be replaced with file '{0}' with id {1}", outerDup.RelativePath, outerDup.Id);
+                        ReplaceFileIdInXmlNodes(xDoc, innerDup.Id, outerDup.Id);
+                        try
+                        {
+                            mongoRepo.DeleteModak(innerDup.Id);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("modak with id {0} not found", innerDup.Id);
+                            Console.WriteLine(ex.ToString());
+                        }
+                    }
+				}
+
+			}
+
+			xDoc.Save(mapOutputPath);
+		}
+
+		private void ReplaceFileIdInXmlNodes(XDocument xDoc, string idOriginal, string idNew)
+		{
+            xDoc.Descendants("file")
+                .Where(fn => fn.Attribute("DbId") != null && fn.Attribute("DbId").Value == idOriginal)
+                .ToList()
+                .ForEach(fn => fn.SetAttributeValue("DbId", idNew));
+		}
+
+		public void SaveSqlDbFilesList(string connectionString, string outputFilePathName)
         {
             var sqlConn = new SqlConnection(connectionString);
             sqlConn.Open();

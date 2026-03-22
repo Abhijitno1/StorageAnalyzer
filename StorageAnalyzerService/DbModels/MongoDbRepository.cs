@@ -249,7 +249,7 @@ namespace StorageAnalyzerService.DbModels
             var options = new GridFSUploadOptions
             {
                 // Store extra fields here
-                Metadata = new BsonDocument { 
+                Metadata = new BsonDocument {
                     { "RelativePath", modak.RelativePath },
                     { "DataHash", modak.DataHash }
                 }
@@ -391,5 +391,44 @@ namespace StorageAnalyzerService.DbModels
             return modakList;
         }
 
+        public List<ModakV2> GetDuplicateModaksList()
+        {
+            List<ModakV2> output = new List<ModakV2>();
+            // 1. Find all files in the bucket
+            var filter = Builders<GridFSFileInfo>.Filter.Empty;
+            var files = _bucket.Find(filter).ToList();
+            // 2. Group by DataHash and find duplicates
+            var duplicates = files
+                .Where(f => f.Metadata != null && f.Metadata.Contains("DataHash"))
+                .GroupBy(f => f.Metadata["DataHash"].AsString)
+                .Where(g => g.Count() > 1)
+                .Select(g => new
+                {
+                    DataHash = g.Key,
+                    Count = g.Count(),
+                    Files = g.Select(f => 
+                    new { 
+                        f.Filename, 
+                        Id = f.Id.ToString(), 
+                        RelativePath = f.Metadata.Contains("RelativePath") ? f.Metadata["RelativePath"].AsString : null
+                    }).ToList()
+                })
+                .ToList();
+            // Output duplicates
+            foreach (var group in duplicates)
+            {
+                foreach (var file in group.Files)
+                {
+                    output.Add(new ModakV2
+                    {
+                        Id = file.Id,
+                        Title = file.Filename,
+                        RelativePath= file.RelativePath,
+						DataHash = group.DataHash
+                    });
+                }
+            }
+            return output;
+        }
     }
 }

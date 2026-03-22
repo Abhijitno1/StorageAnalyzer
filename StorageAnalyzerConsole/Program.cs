@@ -14,16 +14,20 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            WriteDataFile();
-		}
+            string dataFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
+            string mapInputPath = ConfigurationManager.AppSettings["inputFilePathAndName"];
+            string mapOutputPath = ConfigurationManager.AppSettings["outputFilePathAndName"];
+            var migrator = new ModakV2Migrator();
+			migrator.ProcessDuplicatesFromCsv(dataFilePathName, mapInputPath, mapOutputPath);
+        }
 
         static void MigrationTask()
         {
             ModakV2Migrator mercator = new ModakV2Migrator();
             mercator.CheckMissingSqlDatabaseFiles(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
-		}
+        }
 
-		static void WriteExcelFile()
+        static void WriteExcelFile()
         {
             var columns = new Tuple<string, ExcelGenerator.ExcelDataTypes>[]
             {
@@ -45,8 +49,19 @@ namespace StorageAnalyzerConsole
             traverser.SaveMap();
         }
 
+        static void WriteDuplicatesFile()
+        {
+            MongoDbRepository mongoRepo = new MongoDbRepository();
+            var duplicates = mongoRepo.GetDuplicateModaksList();
+            ExcelGenerator excelGen = new ExcelGenerator();
+            string[] headers = new string[] { "Id", "Title", "RelativePath", "DataHash" };
+            object[][] data = duplicates.Select(dup => new object[] { dup.Id, dup.Title, dup.RelativePath, dup.DataHash }).ToArray();
+            var outputFilePathName = ConfigurationManager.AppSettings["outputFilePathAndName"];
+            excelGen.CreateCsvFile(outputFilePathName, headers, data);
+        }
+
         static void ReadDataFile()
-        {            
+        {
             DirectoryMapReader searcher = new DirectoryMapReader();
             searcher.InputFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
             Console.Write("Enter a file name to search: ");
@@ -88,7 +103,7 @@ namespace StorageAnalyzerConsole
             var result = dirComparer.LookupNonMatchingFiles();
             var resultFilePathName = ConfigurationManager.AppSettings["compareResultsFilePathAndName"];
             var resultFile = File.CreateText(resultFilePathName);
-          
+
             if (result.Any())
             {
                 foreach (var entry in result)
@@ -120,7 +135,7 @@ namespace StorageAnalyzerConsole
             {
                 foreach (var entry in result)
                 {
-                    var destFilePath = entry.Replace(rootFolder, syncDestRootFolder); 
+                    var destFilePath = entry.Replace(rootFolder, syncDestRootFolder);
                     Console.WriteLine(destFilePath);
                     var destDir = Path.GetDirectoryName(destFilePath);
                     if (!Directory.Exists(destDir))
@@ -155,3 +170,4 @@ namespace StorageAnalyzerConsole
 
     }
 }
+

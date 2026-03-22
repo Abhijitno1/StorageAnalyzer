@@ -1,7 +1,13 @@
-﻿using System;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using StorageAnalyzerService.DbModels;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace StorageAnalyzerService
 {
@@ -73,7 +79,42 @@ namespace StorageAnalyzerService
             }
         }
 
-        public void CreateExcelFile2(string filePath)
+        public void CreateCsvFile(string filePath, string[] headers, object[][] data)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                // Write headers
+                if (headers != null)
+                    writer.WriteLine(string.Join(",", headers));
+
+                // Write data rows
+                foreach (var row in data)
+                {
+                    string[] stringValues = Array.ConvertAll(row, item => item?.ToString());
+                    writer.WriteLine(string.Join(",", stringValues));
+                }
+            }
+		}
+            
+        public List<ModakV2> ReadCsvFileToList(string filePathName)
+        {
+            IEnumerable<ModakV2> records;
+			var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+			{
+				// Ignore missing fields during reading
+				MissingFieldFound = null,
+				// Ignore headers that exist in the map but not in the CSV
+				HeaderValidated = null
+			};
+			using (var reader = new StreamReader(filePathName))
+			using (var csv = new CsvReader(reader, config))
+			{
+				records = csv.GetRecords<ModakV2>();
+				return records?.ToList();
+			}
+		}
+
+		public void CreateExcelFile2(string filePath)
         {
             // You must have the Microsoft Access Database Engine Redistributable installed on the machine running the code.
             // 1. Define the connection string. 
@@ -134,4 +175,5 @@ namespace StorageAnalyzerService
             return dt;
         }
     }
+
 }
