@@ -145,6 +145,36 @@ namespace StorageAnalyzerService
 			xDoc.Save(mapOutputPath);
 		}
 
+        public void ListMissingFilesFromDb(string mapInputPath, string mapOutputPath)
+        {
+			var xDoc = XDocument.Load(mapInputPath);
+            var fileNodes = xDoc.Descendants("file");
+            var mongoRepo = new MongoDbRepository();
+            mongoRepo.RootFolderPath = "";
+            var modaks = mongoRepo.GetAllModaks();
+			var missingFiles = fileNodes.Where(fileNode => (fileNode.Attribute("DbId") == null) 
+                || !modaks.Exists(modak => modak.Id == fileNode.Attribute("DbId").Value)).ToList();
+            var missingFilepaths = missingFiles.Select(mf => new { Id = mf.Attribute("DbId")?.Value, FilePath = BuildPath(mf) }).ToList();
+            var csvFileHeaders = new string[] { "Id", "FilePath" };
+            var csvData = missingFilepaths.Select(mf => new object[] { mf.Id, mf.FilePath }).ToArray();
+            var xlGen = new ExcelGenerator();
+            xlGen.CreateCsvFile(mapOutputPath, csvFileHeaders, csvData);
+		}
+
+        private string BuildPath(XElement fileNode)
+        {
+            var path = fileNode.Attribute("name").Value;
+            while (fileNode.Parent != null)
+            {
+                fileNode = fileNode.Parent;
+                if (fileNode.Parent != null)
+                    path = fileNode.Attribute("name").Value + "\\" + path;
+            }
+
+            path = fileNode.Attribute("fullPath").Value + "\\" + path;
+            return path;
+		}
+
 		private void ReplaceFileIdInXmlNodes(XDocument xDoc, string idOriginal, string idNew)
 		{
             xDoc.Descendants("file")

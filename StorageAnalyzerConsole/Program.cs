@@ -18,7 +18,7 @@ namespace StorageAnalyzerConsole
             string mapInputPath = ConfigurationManager.AppSettings["inputFilePathAndName"];
             string mapOutputPath = ConfigurationManager.AppSettings["outputFilePathAndName"];
             var migrator = new ModakV2Migrator();
-			migrator.ProcessDuplicatesFromCsv(dataFilePathName, mapInputPath, mapOutputPath);
+			migrator.ListMissingFilesFromDb(mapInputPath, mapOutputPath);
         }
 
         static void MigrationTask()
