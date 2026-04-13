@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using System;
@@ -82,13 +83,44 @@ namespace StorageAnalyzerService.DbModels
                 var foundRec = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == identifier).FirstOrDefault();
                 if (foundRec != null)
                 {
-                    foundRec.DirectoryXml = editedDoc.DocumentElement.OuterXml;
-                    _collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
+                    // Convert XML to JSON and then to BsonDocument for storage in DirectoryJson
+                    // This ensures the repository stores the JSON representation and removes the XML
+                    try
+                    {
+                        string jsonString = Newtonsoft.Json.JsonConvert.SerializeXmlNode(editedDoc, Newtonsoft.Json.Formatting.None, true);
+                        var bsonData = BsonDocument.Parse(jsonString);
+                        foundRec.DirectoryJson = bsonData;
+                        // Remove the legacy XML payload as requested
+                        foundRec.DirectoryXml = null;
+                        _collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
+                    }
+                    catch (Exception)
+                    {
+                        // Fallback: if conversion fails, preserve the XML to avoid data loss
+                        foundRec.DirectoryXml = editedDoc.DocumentElement.OuterXml;
+                        _collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
+                    }
                 }
             }
         }
 
-        public bool DeleteFolderMap(string absolutePath)
+		public void UpdateMap(DbFolder folderHierarchy)
+		{
+            var identifier = folderHierarchy.FullPath;
+			if (identifier != null)
+			{
+				BsonDocument bsonData = folderHierarchy.ToBsonDocument(); 
+                var foundRec = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == identifier).FirstOrDefault();
+				if (foundRec != null)
+				{
+                    foundRec.DirectoryJson = bsonData;
+					_collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
+				}
+			}
+		}
+
+
+		public bool DeleteFolderMap(string absolutePath)
         {
             var foundFolderMap = _collectFolderMaps.Find(k => k.AbsolutePath == absolutePath).FirstOrDefault();
             if (foundFolderMap != null)

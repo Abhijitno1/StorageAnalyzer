@@ -1,7 +1,7 @@
 ﻿using Microsoft.SqlServer.Server;
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Configuration;
 using MongoDB.Driver.GridFS;
 using StorageAnalyzerService.DbModels;
 using System;
@@ -10,7 +10,6 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -248,6 +247,44 @@ namespace StorageAnalyzerService
             }
 
         }
+
+        public async Task ConvertFolderMapXml2JsonB()
+        {
+            try
+            {
+                var repo = new MongoDbRepository();
+
+                var documents = repo.GetAllFolderMaps();
+                foreach (var doc in documents)
+                {
+                    try
+                    {
+                        // 2. Load the XML string
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.LoadXml(doc.DirectoryXml);
+
+						// 3. Convert XML to a JSON string using Newtonsoft.Json
+						// Formatting.None keeps the BSON compact
+						DbFolder folderHierarchy = DbFolderXmlMapper.FromXmlString(doc.DirectoryXml);
+                        repo.UpdateMap(folderHierarchy);
+
+                        Console.WriteLine($"Successfully migrated ID: {doc.Id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error migrating ID {doc.Id}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log and swallow the exception so the caller/debugger doesn't abruptly jump to the end of the
+                // method/state machine when an unexpected error occurs during the async operation.
+                Console.WriteLine($"ConvertFolderMapXml2JsonB failed: {ex}");
+                return;
+            }
+
+		}
 
     }
 }

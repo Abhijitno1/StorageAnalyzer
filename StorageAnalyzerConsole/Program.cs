@@ -18,7 +18,7 @@ namespace StorageAnalyzerConsole
             string mapInputPath = ConfigurationManager.AppSettings["inputFilePathAndName"];
             string mapOutputPath = ConfigurationManager.AppSettings["outputFilePathAndName"];
             var migrator = new ModakV2Migrator();
-			migrator.ListMissingFilesFromDb(mapInputPath, mapOutputPath);
+			migrator.ConvertFolderMapXml2JsonB();
         }
 
         static void MigrationTask()
