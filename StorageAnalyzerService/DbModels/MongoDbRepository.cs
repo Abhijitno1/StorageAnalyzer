@@ -41,6 +41,44 @@ namespace StorageAnalyzerService.DbModels
         public List<FolderMapV2> GetAllFolderMaps() =>
             _collectFolderMaps.Find(_ => true).ToList();
 
+        /// <summary>
+        /// Returns the hierarchical DbFolder for the FolderMap matching the absolute path.
+        /// If DirectoryJson is present it will be mapped; otherwise DirectoryXml will be used as a fallback.
+        /// </summary>
+        public FileSystemItem GetFolderHierarchy(string absolutePath)
+        {
+            var found = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == absolutePath).FirstOrDefault();
+            if (found == null) return null;
+            if (found.DirectoryJson != null)
+            {
+                return DbFolderBsonMapper.FromBsonDocument(found.DirectoryJson);
+            }
+            if (!string.IsNullOrEmpty(found.DirectoryXml))
+            {
+                return DbFolderXmlMapper.FromXmlString(found.DirectoryXml);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns all FolderMaps together with their DbFolder hierarchy (if available).
+        /// </summary>
+        public List<Tuple<FolderMapV2, FileSystemItem>> GetAllFolderHierarchies()
+        {
+            var result = new List<Tuple<FolderMapV2, FileSystemItem>>();
+            var maps = GetAllFolderMaps();
+            foreach (var m in maps)
+            {
+                FileSystemItem root = null;
+                if (m.DirectoryJson != null)
+                    root = DbFolderBsonMapper.FromBsonDocument(m.DirectoryJson);
+                else if (!string.IsNullOrEmpty(m.DirectoryXml))
+                    root = DbFolderXmlMapper.FromXmlString(m.DirectoryXml);
+                result.Add(Tuple.Create(m, root));
+            }
+            return result;
+        }
+
         public XmlDocument GetMap()
         {
             string folderMapText = null;
@@ -104,7 +142,7 @@ namespace StorageAnalyzerService.DbModels
             }
         }
 
-		public void UpdateMap(DbFolder folderHierarchy)
+		public void UpdateMap(FileSystemItem folderHierarchy)
 		{
             var identifier = folderHierarchy.FullPath;
 			if (identifier != null)

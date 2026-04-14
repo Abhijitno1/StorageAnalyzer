@@ -32,8 +32,20 @@ namespace StorageAnalyzerService.DbModels
 
 	}
 
+	public class FileSystemItem
+	{
+		public bool IsFolder { get; set; } = false;
+		public string ItemName { get; set; }
+		public string FullPath { get; set; }
+		public string Extension { get; set; }
+		public long Size { get; set; }
+		public string DbId { get; set; }
+		public DateTime CreationDate { get; set; }
+		public List<FileSystemItem> Children { get; set; } = new List<FileSystemItem>();
+	}
+
 	[JsonObject("folder")]
-	public class DbFolder
+	public class DbFolder11
 	{
 		[JsonProperty("@name")]
 		public string Name { get; set; }
@@ -43,7 +55,7 @@ namespace StorageAnalyzerService.DbModels
 		public DateTime SnapshotDate { get; set; }
 		[JsonProperty("@CreationDate")]
 		public DateTime CreationDate { get; set; }
-		public List<DbFolder> SubFolders { get; set; }
+		public List<DbFolder11> SubFolders { get; set; }
 		public List<DbFile> Files { get; set; }
 	}
 

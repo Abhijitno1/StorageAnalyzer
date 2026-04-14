@@ -259,13 +259,9 @@ namespace StorageAnalyzerService
                 {
                     try
                     {
-                        // 2. Load the XML string
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.LoadXml(doc.DirectoryXml);
-
-						// 3. Convert XML to a JSON string using Newtonsoft.Json
+						// Convert XML to a JSON string using Newtonsoft.Json
 						// Formatting.None keeps the BSON compact
-						DbFolder folderHierarchy = DbFolderXmlMapper.FromXmlString(doc.DirectoryXml);
+						FileSystemItem folderHierarchy = DbFolderXmlMapper.FromXmlString(doc.DirectoryXml);
                         repo.UpdateMap(folderHierarchy);
 
                         Console.WriteLine($"Successfully migrated ID: {doc.Id}");

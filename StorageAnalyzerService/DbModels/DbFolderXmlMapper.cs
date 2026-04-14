@@ -10,47 +10,48 @@ namespace StorageAnalyzerService.DbModels
 {
 	public static class DbFolderXmlMapper
 	{
-		public static DbFolder FromXmlString(string xml)
+		public static FileSystemItem FromXmlString(string xml)
 		{
 			var doc = new XmlDocument();
 			doc.LoadXml(xml);
 			return FromXmlNode(doc.DocumentElement);
 		}
 
-		public static DbFolder FromXmlNode(XmlNode node)
+		public static FileSystemItem FromXmlNode(XmlNode node, string parentPath = null)
 		{
+			FileSystemItem currentItem;
 			if (node == null) return null;
-			var folder = new DbFolder()
+			if (node.Name.Equals("folder", StringComparison.OrdinalIgnoreCase))
 			{
-				Name = node.Attributes?["name"]?.Value,
-				FullPath = node.Attributes?["fullPath"]?.Value,
-				SnapshotDate = ParseDate(node.Attributes?["snapshotDate"]?.Value),
-				CreationDate = ParseDate(node.Attributes?["creationDate"]?.Value),
-				SubFolders = new List<DbFolder>(),
-				Files = new List<DbFile>()
-			};
-
-			foreach (XmlNode child in node.ChildNodes)
-			{
-				if (child.Name.Equals("folder", StringComparison.OrdinalIgnoreCase))
+				currentItem = new FileSystemItem()
 				{
-					folder.SubFolders.Add(FromXmlNode(child));
-				}
-				else if (child.Name.Equals("file", StringComparison.OrdinalIgnoreCase))
+					IsFolder = true,
+					ItemName = node.Attributes?["name"]?.Value,
+					FullPath = (parentPath == null) ? node.Attributes?["fullPath"]?.Value : parentPath + "\\" + node.Attributes?["name"]?.Value,
+					CreationDate = (node.Attributes?["snapshotDate"] != null) ?
+						ParseDate(node.Attributes?["snapshotDate"]?.Value) : ParseDate(node.Attributes?["creationDate"]?.Value),
+					Children = new List<FileSystemItem>()
+				};
+				foreach (XmlNode child in node.ChildNodes)
 				{
-					var f = new DbFile()
-					{
-						Name = child.Attributes?["name"]?.Value,
-						Extension = child.Attributes?["extension"]?.Value,
-						Size = ParseLong(child.Attributes?["size"]?.Value),
-						CreationDate = ParseDate(child.Attributes?["creationDate"]?.Value),
-						DbId = child.Attributes?["DbId"]?.Value ?? child.Attributes?["dbId"]?.Value
-					};
-					folder.Files.Add(f);
+					currentItem.Children.Add(FromXmlNode(child, currentItem.FullPath));
 				}
 			}
+			else
+			{
+				currentItem = new FileSystemItem()
+				{
+					IsFolder = false,
+					ItemName = node.Attributes?["name"]?.Value,
+					FullPath = (parentPath == null) ? node.Attributes?["fullPath"]?.Value : parentPath + "\\" + node.Attributes?["name"]?.Value,
+					Extension = node.Attributes?["extension"]?.Value,
+					Size = ParseLong(node.Attributes?["size"]?.Value),
+					CreationDate = ParseDate(node.Attributes?["creationDate"]?.Value),
+					DbId = node.Attributes?["DbId"]?.Value ?? node.Attributes?["dbId"]?.Value
+				};
+			}
 
-			return folder;
+			return currentItem;
 		}
 
 		private static DateTime ParseDate(string input)
