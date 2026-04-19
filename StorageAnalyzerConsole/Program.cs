@@ -21,11 +21,12 @@ namespace StorageAnalyzerConsole
 			//var output = db.GetAllFolderHierarchies();
 			var migrator = new ModakV2Migrator();
             //migrator.ConvertFolderMapXml2JsonB().Wait();          
-            //migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
-            migrator.GetMissingFileDetails("D:\\Playground\\MissingFileIds.csv");
+            migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
+			//migrator.GetMissingFileDetails("D:\\Playground\\MissingFileIds.csv");
+			//migrator.ScavageOrphanFiles("D:\\Playground\\Orphans");
 		}
 
-        static void MigrationTask()
+		static void MigrationTask()
         {
             ModakV2Migrator mercator = new ModakV2Migrator();
             mercator.CheckMissingSqlDatabaseFiles(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);

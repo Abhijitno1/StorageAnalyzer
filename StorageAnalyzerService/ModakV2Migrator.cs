@@ -190,7 +190,32 @@ namespace StorageAnalyzerService
 			}
         }
 
-        private string BuildPath(XElement fileNode)
+        public void ScavageOrphanFiles(string outputDir)
+        {
+            MongoDbRepository mongoRepo = new MongoDbRepository();
+            CSVUtils csvUtils = new CSVUtils(); 
+            var mapInputPath = "D:\\Playground\\OrphanDbIds.csv";
+
+			var orphanDbIdData = csvUtils.GetDataTableFromCSVFile(mapInputPath, true);
+            var orphanDbIds = csvUtils.ConvertFromDataTable2StringList(orphanDbIdData);
+            foreach (var dbId in orphanDbIds)
+            {
+                var modak = mongoRepo.GetModak(dbId);
+                if (modak != null)
+                {
+					Console.WriteLine($"Orphan file with Id: {dbId}, Title: {modak.Title}, Relative Path: {modak.RelativePath}");
+                    var filePathName = Path.Combine(outputDir, $"{modak.Title}");
+					File.WriteAllBytes(filePathName, modak.PicData);
+					mongoRepo.DeleteModak(dbId);
+				}
+				else
+                {
+                    Console.WriteLine($"Orphan file with Id: {dbId} not found in database");
+                }
+            }
+		}
+
+		private string BuildPath(XElement fileNode)
         {
             var path = fileNode.Attribute("name").Value;
             while (fileNode.Parent != null)
