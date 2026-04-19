@@ -17,8 +17,8 @@ namespace StorageAnalyzerService.DbModels
                 currentItem = new FileSystemItem()
                 {
                     IsFolder = true,
-                    ItemName = doc.GetValue("Name", BsonNull.Value).AsString,
-                    FullPath = string.IsNullOrEmpty(parentPath) ? GetString(doc, "FullPath") : parentPath + "\\" + doc.GetValue("Name", BsonNull.Value).AsString,
+                    ItemName = doc.GetValue("ItemName", BsonNull.Value).AsString,
+                    FullPath = string.IsNullOrEmpty(parentPath) ? GetString(doc, "FullPath") : parentPath + "\\" + doc.GetValue("ItemName", BsonNull.Value).AsString,
                     CreationDate = GetDateTime(doc, "CreationDate"),
                     Children = new List<FileSystemItem>()
                 };
@@ -37,8 +37,8 @@ namespace StorageAnalyzerService.DbModels
 				currentItem = new FileSystemItem()
 				{
 					IsFolder = false,
-					ItemName = doc.GetValue("Name", BsonNull.Value).AsString,
-                    FullPath = string.IsNullOrEmpty(parentPath) ? GetString(doc, "FullPath") : parentPath + "\\" + doc.GetValue("Name", BsonNull.Value).AsString,
+					ItemName = doc.GetValue("ItemName", BsonNull.Value).AsString,
+                    FullPath = string.IsNullOrEmpty(parentPath) ? GetString(doc, "FullPath") : parentPath + "\\" + doc.GetValue("ItemName", BsonNull.Value).AsString,
 					Extension = doc.GetValue("Extension", BsonNull.Value).AsString,
 					Size = GetLong(doc, "Size"),
 					CreationDate = GetDateTime(doc, "CreationDate"),

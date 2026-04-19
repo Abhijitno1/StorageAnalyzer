@@ -142,23 +142,23 @@ namespace StorageAnalyzerService.DbModels
             }
         }
 
-		public void UpdateMap(FileSystemItem folderHierarchy)
-		{
+        public void UpdateMap(FileSystemItem folderHierarchy)
+        {
             var identifier = folderHierarchy.FullPath;
-			if (identifier != null)
-			{
-				BsonDocument bsonData = folderHierarchy.ToBsonDocument(); 
+            if (identifier != null)
+            {
+                BsonDocument bsonData = folderHierarchy.ToBsonDocument();
                 var foundRec = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == identifier).FirstOrDefault();
-				if (foundRec != null)
-				{
+                if (foundRec != null)
+                {
                     foundRec.DirectoryJson = bsonData;
-					_collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
-				}
-			}
-		}
+                    _collectFolderMaps.ReplaceOne(x => x.Id == foundRec.Id, foundRec);
+                }
+            }
+        }
 
 
-		public bool DeleteFolderMap(string absolutePath)
+        public bool DeleteFolderMap(string absolutePath)
         {
             var foundFolderMap = _collectFolderMaps.Find(k => k.AbsolutePath == absolutePath).FirstOrDefault();
             if (foundFolderMap != null)
@@ -476,10 +476,10 @@ namespace StorageAnalyzerService.DbModels
                 {
                     DataHash = g.Key,
                     Count = g.Count(),
-                    Files = g.Select(f => 
-                    new { 
-                        f.Filename, 
-                        Id = f.Id.ToString(), 
+                    Files = g.Select(f =>
+                    new {
+                        f.Filename,
+                        Id = f.Id.ToString(),
                         RelativePath = f.Metadata.Contains("RelativePath") ? f.Metadata["RelativePath"].AsString : null
                     }).ToList()
                 })
@@ -493,12 +493,46 @@ namespace StorageAnalyzerService.DbModels
                     {
                         Id = file.Id,
                         Title = file.Filename,
-                        RelativePath= file.RelativePath,
-						DataHash = group.DataHash
+                        RelativePath = file.RelativePath,
+                        DataHash = group.DataHash
                     });
                 }
             }
             return output;
         }
-    }
+
+        public List<string> GetAllDbIdsFromFolderMap()
+        {
+            var output = new List<string>();
+            var foundFolderMap = _collectFolderMaps.Find(k => k.AbsolutePath == RootFolderPath).FirstOrDefault();
+            if (foundFolderMap != null)
+            {
+                GetAllDbIdsFromFolderMap(foundFolderMap.DirectoryJson, output);
+			}
+            return output;
+        }
+
+		public void GetAllDbIdsFromFolderMap(BsonDocument doc, List<string> output)
+        {
+			// If this node is a folder, traverse children
+			if (doc.GetValue("IsFolder", false).AsBoolean)
+			{
+				if (doc.Contains("Children") && doc["Children"].IsBsonArray)
+				{
+					foreach (var child in doc["Children"].AsBsonArray)
+					{
+						if (child.IsBsonDocument)
+						{
+							GetAllDbIdsFromFolderMap(child.AsBsonDocument, output);
+						}
+					}
+				}
+			}
+			else
+			{
+				string dbId = doc.GetValue("DbId", BsonNull.Value).AsString;
+                output.Add(dbId);
+			}
+		}
+	}
 }

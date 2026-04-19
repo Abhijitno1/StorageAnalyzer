@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StorageAnalyzerService.DbModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,5 +56,20 @@ namespace StorageAnalyzerService
             // ToLower() ensures it matches your ModakV2 style
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();
         }
-    }
+
+		public static IEnumerable<FileSystemItem> Descendants(this FileSystemItem root, object criteria, Func<FileSystemItem, object, bool> matchSelector)
+		{
+			var isMatch = matchSelector(root, criteria);
+			foreach (var child in root.Children)
+			{
+                var descendants = Descendants(child, criteria, matchSelector);
+				foreach (var descendant in descendants)
+				{
+					yield return descendant;
+				}
+			}
+            if (isMatch)
+                yield return root;
+		}
+	}
 }

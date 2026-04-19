@@ -1,6 +1,7 @@
 ﻿using Microsoft.SqlServer.Server;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using StorageAnalyzerService.DbModels;
@@ -97,29 +98,31 @@ namespace StorageAnalyzerService
             }
         }
 
-		public void ProcessDuplicatesFromCsv(string dataFilePathName, string mapInputPath, string mapOutputPath)
-		{
-            MongoDbRepository mongoRepo = new MongoDbRepository();  //Future params: "mongodb://localhost:27017", "DirectoryMap"
-            //mongoRepo.RootFolderPath = mapInputPath;
-            //var xmlDoc = mongoRepo.GetMap();
-            //var xDoc = XDocument.Parse(xmlDoc.OuterXml);
-			var xDoc = XDocument.Load(mapInputPath);
 
-			ExcelGenerator excelGen = new ExcelGenerator();
-			var duplicates = excelGen.ReadCsvFileToList(dataFilePathName);
-			string prevFileHash = null;
-			int inner = -1;
-			for (int outer = 0; outer < duplicates.Count(); outer++)
-			{
-				var outerDup = duplicates[outer];
-				if (prevFileHash != outerDup.DataHash)
-				{
-					prevFileHash = outerDup.DataHash;
-					inner = outer;
-					Console.WriteLine("*** Processing files with hash {0}", outerDup.DataHash);
-				}
-				else
-				{
+
+        public void ProcessDuplicatesFromCsv(string dataFilePathName, string mapInputPath, string mapOutputPath)
+        {
+            MongoDbRepository mongoRepo = new MongoDbRepository();  //Future params: "mongodb://localhost:27017", "DirectoryMap"
+                                                                    //mongoRepo.RootFolderPath = mapInputPath;
+                                                                    //var xmlDoc = mongoRepo.GetMap();
+                                                                    //var xDoc = XDocument.Parse(xmlDoc.OuterXml);
+            var xDoc = XDocument.Load(mapInputPath);
+
+            ExcelGenerator excelGen = new ExcelGenerator();
+            var duplicates = excelGen.ReadCsvFileToList(dataFilePathName);
+            string prevFileHash = null;
+            int inner = -1;
+            for (int outer = 0; outer < duplicates.Count(); outer++)
+            {
+                var outerDup = duplicates[outer];
+                if (prevFileHash != outerDup.DataHash)
+                {
+                    prevFileHash = outerDup.DataHash;
+                    inner = outer;
+                    Console.WriteLine("*** Processing files with hash {0}", outerDup.DataHash);
+                }
+                else
+                {
                     if (inner != outer)
                     {
                         var innerDup = duplicates[inner];
@@ -137,28 +140,55 @@ namespace StorageAnalyzerService
                             Console.WriteLine(ex.ToString());
                         }
                     }
-				}
+                }
 
-			}
+            }
 
-			xDoc.Save(mapOutputPath);
-		}
+            xDoc.Save(mapOutputPath);
+        }
 
         public void ListMissingFilesFromDb(string mapInputPath, string mapOutputPath)
         {
-			var xDoc = XDocument.Load(mapInputPath);
+            var xDoc = XDocument.Load(mapInputPath);
             var fileNodes = xDoc.Descendants("file");
             var mongoRepo = new MongoDbRepository();
             mongoRepo.RootFolderPath = "";
             var modaks = mongoRepo.GetAllModaks();
-			var missingFiles = fileNodes.Where(fileNode => (fileNode.Attribute("DbId") == null) 
+            var missingFiles = fileNodes.Where(fileNode => (fileNode.Attribute("DbId") == null)
                 || !modaks.Exists(modak => modak.Id == fileNode.Attribute("DbId").Value)).ToList();
             var missingFilepaths = missingFiles.Select(mf => new { Id = mf.Attribute("DbId")?.Value, FilePath = BuildPath(mf) }).ToList();
             var csvFileHeaders = new string[] { "Id", "FilePath" };
             var csvData = missingFilepaths.Select(mf => new object[] { mf.Id, mf.FilePath }).ToArray();
             var xlGen = new ExcelGenerator();
             xlGen.CreateCsvFile(mapOutputPath, csvFileHeaders, csvData);
-		}
+        }
+
+        public void GetMissingFileDetails(string mapInputPath)
+        {
+            MongoDbRepository mongoRepo = new MongoDbRepository();
+            var folderMapPath = "E:\\TestGround\\DirectoryMap";
+			var hierarchyRoot = mongoRepo.GetFolderHierarchy(folderMapPath);
+            Func<FileSystemItem, object, bool> childrenSelector = (curItem, criteria) =>
+            {
+                return !curItem.IsFolder && curItem.DbId == criteria.ToString();
+            };
+			CSVUtils csvUtils = new CSVUtils();
+            var missingDbIdData = csvUtils.GetDataTableFromCSVFile(mapInputPath, true);
+            var missingDbIds = csvUtils.ConvertFromDataTable2StringList(missingDbIdData);
+            foreach (var dbId in missingDbIds)
+            {
+                var matchingFiles = hierarchyRoot.Descendants(dbId, childrenSelector).ToList();
+				if (matchingFiles.Count > 0)
+                {
+                    var file = matchingFiles[0];
+                    Console.WriteLine($"Missing file with Id: {dbId}, FullPath: {file.FullPath}, Creation Date: {file.CreationDate}");
+                }
+                else
+                {
+                    Console.WriteLine($"Missing file with Id: {dbId} not found in folder hierarchy");
+				}
+			}
+        }
 
         private string BuildPath(XElement fileNode)
         {
@@ -172,17 +202,17 @@ namespace StorageAnalyzerService
 
             path = fileNode.Attribute("fullPath").Value + "\\" + path;
             return path;
-		}
+        }
 
-		private void ReplaceFileIdInXmlNodes(XDocument xDoc, string idOriginal, string idNew)
-		{
+        private void ReplaceFileIdInXmlNodes(XDocument xDoc, string idOriginal, string idNew)
+        {
             xDoc.Descendants("file")
                 .Where(fn => fn.Attribute("DbId") != null && fn.Attribute("DbId").Value == idOriginal)
                 .ToList()
                 .ForEach(fn => fn.SetAttributeValue("DbId", idNew));
-		}
+        }
 
-		public void SaveSqlDbFilesList(string connectionString, string outputFilePathName)
+        public void SaveSqlDbFilesList(string connectionString, string outputFilePathName)
         {
             var sqlConn = new SqlConnection(connectionString);
             sqlConn.Open();
@@ -259,9 +289,9 @@ namespace StorageAnalyzerService
                 {
                     try
                     {
-						// Convert XML to a JSON string using Newtonsoft.Json
-						// Formatting.None keeps the BSON compact
-						FileSystemItem folderHierarchy = DbFolderXmlMapper.FromXmlString(doc.DirectoryXml);
+                        // Convert XML to a JSON string using Newtonsoft.Json
+                        // Formatting.None keeps the BSON compact
+                        FileSystemItem folderHierarchy = DbFolderXmlMapper.FromXmlString(doc.DirectoryXml);
                         repo.UpdateMap(folderHierarchy);
 
                         Console.WriteLine($"Successfully migrated ID: {doc.Id}");
@@ -280,7 +310,27 @@ namespace StorageAnalyzerService
                 return;
             }
 
-		}
+        }
 
-    }
+        public void DisplayMissingFilesInMongoDb(string mapInputPath)
+        {
+            var mongoRepo = new MongoDbRepository();
+            mongoRepo.RootFolderPath = mapInputPath;
+            var fileNodeDbIds = mongoRepo.GetAllDbIdsFromFolderMap();
+            var modaks = mongoRepo.GetAllModaks();
+            var modakIds = modaks.Select(m => m.Id);
+            var missingFiles = fileNodeDbIds.Except(modakIds);
+            var orphanFiles = modakIds.Except(fileNodeDbIds);
+			Console.WriteLine("MissingFileIds");
+			foreach (var missingFileId in missingFiles)
+            {
+                Console.WriteLine(missingFileId);
+            }
+			Console.WriteLine("OrphanFileIds");
+			foreach (var orphanFileId in orphanFiles)
+			{
+				Console.WriteLine(orphanFileId);
+			}
+		}
+	}
 }

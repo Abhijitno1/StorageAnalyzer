@@ -14,14 +14,15 @@ namespace StorageAnalyzerConsole
     {
         static void Main(string[] args)
         {
-            //string dataFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
-            //string mapInputPath = ConfigurationManager.AppSettings["inputFilePathAndName"];
-            //string mapOutputPath = ConfigurationManager.AppSettings["outputFilePathAndName"];
-            var migrator = new ModakV2Migrator();
-			migrator.ConvertFolderMapXml2JsonB().Wait();
-            //MongoDbRepository db = new MongoDbRepository();
-            //var output = db.GetAllFolderHierarchies();
-
+			//string dataFilePathName = ConfigurationManager.AppSettings["dataFilePathAndName"];
+			//string mapInputPath = ConfigurationManager.AppSettings["inputFilePathAndName"];
+			//string mapOutputPath = ConfigurationManager.AppSettings["outputFilePathAndName"];
+			//MongoDbRepository db = new MongoDbRepository();
+			//var output = db.GetAllFolderHierarchies();
+			var migrator = new ModakV2Migrator();
+            //migrator.ConvertFolderMapXml2JsonB().Wait();          
+            //migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
+            migrator.GetMissingFileDetails("D:\\Playground\\MissingFileIds.csv");
 		}
 
         static void MigrationTask()
