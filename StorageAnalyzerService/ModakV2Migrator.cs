@@ -98,9 +98,76 @@ namespace StorageAnalyzerService
             }
         }
 
+        public void ConvertDirectoryJson2FlatData()
+        {
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("DirectoryMap");
+            var _driveMaps = database.GetCollection<FileSystemElement>("DriveMaps");
+            var _collectFolderMaps = database.GetCollection<FolderMapV2>("FolderMaps");
+            var folderMaps = _collectFolderMaps.Find(Builders<FolderMapV2>.Filter.Empty).ToList();
+            foreach (var folderMap in folderMaps)
+            {
+				var folderHierarchy = folderMap.DirectoryJson != null ? DbFolderBsonMapper.FromBsonDocument(folderMap.DirectoryJson) : null;
+				FlattenFolderHierarchy(folderHierarchy, _driveMaps, null);
+			}
+        }
 
+        private void FlattenFolderHierarchy(FileSystemItem item, IMongoCollection<FileSystemElement> driveMaps, FileSystemElement parent)
+		{
+			if (item == null)
+				return;
 
-        public void ProcessDuplicatesFromCsv(string dataFilePathName, string mapInputPath, string mapOutputPath)
+			var fileSystemElement = new FileSystemElement
+			{
+				ItemName = item.ItemName,
+				FullPath = (parent == null)? item.FullPath : Path.Combine(parent.FullPath, item.ItemName),
+				Extension = item.Extension,
+				CreationDate = item.CreationDate,
+				DbId = item.DbId,
+                Size = item.Size,
+				IsFolder = item.IsFolder,
+				parentId = parent?.Id
+			};
+			driveMaps.InsertOne(fileSystemElement);
+
+			if (item.IsFolder && item.Children != null)
+			{
+				foreach (var child in item.Children)
+				{
+					FlattenFolderHierarchy(child, driveMaps, fileSystemElement);
+				}
+			}
+		}
+
+		public void SetPositionFolderHierarchy()
+		{
+			var client = new MongoClient("mongodb://localhost:27017");
+			var database = client.GetDatabase("DirectoryMap");
+			var _driveMaps = database.GetCollection<FileSystemElement>("DriveMaps");
+			var mapRoots = _driveMaps.Find(elm => elm.parentId == null).ToList();
+            foreach (var root in mapRoots)
+			{
+                root.Order = 0;
+                _driveMaps.UpdateOne(elm => elm.Id == root.Id, Builders<FileSystemElement>.Update.Set(elm => elm.Order, root.Order));
+                UpdateChildrenPosition(root.Id, _driveMaps);
+			}
+		}
+
+        public void UpdateChildrenPosition(string parentId, IMongoCollection<FileSystemElement> driveMaps)
+		{
+			var children = driveMaps.Find(elm => elm.parentId == parentId).ToList();
+			foreach (var child in children)
+			{
+				child.Order = children.IndexOf(child);
+				driveMaps.UpdateOne(elm => elm.Id == child.Id, Builders<FileSystemElement>.Update.Set(elm => elm.Order, child.Order));
+				if (child.IsFolder)
+				{
+					UpdateChildrenPosition(child.Id, driveMaps);
+				}
+			}
+		}
+
+		public void ProcessDuplicatesFromCsv(string dataFilePathName, string mapInputPath, string mapOutputPath)
         {
             MongoDbRepository mongoRepo = new MongoDbRepository();  //Future params: "mongodb://localhost:27017", "DirectoryMap"
                                                                     //mongoRepo.RootFolderPath = mapInputPath;

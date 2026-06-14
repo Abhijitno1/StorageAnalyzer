@@ -20,8 +20,10 @@ namespace StorageAnalyzerConsole
 			//MongoDbRepository db = new MongoDbRepository();
 			//var output = db.GetAllFolderHierarchies();
 			var migrator = new ModakV2Migrator();
-            //migrator.ConvertFolderMapXml2JsonB().Wait();          
-            migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
+            //migrator.ConvertFolderMapXml2JsonB().Wait();
+            //migrator.ConvertDirectoryJson2FlatData();
+            migrator.SetPositionFolderHierarchy();
+			//migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
 			//migrator.GetMissingFileDetails("D:\\Playground\\MissingFileIds.csv");
 			//migrator.ScavageOrphanFiles("D:\\Playground\\Orphans");
 		}

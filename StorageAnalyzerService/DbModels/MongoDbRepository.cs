@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using MongoDB.Driver.Search;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -22,7 +23,8 @@ namespace StorageAnalyzerService.DbModels
     public class MongoDbRepository
     {
         private readonly IMongoCollection<FolderMapV2> _collectFolderMaps;
-        private readonly IMongoCollection<ModakV2> _collectModaks;
+		private readonly IMongoCollection<FileSystemElement> _driveMaps;
+		private readonly IMongoCollection<ModakV2> _collectModaks;
         private readonly GridFSBucket _bucket;
         XmlDocument xmlDoc = new XmlDocument();
 
@@ -35,17 +37,22 @@ namespace StorageAnalyzerService.DbModels
             var database = client.GetDatabase("DirectoryMap");
             _collectModaks = database.GetCollection<ModakV2>("Modaks");
             _collectFolderMaps = database.GetCollection<FolderMapV2>("FolderMaps");
+            _driveMaps = database.GetCollection<FileSystemElement>("DriveMaps");
             _bucket = new GridFSBucket(database);
         }
 
         public List<FolderMapV2> GetAllFolderMaps() =>
             _collectFolderMaps.Find(_ => true).ToList();
 
+		public List<FileSystemElement> GetAllDriveMaps() =>
+			_driveMaps.Find(map => map.parentId == null).ToList();
+
+		
         /// <summary>
-        /// Returns the hierarchical DbFolder for the FolderMap matching the absolute path.
-        /// If DirectoryJson is present it will be mapped; otherwise DirectoryXml will be used as a fallback.
-        /// </summary>
-        public FileSystemItem GetFolderHierarchy(string absolutePath)
+		/// Returns the hierarchical DbFolder for the FolderMap matching the absolute path.
+		/// If DirectoryJson is present it will be mapped; otherwise DirectoryXml will be used as a fallback.
+		/// </summary>
+		public FileSystemItem GetFolderHierarchy(string absolutePath)
         {
             var found = _collectFolderMaps.Find(folderMap => folderMap.AbsolutePath == absolutePath).FirstOrDefault();
             if (found == null) return null;
@@ -60,10 +67,55 @@ namespace StorageAnalyzerService.DbModels
             return null;
         }
 
-        /// <summary>
-        /// Returns all FolderMaps together with their DbFolder hierarchy (if available).
-        /// </summary>
-        public List<Tuple<FolderMapV2, FileSystemItem>> GetAllFolderHierarchies()
+		public FileSystemItem GetDriveHierarchy(string absolutePath)
+		{
+			var found = _driveMaps.Find(map => map.FullPath == absolutePath).FirstOrDefault();
+			if (found == null) return null;
+
+			var parentItem = new FileSystemItem
+			{
+				IsFolder = true,
+				ItemName = found.ItemName,
+				FullPath = found.FullPath,
+				Extension = found.Extension,
+				Size = found.Size,
+				CreationDate = found.CreationDate,
+				DbId = found.DbId
+			};
+			var children = _driveMaps.Find(m => m.parentId == found.Id).ToList();
+			foreach (var child in children)
+            {
+				AddChild2DriveHeirarchy(parentItem, found.Id, child); 
+            }
+
+			return parentItem;
+		}
+
+		private void AddChild2DriveHeirarchy(FileSystemItem parentItem, string parentId, FileSystemElement child)
+		{
+			var childItem = new FileSystemItem
+			{
+				IsFolder = child.IsFolder,
+				ItemName = child.ItemName,
+				FullPath = child.FullPath,
+				Extension = child.Extension,
+				Size = child.Size,
+				CreationDate = child.CreationDate,
+				DbId = child.DbId
+			};
+			parentItem.Children.Add(childItem);
+			var children = _driveMaps.Find(m => m.parentId == child.Id).ToList();
+			foreach (var childLevel2 in children)
+			{
+				AddChild2DriveHeirarchy(childItem, child.Id, childLevel2);
+			}
+		}
+
+
+		/// <summary>
+		/// Returns all FolderMaps together with their DbFolder hierarchy (if available).
+		/// </summary>
+		public List<Tuple<FolderMapV2, FileSystemItem>> GetAllFolderHierarchies()
         {
             var result = new List<Tuple<FolderMapV2, FileSystemItem>>();
             var maps = GetAllFolderMaps();
@@ -104,7 +156,69 @@ namespace StorageAnalyzerService.DbModels
             _collectFolderMaps.InsertOne(folderMap);
         }
 
-        public void GenerateChildNodeTree(string childFolderPath, XmlNode destXmlNode)
+		public void SaveDriveMap()
+		{
+			DirectoryInfo rootFolder = new DirectoryInfo(RootFolderPath);
+			TraverseFolderTree(rootFolder, null);
+		}
+
+        private void TraverseFolderTree(DirectoryInfo currentFolder, FileSystemElement baEl)
+        {
+            if (baEl == null)
+            {
+                baEl = new FileSystemElement();
+            }
+
+            baEl.ItemName = currentFolder.Name;
+            baEl.FullPath = currentFolder.FullName;
+            baEl.CreationDate = currentFolder.CreationTime;
+            _driveMaps.InsertOne(baEl);
+
+			foreach (var childDir in currentFolder.GetDirectories())
+            {
+                var childEl = new FileSystemElement
+                {
+                    parentId = baEl.DbId,
+                    IsFolder = true
+                };
+				TraverseFolderTree(childDir, childEl);
+			}
+			foreach (var childFile in currentFolder.GetFiles())
+			{
+				var childEl = new FileSystemElement
+				{
+					parentId = baEl.DbId,
+					IsFolder = false,
+                    ItemName = childFile.Name,
+                    FullPath = childFile.FullName,
+                    CreationDate = childFile.CreationTime,
+                    Extension = childFile.Extension
+				};
+
+				//Also Add to DB
+				ModakV2 modak = new ModakV2()
+				{
+					Title = childFile.Name,
+					RelativePath = childEl.FullPath,
+				};
+				var fs = childFile.OpenRead();
+                var size = fs.Length;
+				var fileData = new byte[size];
+				//ToDo: Optiomize this file read in future
+				fs.Read(fileData, 0, (int)size);
+				fs.Dispose();
+				modak.PicData = fileData;
+				InsertModak(modak);
+				//Ref: https://stackoverflow.com/questions/5212751/how-can-i-retrieve-id-of-inserted-entity-using-entity-framework
+				childEl.Size = size;
+                childEl.DbId = modak.Id;
+
+				_driveMaps.InsertOne(childEl);
+			}
+
+		}
+
+		public void GenerateChildNodeTree(string childFolderPath, XmlNode destXmlNode)
         {
             DirectoryInfo rootFolder = new DirectoryInfo(childFolderPath);
             xmlDoc = destXmlNode.OwnerDocument;
