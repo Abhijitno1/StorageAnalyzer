@@ -165,7 +165,7 @@ namespace StorageAnalyzerService
 		{
 			_driveMaps.UpdateOne(x => x.Id == curNode.Id, Builders<FileSystemElement>.Update.Set(elm => elm.rootId, rootId));
 
-			var children = _driveMaps.Find(elm => elm.parentId == null).ToList();
+			var children = _driveMaps.Find(elm => elm.parentId == curNode.Id).ToList();
 			foreach (var child in children)
 			{
 				UpdateRootReferenceInTreeNodes(_driveMaps, child, rootId);
