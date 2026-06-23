@@ -18,6 +18,8 @@ namespace StorageAnalyzerService.DbModels
 		[BsonRepresentation(BsonType.ObjectId)] 
 		public string parentId { get; set; }
 
+		[BsonRepresentation(BsonType.ObjectId)]
+		public string rootId { get; set; }
 		public bool IsFolder { get; set; } = false;
 		public string ItemName { get; set; }
 		[BsonIgnoreIfNull]

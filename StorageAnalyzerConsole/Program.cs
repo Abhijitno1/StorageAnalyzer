@@ -22,7 +22,8 @@ namespace StorageAnalyzerConsole
 			var migrator = new ModakV2Migrator();
             //migrator.ConvertFolderMapXml2JsonB().Wait();
             //migrator.ConvertDirectoryJson2FlatData();
-            migrator.SetPositionFolderHierarchy();
+            //migrator.SetPositionFolderHierarchy();
+            migrator.SeparateOutDiskMapRoots();
 			//migrator.DisplayMissingFilesInMongoDb("E:\\TestGround\\DirectoryMap");
 			//migrator.GetMissingFileDetails("D:\\Playground\\MissingFileIds.csv");
 			//migrator.ScavageOrphanFiles("D:\\Playground\\Orphans");

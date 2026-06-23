@@ -236,6 +236,7 @@
     <Compile Include="DbModels\DbFolderBsonMapper.cs" />
     <Compile Include="DbModels\DbFolderXmlMapper.cs" />
     <Compile Include="DbModels\FileSystemElement.cs" />
+    <Compile Include="DbModels\FileSystemParent.cs" />
     <Compile Include="DbModels\FolderMapV2.cs" />
     <Compile Include="DbModels\FolderMap.cs" />
     <Compile Include="DbModels\ModakV2.cs" />

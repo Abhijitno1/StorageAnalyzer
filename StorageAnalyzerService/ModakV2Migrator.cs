@@ -139,6 +139,39 @@ namespace StorageAnalyzerService
 			}
 		}
 
+        public void SeparateOutDiskMapRoots()
+		{
+			var client = new MongoClient("mongodb://localhost:27017");
+			var database = client.GetDatabase("DirectoryMap");
+			var _driveMaps = database.GetCollection<FileSystemElement>("DriveMaps");
+			var mapRoots = _driveMaps.Find(elm => elm.parentId == null).ToList();
+			var _driveMapRoots = database.GetCollection<FileSystemParent>("DriveMapRoots");
+			foreach (var root in mapRoots)
+			{
+				var extRoot = new FileSystemParent
+				{
+                    Id = root.Id,
+					ItemName = root.ItemName,
+					FullPath = root.FullPath,
+					CreationDate = root.CreationDate
+				};
+				_driveMapRoots.InsertOne(extRoot);
+
+				UpdateRootReferenceInTreeNodes(_driveMaps, root, extRoot.Id);
+			}
+		}
+
+		private void UpdateRootReferenceInTreeNodes(IMongoCollection<FileSystemElement> _driveMaps, FileSystemElement curNode, string rootId)
+		{
+			_driveMaps.UpdateOne(x => x.Id == curNode.Id, Builders<FileSystemElement>.Update.Set(elm => elm.rootId, rootId));
+
+			var children = _driveMaps.Find(elm => elm.parentId == null).ToList();
+			foreach (var child in children)
+			{
+				UpdateRootReferenceInTreeNodes(_driveMaps, child, rootId);
+			}
+		}
+
 		public void SetPositionFolderHierarchy()
 		{
 			var client = new MongoClient("mongodb://localhost:27017");
